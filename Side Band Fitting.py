@@ -1,19 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[206]:
+# In[1]:
 
 
-#get_ipython().run_line_magic('matplotlib', 'inline')
 import os
 import sys
-import math
 from scipy import optimize
 from scipy.optimize import leastsq
 from numpy import *
 import glob
 from matplotlib import *
 from pylab import *
+import math
 
 import matplotlib.font_manager as fm
 font_names = [f.name for f in fm.fontManager.ttflist]
@@ -27,7 +26,7 @@ plt.rcParams['axes.linewidth'] = 0.5
 plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 
-# In[207]:
+# In[2]:
 
 
 def get_file_detuning_1(file):
@@ -88,15 +87,7 @@ def get_file_contents(file):
     return file_contents
 
 
-# In[208]:
-
-
-def convert_to_mW(input_list):
-    converted_list = (10**(input_list/10))/1000
-    return converted_list
-
-
-# In[209]:
+# In[3]:
 
 
 def get_voltage(data):
@@ -111,6 +102,10 @@ def get_frequency(detuning, detuning_files_dict):
     frequency = array(frequency)
     return frequency
 
+def convert_to_mW(input_list):
+    converted_list = (10**(input_list/10))/1000
+    return converted_list
+
 def get_S21_detuning(voltage, power):
     power_mW = convert_to_mW(power)
     S21 = voltage/power_mW
@@ -121,7 +116,7 @@ def get_S21_normalised(S21_list, index_maxima):
     return S21_normalised
 
 
-# In[210]:
+# In[4]:
 
 
 def get_voltage_from_file(file, power):
@@ -129,35 +124,68 @@ def get_voltage_from_file(file, power):
     voltage = get_voltage(raw_data)
     voltage = convert_to_mW(voltage)
     S21_detuning = get_S21_detuning(voltage, power)
-    index_maximum = get_index_maximum(voltage)
-    return S21_detuning, index_maximum
+    return S21_detuning
 
 def get_gamma(detuning, detuning_files_dict, power):
-    file_results = [get_voltage_from_file(file, power) for file in detuning_files_dict[detuning]]
-    S21_list_detuning, index_maxima = zip(*file_results)
-    frequency = get_frequency(detuning, detuning_files_dict)
-    frequency = get_offset_frequency(frequency, index_maxima)
-    S21_offset_list = get_S21_offset_list(S21_list_detuning, index_maxima)
-    S21_average = average(S21_offset_list, axis=0)
-    #p_final = fit(S21_average, frequency)
-    #gamma = p_final[1]
-    #create_figure_1(S21_average, frequency, title=title)
-    #plt.plot(frequency,peval(frequency, p_final),'k--', alpha=0.5,linewidth=2.0,label='fit')
+    frequency, S21_detunings = get_frequency_and_S21_detunings(detuning, detuning_files_dict, power)
+    frequency, S21_offsets = get_frequency_and_S21_offsets(frequency, S21_detunings)
+    S21_averages = get_S21_averages(S21_offsets)
+    gamma = process_S21_averages(S21_averages, frequency, detuning, power)
     return gamma
 
-# In[211]:
+def get_frequency_and_S21_detunings(detuning, detuning_files_dict, power):
+    S21_list_detuning = [get_voltage_from_file(file, power)
+                         for file in detuning_files_dict[detuning]]
+    frequency = get_frequency(detuning, detuning_files_dict)
+    # plot_detunings_raw(S21_list_detuning, frequency)
+    return frequency, S21_list_detuning
+
+def get_frequency_and_S21_offsets(frequency, S21_detunings):
+    index_maxima = [get_index_maximum(S21) for S21 in S21_detunings]
+    frequency = get_offset_frequency(frequency, index_maxima)
+    S21_offsets = get_S21_offsets(S21_detunings, index_maxima)
+    S21_offsets = [restrict_domain(S21, min(index_maxima), 200) for S21 in S21_offsets]
+    frequency = restrict_domain(frequency, min(index_maxima), 200)
+    return frequency, S21_offsets
+
+def get_S21_averages(S21_offsets):
+    number_of_trials = len(S21_offsets)
+    group_size = 5
+    group_count = math.ceil(number_of_trials/group_size)
+    S21_averages = [get_S21_average(group_number, group_size, S21_offsets)
+                    for group_number in range(group_count)]
+    return S21_averages
+
+def get_S21_average(group_number, group_size, S21_offsets):
+    left_index = group_number*group_size
+    right_index = (group_number+1)*group_size
+    S21_group = S21_offsets[left_index:right_index]
+    print(len(S21_group))
+    group_average = np.mean(S21_group, axis=0)
+    return group_average
+
+def process_S21_averages(S21_averages, frequency, detuning, power):
+    gamma_list = []
+    for average_number, S21_average in enumerate(S21_averages):
+        fitting_parameters = fit(S21_average, frequency)
+        gamma_list.append(fitting_parameters[1])
+        title = f"Detuning: {detuning}, Power: {power},\nAverage number: {average_number}"
+        create_figure_1(S21_average, frequency, title=title, fitting=fitting_parameters)
+    return mean(gamma_list)
+
+# In[5]:
+
 
 def get_index_maximum(S21):
     """
-    We get a ballpark guess of where the peak is by using argmax
-    Around this point we find assign a value to how good that point
-    would work as the centre of the points using a weighted sum.
-    The worse the point is, the higher the value of the heuristic.
-    We get something that looks like y=|x| but with a rounded bottom.
-    Using the data in the rounded region was less robust, so we define
-    two lines from each side of the bottom in the region where the
-    heuristic is better behaved and find where they intersect.
-    This point is used as the centre.
+    We get a ballpark guess of where the peak is by using argmax. Around this
+    point we find assign a value to how good that point would work as the centre
+    of the points using a weighted sum. The worse the point is, the higher the
+    value of the heuristic. We get something that looks like y=|x| but with a
+    rounded bottom. Using the data in the rounded region was less robust, so we
+    define two lines from each side of the bottom in the region where the
+    heuristic is better behaved and find where they intersect. This point is
+    used as the centre.
     """
     first_guess = argmax(S21)
     left_x, right_x = first_guess-150, first_guess+150
@@ -165,13 +193,24 @@ def get_index_maximum(S21):
     points = array(range(left_x, right_x))
     uncentred_heuristics = [get_uncentred_heuristic(S21, x, points) for x in candidates]
     m = argmin(uncentred_heuristics)
+    x_m, y_m = get_heuristic_line_intersection(m, uncentred_heuristics)
+    #plot_index_max_heuristic(candidates, uncentred_heuristics, x_m, y_m,
+    #                         x_1, x_2, x_3, x_4, y_1, y_2, y_3, y_4)
+    return candidates[x_m]
+
+def get_uncentred_heuristic(S21, x, points):
+    uncentred_heuristic = abs(x-points)*(S21[points])**2
+    uncentred_heuristic = sum(uncentred_heuristic)
+    return uncentred_heuristic
+
+def get_heuristic_line_intersection(m, uncentred_heuristics):
     x_1, x_2, x_3, x_4 = m-15, m-14, m+14, m+15
     y_1, y_2, y_3, y_4 = (uncentred_heuristics[x] for x in [x_1, x_2, x_3, x_4])
     a, b, e = y_2-y_1, x_1-x_2, x_1*(y_2-y_1)+y_1*(x_1-x_2)
     c, d, f = y_4-y_3, x_3-x_4, x_3*(y_4-y_3)+y_3*(x_3-x_4)
     x_m = math.floor((d*e-b*f)/(a*d-b*c))
     y_m = (-c*e+a*f)/(a*d-b*c)
-    return candidates[x_m]
+    return x_m, y_m
 
 def plot_index_max_heuristic(candidates, uncentred_heuristics, x_m, y_m,
                              x_1, x_2, x_3, x_4, y_1, y_2, y_3, y_4):
@@ -181,11 +220,6 @@ def plot_index_max_heuristic(candidates, uncentred_heuristics, x_m, y_m,
     plt.plot([candidates[x_1], candidates[x_2]], [y_1, y_2], '-r')
     plt.plot([candidates[x_3], candidates[x_4]], [y_3, y_4], '-r')
     plt.show()
-
-def get_uncentred_heuristic(S21, x, points):
-    uncentred_heuristic = abs(x-points)*(S21[points])**2
-    uncentred_heuristic = sum(uncentred_heuristic)
-    return uncentred_heuristic
 
 def get_moving_average(points, window_width):
     N = len(points)
@@ -202,7 +236,7 @@ def inside_window(i, N):
     return i
 
 
-# In[212]:
+# In[6]:
 
 
 def get_offset_frequency(frequency, index_maxima):
@@ -212,7 +246,7 @@ def get_offset_frequency(frequency, index_maxima):
     frequency -= resonant_frequency
     return frequency
 
-def get_S21_offset_list(S21_list, index_maxima):
+def get_S21_offsets(S21_list, index_maxima):
     min_index, max_index = min(index_maxima), max(index_maxima)
     S21_offset_list = [get_S21_offset(S21, index, min_index, max_index)
                        for S21, index in zip(S21_list, index_maxima)]
@@ -224,8 +258,30 @@ def get_S21_offset(S21, index, min_index, max_index):
     S21_offset = S21[left_index:right_index]
     return S21_offset
 
+def restrict_domain(S21, centre, width):
+    left = centre - width
+    right = centre + width
+    S21 = S21[left:right]
+    return S21
 
-# In[213]:
+
+# In[14]:
+
+
+def create_figure_1(S21_list, frequency, filter_rate=1,
+                    title="S21 vs frequency", fitting=None):
+    S21_list = ensure_2D_list(S21_list)
+    plt.figure(figsize=(80, 60))
+    for index, S21 in enumerate(S21_list):
+        if index % filter_rate == 0:
+            plt.plot(frequency, S21,'.',alpha=1)
+    plot_fitting(fitting, frequency)
+    add_plot_labels(title)
+    plt.show()
+
+def plot_fitting(fitting, frequency):
+    if fitting is not None:
+        plt.plot(frequency,peval(frequency, fitting),'k--', alpha=0.5,linewidth=2.0,label='fit')
 
 def plot_detunings_raw(S21_list_detuning, frequency):
     for i, S21 in enumerate(S21_list_detuning):
@@ -236,15 +292,6 @@ def plot_detunings_raw(S21_list_detuning, frequency):
         plt.plot([frequency[max_x], frequency[max_x]], [0, max(S21)], 'r')
         plt.show()
 
-def create_figure_1(S21_list, frequency, filter_rate=1, title="S21 vs frequency"):
-    #plt.figure(figsize=(80, 60))
-    S21_list = ensure_2D_list(S21_list)
-    for index, S21 in enumerate(S21_list):
-        if index % filter_rate == 0:
-            plot_figure_1(frequency, S21)
-    add_plot_labels(title)
-    #plt.show()
-
 def ensure_2D_list(test_list):
     if hasattr(test_list[0], '__iter__'):
         return test_list
@@ -253,17 +300,18 @@ def ensure_2D_list(test_list):
 
 def add_plot_labels(title):
     plt.title(title)
-    #plt.xlim(-2*10**7, 3.5*10**7)
     x_ticks = plt.xticks()[0]
-    x_labels = [f'{value:.0f}' for value in plt.xticks()[0]/10**3]
+    order_of_magnitude = math.ceil(math.log(max(abs(x_ticks)), 1000)) - 1
+    x_labels = [f'{value:.0f}' for value in (x_ticks/1000**order_of_magnitude)]
     plt.xticks(x_ticks, x_labels)
+    add_axis_labels(order_of_magnitude)
 
-def plot_figure_1(frequency, voltage):
-    plt.plot(frequency, voltage,'.',alpha=1)
-    plt.xlabel('${\omega_c}$ (kHz)')
+def add_axis_labels(order_of_magnitude):
+    x_scale = ["Hz", "kHz", "MHz", "GHz", "THz"][order_of_magnitude]
+    plt.xlabel('${\omega_c}$' + f'({x_scale})')
     plt.ylabel('Amplitude')
 
-# In[214]:
+# In[8]:
 
 
 def peval(freq,p):
@@ -287,7 +335,7 @@ def fit(S21, freq):
     return p_final
 
 
-# In[215]:
+# In[9]:
 
 
 def output_gamma(detunings, gamma_list, data_set, power_folder):
@@ -306,7 +354,7 @@ def prepare_output_path():
     return output_path
 
 
-# In[216]:
+# In[10]:
 
 
 def process_experiment_1(data_set, power_folder):
@@ -332,7 +380,7 @@ def iterate_through_power_levels_2(data_set):
         process_experiment_1(data_set, power_folder)
 
 
-# In[217]:
+# In[15]:
 
 
 """
