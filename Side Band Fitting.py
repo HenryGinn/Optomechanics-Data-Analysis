@@ -166,7 +166,7 @@ def get_index_maximum(S21):
     uncentred_heuristics = [get_uncentred_heuristic(S21, x, points) for x in candidates]
     m = argmin(uncentred_heuristics)
     x_1, x_2, x_3, x_4 = m-15, m-14, m+14, m+15
-    y_1, y_2, y_3, y_4 = uncentred_heuristics[x_1], uncentred_heuristics[x_2], uncentred_heuristics[x_3], uncentred_heuristics[x_4]
+    y_1, y_2, y_3, y_4 = (uncentred_heuristics[x] for x in [x_1, x_2, x_3, x_4])
     a, b, e = y_2-y_1, x_1-x_2, x_1*(y_2-y_1)+y_1*(x_1-x_2)
     c, d, f = y_4-y_3, x_3-x_4, x_3*(y_4-y_3)+y_3*(x_3-x_4)
     x_m = math.floor((d*e-b*f)/(a*d-b*c))
@@ -227,7 +227,7 @@ def get_S21_offset(S21, index, min_index, max_index):
 
 # In[213]:
 
-def plot_detunings_raw(S21_list_detuning)
+def plot_detunings_raw(S21_list_detuning, frequency):
     for i, S21 in enumerate(S21_list_detuning):
         max_x = get_index_maximum(array(S21))
         max_y = S21[max_x]

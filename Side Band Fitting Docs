@@ -1,0 +1,8 @@
+1: How to review the realignment of the plots so that the peak is at the centre before the average.
+Go to the get_gamma function and call the function plot_detunings_raw. For a given detuning, this will iterate through all the data that will be averaged together to make that detuning and plot each one, with a vertical red line drawn showing where it thinks the peak is.
+
+2: How to review the computation of where the peak is.
+At the end of the function get_index_maximum, call plot_index_max_heuristic. This will plot the shape the heuristic (should be like the function |x| but rounded at the bottom), two line segements on either side of the minimum (these should be on straight parts of the curve), and a red square at the bottom. This red square is where the minimum is. It will usually be directly below the minimum, but can be offset to the left. This is expected behaviour, and finds the minimum more accurately.
+
+3: How to review the plots after the average has been taken.
+At the end of get_gamma, call the function create_figure_1.
