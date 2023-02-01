@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[100]:
 
 
 import os
@@ -26,7 +26,7 @@ plt.rcParams['axes.linewidth'] = 0.5
 plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 
-# In[2]:
+# In[101]:
 
 
 def get_file_detuning_1(file):
@@ -61,6 +61,7 @@ def get_files_2(data_set, power_folder):
     files = []
     for folder in os.listdir(power_folder_path):
         path = os.path.join(power_folder_path, folder)
+        print(data_set, power_folder, path)
         for file in os.listdir(path):
             files.append(os.path.join(power_folder_path, folder, file))
     return files
@@ -87,8 +88,15 @@ def get_file_contents(file):
     return file_contents
 
 
-# In[3]:
+# In[102]:
 
+
+def get_S21_from_file(file, power):
+    raw_data = get_file_contents(file)
+    voltage = get_voltage(raw_data)
+    voltage = convert_to_mW(voltage)
+    S21_detuning = get_S21_detuning(voltage, power)
+    return S21_detuning
 
 def get_voltage(data):
     voltage = [float(line.strip().split('\t')[0]) for line in data[1:]]
@@ -116,15 +124,8 @@ def get_S21_normalised(S21_list, index_maxima):
     return S21_normalised
 
 
-# In[4]:
+# In[103]:
 
-
-def get_voltage_from_file(file, power):
-    raw_data = get_file_contents(file)
-    voltage = get_voltage(raw_data)
-    voltage = convert_to_mW(voltage)
-    S21_detuning = get_S21_detuning(voltage, power)
-    return S21_detuning
 
 def get_gamma(detuning, detuning_files_dict, power):
     frequency, S21_detunings = get_frequency_and_S21_detunings(detuning, detuning_files_dict, power)
@@ -134,11 +135,11 @@ def get_gamma(detuning, detuning_files_dict, power):
     return gamma
 
 def get_frequency_and_S21_detunings(detuning, detuning_files_dict, power):
-    S21_list_detuning = [get_voltage_from_file(file, power)
+    S21_detunings = [get_S21_from_file(file, power)
                          for file in detuning_files_dict[detuning]]
     frequency = get_frequency(detuning, detuning_files_dict)
     # plot_detunings_raw(S21_list_detuning, frequency)
-    return frequency, S21_list_detuning
+    return frequency, S21_detunings
 
 def get_frequency_and_S21_offsets(frequency, S21_detunings):
     index_maxima = [get_index_maximum(S21) for S21 in S21_detunings]
@@ -160,7 +161,7 @@ def get_S21_average(group_number, group_size, S21_offsets):
     left_index = group_number*group_size
     right_index = (group_number+1)*group_size
     S21_group = S21_offsets[left_index:right_index]
-    print(len(S21_group))
+    #print(len(S21_group))
     group_average = np.mean(S21_group, axis=0)
     return group_average
 
@@ -170,15 +171,17 @@ def process_S21_averages(S21_averages, frequency, detuning, power):
         fitting_parameters = fit(S21_average, frequency)
         gamma_list.append(fitting_parameters[1])
         title = f"Detuning: {detuning}, Power: {power},\nAverage number: {average_number}"
-        create_figure_1(S21_average, frequency, title=title, fitting=fitting_parameters)
+        if fitting_parameters[1] > 200:
+            create_figure_1(S21_average, frequency, title=title, fitting=fitting_parameters)
     return mean(gamma_list)
 
-# In[5]:
+
+# In[104]:
 
 
 def get_index_maximum(S21):
     """
-    We get a ballpark guess of where the peak is by using argmax. Around this
+    We get a ballpark guess of where the peak is by using argmax Around this
     point we find assign a value to how good that point would work as the centre
     of the points using a weighted sum. The worse the point is, the higher the
     value of the heuristic. We get something that looks like y=|x| but with a
@@ -188,7 +191,10 @@ def get_index_maximum(S21):
     used as the centre.
     """
     first_guess = argmax(S21)
-    left_x, right_x = first_guess-150, first_guess+150
+    if first_guess > len(S21)-160:
+        plt.plot(S21)
+        plt.show()
+    left_x, right_x = max(0, first_guess-150), min(first_guess+150, len(S21)-1)
     candidates = list(range(left_x, right_x, 4))
     points = array(range(left_x, right_x))
     uncentred_heuristics = [get_uncentred_heuristic(S21, x, points) for x in candidates]
@@ -236,7 +242,7 @@ def inside_window(i, N):
     return i
 
 
-# In[6]:
+# In[105]:
 
 
 def get_offset_frequency(frequency, index_maxima):
@@ -265,13 +271,15 @@ def restrict_domain(S21, centre, width):
     return S21
 
 
-# In[14]:
+# In[106]:
 
 
 def create_figure_1(S21_list, frequency, filter_rate=1,
                     title="S21 vs frequency", fitting=None):
     S21_list = ensure_2D_list(S21_list)
-    plt.figure(figsize=(80, 60))
+    plt.close('all')
+    #plt.figure(figsize=(80, 60))
+    plt.figure()
     for index, S21 in enumerate(S21_list):
         if index % filter_rate == 0:
             plt.plot(frequency, S21,'.',alpha=1)
@@ -300,25 +308,22 @@ def ensure_2D_list(test_list):
 
 def add_plot_labels(title):
     plt.title(title)
+    #plt.xlim(-2*10**7, 3.5*10**7)
     x_ticks = plt.xticks()[0]
-    order_of_magnitude = math.ceil(math.log(max(abs(x_ticks)), 1000)) - 1
-    x_labels = [f'{value:.0f}' for value in (x_ticks/1000**order_of_magnitude)]
+    x_labels = [f'{value:.0f}' for value in plt.xticks()[0]/10**3]
     plt.xticks(x_ticks, x_labels)
-    add_axis_labels(order_of_magnitude)
 
-def add_axis_labels(order_of_magnitude):
-    x_scale = ["Hz", "kHz", "MHz", "GHz", "THz"][order_of_magnitude]
-    plt.xlabel('${\omega_c}$' + f'({x_scale})')
+def plot_figure_1(frequency, voltage):
+    plt.plot(frequency, voltage,'.',alpha=1)
+    plt.xlabel('${\omega_c}$ (kHz)')
     plt.ylabel('Amplitude')
 
-# In[8]:
+
+# In[107]:
 
 
 def peval(freq,p):
-    F = p[0]
-    gamma = p[1]
-    noise = p[2]
-    w = p[3]
+    F, gamma, noise, w = p
     res = (F/(gamma**2+4*(freq-w)**2))+noise
     return res
 
@@ -331,11 +336,12 @@ def fit(S21, freq):
     #p0=[7e-10, 3.53181220e+01, 5.69756968e-14, 4.02844320e+09]
     # The second parameter in p_final is Gamma_m
     plsq=leastsq(residuals,p0,args=(S21,freq),full_output=1)
-    p_final=plsq[0]
-    return p_final
+    fitting_parameters = plsq[0]
+    print(plsq[1])
+    return fitting_parameters
 
 
-# In[9]:
+# In[108]:
 
 
 def output_gamma(detunings, gamma_list, data_set, power_folder):
@@ -354,7 +360,7 @@ def prepare_output_path():
     return output_path
 
 
-# In[10]:
+# In[109]:
 
 
 def process_experiment_1(data_set, power_folder):
@@ -371,16 +377,16 @@ def process_experiment_2(data_set, power_folder):
 
 def iterate_through_power_levels_1(data_set):
     path = os.path.join(os.path.dirname(os.path.dirname(sys.path[0])), data_set)
-    for power_folder in os.listdir(path)[2:3]:
+    for power_folder in os.listdir(path):
         process_experiment_1(data_set, power_folder)
 
 def iterate_through_power_levels_2(data_set):
     path = os.path.join(os.path.dirname(os.path.dirname(sys.path[0])), data_set, "Spectrum")
     for power_folder in os.listdir(path):
-        process_experiment_1(data_set, power_folder)
+        process_experiment_2(data_set, power_folder)
 
 
-# In[15]:
+# In[110]:
 
 
 """
@@ -388,6 +394,6 @@ For data sets in the same format as 15112022, use version 1 of functions
 For data sets in the same format as 16112022, use version 2 of functions
 You should only ever need to change the number on iterate_through_power_levels_i
 """
-data_set = "15112022"
-iterate_through_power_levels_1(data_set)
+data_set = "16112022_overnight"
+iterate_through_power_levels_2(data_set)
 

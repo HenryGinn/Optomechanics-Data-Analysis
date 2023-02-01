@@ -12,7 +12,6 @@ At the end of get_gamma, call the function create_figure_1.
 CURRENT TASKS
 
 1: Add in functionality to review how good the fit is. If the fit is not good, this should be able to be handled manually, or at least excluded from the data for now.
-2: Average the graphs in smaller chunks, compute gamma, and then average the values of gamma. Note that as the fitting procedure is non-linear, this can change the results
 
 NOTE ABOUT PLOTTING
 If you are running in VS code, you need to be plotting in inline mode or it won't display. You won't be able to dynamically interact with the graph (such as reselecting a region).
