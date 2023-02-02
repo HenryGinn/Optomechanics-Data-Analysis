@@ -167,6 +167,8 @@ def process_S21_averages(S21_averages, frequency, detuning, power):
     gamma_list = []
     for average_number, S21_average in enumerate(S21_averages):
         fitting_parameters, plot_fit = fit(S21_average, frequency)
+        title = f"Detuning: {detuning}, Power: {power}\nAverage number: {average_number}"
+        #create_figure_1(S21_average, frequency, fitting=fitting_parameters, title=title)
         if plot_fit is True:
             fitting_parameters, data_accepted = fit_plot_manually(S21_average, frequency, fitting_parameters)
             if data_accepted is False:

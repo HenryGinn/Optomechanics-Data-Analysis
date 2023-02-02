@@ -9,6 +9,10 @@ At the end of the function get_index_maximum, call plot_index_max_heuristic. Thi
 3: How to review the plots after the average has been taken.
 At the end of get_gamma, call the function create_figure_1.
 
+4: Manual fitting instructions
+Deciding if a plot needs to be fitted manually: the initial fitting parameters are assumed to be somewhat reasonable, and a fitting heuristic is computed by how different the computed fitting parameters are from the initial. If this is above a certain threshold, it will be flagged and sent to be handled manually.
+The figure will be plotted with the automatic fit. Close this figure and then a menu will appear asking what changes you want to make to the fitting parameters, or if you want to accept or reject the fit. If the data is wrong, or cannot be fitted sufficiently well, it should be rejected. You need to close the figures manually to move on to the next figure
+
 CURRENT TASKS
 
 1: Add in functionality to review how good the fit is. If the fit is not good, this should be able to be handled manually, or at least excluded from the data for now.
