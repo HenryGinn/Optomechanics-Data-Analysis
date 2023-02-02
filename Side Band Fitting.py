@@ -50,7 +50,6 @@ def get_file_detuning_2(file):
 def get_files_1(data_set, power_folder):
     parent_folder = os.path.dirname(os.path.dirname(sys.path[0]))
     path = os.path.join(parent_folder, data_set, power_folder, "Spectrum")
-    print(data_set, power_folder, path)
     os.chdir(path)
     files= glob.glob('*.txt')
     return files
@@ -61,7 +60,6 @@ def get_files_2(data_set, power_folder):
     files = []
     for folder in os.listdir(power_folder_path):
         path = os.path.join(power_folder_path, folder)
-        print(data_set, power_folder, path)
         for file in os.listdir(path):
             files.append(os.path.join(power_folder_path, folder, file))
     return files
@@ -168,13 +166,13 @@ def get_S21_average(group_number, group_size, S21_offsets):
 def process_S21_averages(S21_averages, frequency, detuning, power):
     gamma_list = []
     for average_number, S21_average in enumerate(S21_averages):
-        fitting_parameters = fit(S21_average, frequency)
+        fitting_parameters, plot_fit = fit(S21_average, frequency)
+        if plot_fit is True:
+            fitting_parameters, data_accepted = fit_plot_manually(S21_average, frequency, fitting_parameters)
+            if data_accepted is False:
+                continue
         gamma_list.append(fitting_parameters[1])
-        title = f"Detuning: {detuning}, Power: {power},\nAverage number: {average_number}"
-        if fitting_parameters[1] > 200:
-            create_figure_1(S21_average, frequency, title=title, fitting=fitting_parameters)
     return mean(gamma_list)
-
 
 # In[104]:
 
@@ -191,9 +189,6 @@ def get_index_maximum(S21):
     used as the centre.
     """
     first_guess = argmax(S21)
-    if first_guess > len(S21)-160:
-        plt.plot(S21)
-        plt.show()
     left_x, right_x = max(0, first_guess-150), min(first_guess+150, len(S21)-1)
     candidates = list(range(left_x, right_x, 4))
     points = array(range(left_x, right_x))
@@ -331,15 +326,51 @@ def residuals(p,X,f):
     res=peval(f,p)-X
     return res
 
-def fit(S21, freq):
-    p0=[10e-10, 20, 0.6e-14, 0]
-    #p0=[7e-10, 3.53181220e+01, 5.69756968e-14, 4.02844320e+09]
-    # The second parameter in p_final is Gamma_m
-    plsq=leastsq(residuals,p0,args=(S21,freq),full_output=1)
-    fitting_parameters = plsq[0]
-    print(plsq[1])
-    return fitting_parameters
+def fit(S21, frequency):
+    initial_fitting_parameters = [5e-12, 5, 3e-15, 1.5]
+    fitting_results = leastsq(residuals, initial_fitting_parameters, args=(S21,frequency), full_output=1)
+    fitting_parameters = fitting_results[0]
+    flag_plot = get_flag_plot(fitting_parameters, initial_fitting_parameters)
+    return fitting_parameters, flag_plot
 
+def get_flag_plot(fitting_parameters, initial_fitting_parameters):
+    fit_ratio = fitting_parameters/initial_fitting_parameters
+    fit_heuristic = sum(fit_ratio + 1/fit_ratio)
+    if fit_heuristic > 40:
+        print(f"Fit heuristic: {fit_heuristic}")
+        return True
+    return False
+
+def fit_plot_manually(S21, frequency, fitting_parameters):
+    while True:
+        for i, j in zip(["F", "Gamma", "Noise", "w"], fitting_parameters):
+            print(f"{i}: {j}")
+        create_figure_1(S21, frequency, fitting=fitting_parameters)
+        prompt = ("\nWhich option do you want to change?\n1: F\n2: Gamma\n3: Noise\n" +
+                  "4: w\n5: Reset to default\n6: Change all at once\n" +
+                  "7: Attempt automatic fit\n8: Accept\nNo input: Reject\n")
+        fitting_input_choice = input(prompt)
+        if fitting_input_choice == "":
+            return fitting_parameters, False
+        elif fitting_input_choice in ["1", "2", "3", "4"]:
+            prompt = "\nWhat is the new value you want to change it to: "
+            try:
+                new_parameter_value = float(input(prompt))
+                fitting_parameters[int(fitting_input_choice)-1] = new_parameter_value
+            except:
+                pass
+        elif fitting_input_choice == "5":
+            fitting_parameters = [5e-12, 5, 3e-15, 1.5]
+        elif fitting_input_choice == "6":
+            prompt = "Enter all the new values in a list separated by spaces\n"
+            fitting_parameters = [float(parameter_input) for parameter_input in input(prompt).split(" ")]
+        elif fitting_input_choice == "7":
+            fitting_results = leastsq(residuals, fitting_parameters, args=(S21,frequency), full_output=1)
+            fitting_parameters = fitting_results[0]
+        elif fitting_input_choice == "8":
+            return fitting_parameters, True
+        else:
+            print("Sorry, you must choose one of the options. Try again.")
 
 # In[108]:
 
