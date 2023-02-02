@@ -78,6 +78,8 @@ def get_detuning_files_dict_2(data_set, power_folder):
     detuning_files_dict = {detuning: [] for detuning in detunings}
     for file in files:
         detuning_files_dict[get_file_detuning_2(file)].append(file)
+    for i, j in detuning_files_dict.items():
+        detuning_files_dict[i] = sorted(j, key=lambda name: int(name[230:-5]))
     return detuning_files_dict, detunings
 
 def get_file_contents(file):
@@ -126,6 +128,8 @@ def get_S21_normalised(S21_list, index_maxima):
 
 
 def get_gamma(detuning, detuning_files_dict, power):
+    for i in detuning_files_dict[detuning]:
+        print(i)
     frequency, S21_detunings = get_frequency_and_S21_detunings(detuning, detuning_files_dict, power)
     frequency, S21_offsets = get_frequency_and_S21_offsets(frequency, S21_detunings)
     S21_averages = get_S21_averages(S21_offsets)
@@ -168,6 +172,7 @@ def process_S21_averages(S21_averages, frequency, detuning, power):
     for average_number, S21_average in enumerate(S21_averages):
         fitting_parameters, plot_fit = fit(S21_average, frequency)
         title = f"Detuning: {detuning}, Power: {power}\nAverage number: {average_number}"
+        print(title)
         #create_figure_1(S21_average, frequency, fitting=fitting_parameters, title=title)
         if plot_fit is True:
             fitting_parameters, data_accepted = fit_plot_manually(S21_average, frequency, fitting_parameters)
@@ -279,7 +284,7 @@ def create_figure_1(S21_list, frequency, filter_rate=1,
     plt.figure()
     for index, S21 in enumerate(S21_list):
         if index % filter_rate == 0:
-            plt.plot(frequency, S21,'.',alpha=1)
+            plt.plot(frequency, S21,'.-',alpha=1)
     plot_fitting(fitting, frequency)
     add_plot_labels(title)
     plt.show()

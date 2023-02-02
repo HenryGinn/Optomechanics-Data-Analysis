@@ -1,3 +1,7 @@
+NOTES FOR USE
+1: Make sure it knows which folder structure is being used for the data set. Instructions are given at the end of Side Band Fitting.
+2: Make sure to run the add leading 0s in file names program. This allows python to sort the files accurately
+
 HOW TO REVIEW PARTS OF ANALYSIS
 
 1: How to review the realignment of the plots so that the peak is at the centre before the average.
@@ -15,7 +19,12 @@ The figure will be plotted with the automatic fit. Close this figure and then a 
 
 CURRENT TASKS
 
-1: Add in functionality to review how good the fit is. If the fit is not good, this should be able to be handled manually, or at least excluded from the data for now.
+1: Fix file names so they can be sorted easily DONE
+2: Sort the file names for each detuning
+3: 3 subplots needed.
+Subplot 1: detuning vs time
+Subplot 2: colourplot where each vertical strip is an S21 vs frequency relationship and time is on the horizontal axis
+Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs frequency) and time is on the horizonal axis.
 
 NOTE ABOUT PLOTTING
 If you are running in VS code, you need to be plotting in inline mode or it won't display. You won't be able to dynamically interact with the graph (such as reselecting a region).
