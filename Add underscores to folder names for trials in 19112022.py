@@ -7,6 +7,7 @@ def fix_names():
     data_set_path_spectrum = os.path.join(parent_path, "19112022", "Spectrum")
     data_set_path_transmission = os.path.join(parent_path, "19112022", "Transmission")
     iterate_through_power_folders(data_set_path_spectrum)
+    iterate_through_power_folders(data_set_path_transmission)
 
 def iterate_through_power_folders(path):
     for power_folder_name in os.listdir(path):
@@ -20,5 +21,9 @@ def update_path(power_folder_path, trial_folder_name):
         trial_folder_name = f"{trial_folder_name[0:2]}_{trial_folder_name[2:]}"
     new_trial_folder_path = os.path.join(power_folder_path, trial_folder_name)
     os.rename(original_trial_folder_path, new_trial_folder_path)
+
+input(("Warning: you must put each of the sets of trials into folders '27', '28', '29' beforehand\n"
+       "Make sure you have done this for transmission and spectrum folders\n"
+       "Press enter to continue running the program if you have done this\n"))
 
 fix_names()

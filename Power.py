@@ -1,4 +1,5 @@
 from Trial import Trial
+import os
 
 class Power():
 
@@ -24,6 +25,7 @@ class Power():
 
     def process_power(self):
         self.set_trial_paths()
+        #self.output_trial_paths()
         self.set_trial_list()
 
     def set_trial_paths(self):
@@ -37,8 +39,22 @@ class Power():
         self.trial_paths_transmission = [self.transmission_path]
 
     def set_trial_paths_B(self):
-        for folder_name in self.spectrum_path:
+        for folder_name in sorted(os.listdir(self.spectrum_path)):
             print(folder_name)
+
+    def output_trial_paths(self):
+        self.output_trial_paths_spectrum()
+        self.output_trial_paths_transmission()
+
+    def output_trial_paths_spectrum(self):
+        print("\nTrial paths spectrum")
+        for path in self.trial_paths_spectrum:
+            print(path)
+
+    def output_trial_paths_transmission(self):
+        print("\nTrial paths transmission")
+        for path in self.trial_paths_transmission:
+            print(path)
 
     def set_trial_list(self):
         self.trial_list = []

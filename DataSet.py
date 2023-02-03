@@ -37,7 +37,7 @@ class DataSet():
         elif self.folder_structure_type in [2, 3]:
             self.set_power_folder_path_data_2()
         else:
-            raise Exception("Folder structure type unknown. Must be 1 or 2")
+            raise Exception("Folder structure type unknown. Must be 1, 2, or 3")
 
     def set_power_folder_path_data_1(self):
         self.power_folder_names = sorted(list(os.listdir(self.data_set_path)))
