@@ -6,9 +6,9 @@ class Trial():
     This class handles all the data for a trial done at a specific power.
     Organising the processing or detunings happens here.
 
-    Folder structure A is where all the detunings for a trial are stored in one
-    folder. Folder structure B is where each detuning has it's own folder.
-    15112022 is type A, 16112022_overnight and 19112022 are type B.
+    Folder structure "a" is where all the detunings for a trial are stored in one
+    folder. Folder structure "b" is where each detuning has it's own folder.
+    15112022 is type a, 16112022_overnight and 19112022 are type b.
     """
     
     def __init__(self, power_obj, transmission_path, spectrum_path):
