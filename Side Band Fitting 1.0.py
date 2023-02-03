@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[100]:
-
-
 import os
 import sys
 from scipy import optimize
@@ -16,18 +10,11 @@ import math
 
 import matplotlib.font_manager as fm
 font_names = [f.name for f in fm.fontManager.ttflist]
-# mpl.rcParams['font.family'] = 'Times'
-# mpl.rcParams['mathtext.fontset'] = 'custom'
-# mpl.rcParams['mathtext.rm'] = 'Times'
-# mpl.rcParams['mathtext.it'] = 'Times:italic'
-# mpl.rcParams['mathtext.bf'] = 'Times'
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
 plt.rcParams['axes.formatter.limits'] = [-5,5]
 
-
-# In[101]:
-
+############################### FILE HANDLING ###############################
 
 def get_file_detuning_1(file):
     underscore_locations = [index for index, character in enumerate(file)
@@ -70,6 +57,7 @@ def get_detuning_files_dict_1(data_set, power_folder):
     detuning_files_dict = {detuning: [] for detuning in detunings}
     for file in files:
         detuning_files_dict[get_file_detuning_1(file)].append(file)
+    detuning_files_dict = sort_detuning_files_dict(detuning_files_dict)
     return detuning_files_dict, detunings
 
 def get_detuning_files_dict_2(data_set, power_folder):
@@ -78,8 +66,7 @@ def get_detuning_files_dict_2(data_set, power_folder):
     detuning_files_dict = {detuning: [] for detuning in detunings}
     for file in files:
         detuning_files_dict[get_file_detuning_2(file)].append(file)
-    for i, j in detuning_files_dict.items():
-        detuning_files_dict[i] = sorted(j, key=lambda name: int(name[230:-5]))
+    detuning_files_dict = sort_detuning_files_dict(detuning_files_dict)
     return detuning_files_dict, detunings
 
 def get_file_contents(file):
@@ -87,9 +74,12 @@ def get_file_contents(file):
         file_contents=f.readlines()
     return file_contents
 
+def sort_detuning_files_dict(detuning_files_dict):
+    for detuning, file_list in detuning_files_dict.items():
+        detuning_files_dict[detuning] = sorted(file_list)
+    return detuning_files_dict
 
-# In[102]:
-
+############################### PROCESS SPECTRUM FILES ###############################
 
 def get_S21_from_file(file, power):
     raw_data = get_file_contents(file)
@@ -123,13 +113,9 @@ def get_S21_normalised(S21_list, index_maxima):
     S21_normalised = [S21/S21[index] for S21, index in zip(S21_list, index_maxima)]
     return S21_normalised
 
-
-# In[103]:
-
+############################### FILE HANDLING ###############################
 
 def get_gamma(detuning, detuning_files_dict, power):
-    for i in detuning_files_dict[detuning]:
-        print(i)
     frequency, S21_detunings = get_frequency_and_S21_detunings(detuning, detuning_files_dict, power)
     frequency, S21_offsets = get_frequency_and_S21_offsets(frequency, S21_detunings)
     S21_averages = get_S21_averages(S21_offsets)
@@ -180,9 +166,6 @@ def process_S21_averages(S21_averages, frequency, detuning, power):
                 continue
         gamma_list.append(fitting_parameters[1])
     return mean(gamma_list)
-
-# In[104]:
-
 
 def get_index_maximum(S21):
     """
@@ -243,10 +226,6 @@ def inside_window(i, N):
         return N-1
     return i
 
-
-# In[105]:
-
-
 def get_offset_frequency(frequency, index_maxima):
     min_index, max_index = min(index_maxima), max(index_maxima)
     frequency = frequency[0:len(frequency) - (max_index - min_index)]
@@ -272,10 +251,6 @@ def restrict_domain(S21, centre, width):
     S21 = S21[left:right]
     return S21
 
-
-# In[106]:
-
-
 def create_figure_1(S21_list, frequency, filter_rate=1,
                     title="S21 vs frequency", fitting=None):
     S21_list = ensure_2D_list(S21_list)
@@ -284,7 +259,7 @@ def create_figure_1(S21_list, frequency, filter_rate=1,
     plt.figure()
     for index, S21 in enumerate(S21_list):
         if index % filter_rate == 0:
-            plt.plot(frequency, S21,'.-',alpha=1)
+            plt.plot(frequency, S21,'.',alpha=1)
     plot_fitting(fitting, frequency)
     add_plot_labels(title)
     plt.show()
@@ -319,10 +294,6 @@ def plot_figure_1(frequency, voltage):
     plt.plot(frequency, voltage,'.',alpha=1)
     plt.xlabel('${\omega_c}$ (kHz)')
     plt.ylabel('Amplitude')
-
-
-# In[107]:
-
 
 def peval(freq,p):
     F, gamma, noise, w = p
@@ -379,9 +350,6 @@ def fit_plot_manually(S21, frequency, fitting_parameters):
         else:
             print("Sorry, you must choose one of the options. Try again.")
 
-# In[108]:
-
-
 def output_gamma(detunings, gamma_list, data_set, power_folder):
     output_path = prepare_output_path()
     file_name = os.path.join(output_path, f"gamma_vs_detuning_{data_set}_{power_folder}")
@@ -396,9 +364,6 @@ def prepare_output_path():
     if os.path.isdir(output_path) is False:
         os.mkdir(output_path)
     return output_path
-
-
-# In[109]:
 
 
 def process_experiment_1(data_set, power_folder):
@@ -422,10 +387,6 @@ def iterate_through_power_levels_2(data_set):
     path = os.path.join(os.path.dirname(os.path.dirname(sys.path[0])), data_set, "Spectrum")
     for power_folder in os.listdir(path):
         process_experiment_2(data_set, power_folder)
-
-
-# In[110]:
-
 
 """
 For data sets in the same format as 15112022, use version 1 of functions
