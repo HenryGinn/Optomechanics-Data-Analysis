@@ -6,6 +6,10 @@ class Power():
     """
     This class handles all the data for a specific power within one dataset.
     Organising the processing of the trials and plotting things happens here.
+
+    Folder structure "A" is where there is only one trial for a given power.
+    Folder structure "B" is where there are multiple
+    15112022 and 16112022_overnight are of type A and 19112022 is of type B
     """
     
     def __init__(self, data_set, power_folder, transmission_path, spectrum_path):
@@ -25,8 +29,7 @@ class Power():
 
     def process_power(self):
         self.set_trial_paths()
-        #self.output_trial_paths()
-        self.set_trial_list()
+        self.set_trial_objects()
 
     def set_trial_paths(self):
         set_trial_path_functions = {1: self.set_trial_paths_A,
@@ -35,34 +38,52 @@ class Power():
         set_trial_path_functions[self.data_set.folder_structure_type]()
 
     def set_trial_paths_A(self):
-        self.trial_paths_spectrum = [self.spectrum_path]
-        self.trial_paths_transmission = [self.transmission_path]
+        self.trial_transmission_paths = [self.transmission_path]
+        self.trial_spectrum_paths = [self.spectrum_path]
 
     def set_trial_paths_B(self):
-        for folder_name in sorted(os.listdir(self.spectrum_path)):
-            print(folder_name)
+        self.set_trial_transmission_paths_B()
+        self.set_trial_spectrum_paths_B()
+
+    def set_trial_transmission_paths_B(self):
+        trial_transmission_folder_names = list(sorted(os.listdir(self.transmission_path)))
+        self.trial_transmission_paths = [os.path.join(self.transmission_path, folder_name)
+                                         for folder_name in trial_transmission_folder_names]
+
+    def set_trial_spectrum_paths_B(self):
+        trial_spectrum_folder_names = list(sorted(os.listdir(self.transmission_path)))
+        self.trial_spectrum_paths = [os.path.join(self.spectrum_path, folder_name)
+                                     for folder_name in trial_spectrum_folder_names]
 
     def output_trial_paths(self):
-        self.output_trial_paths_spectrum()
-        self.output_trial_paths_transmission()
+        self.output_trial_transmission_paths()
+        self.output_trial_spectrum_path()
 
-    def output_trial_paths_spectrum(self):
-        print("\nTrial paths spectrum")
-        for path in self.trial_paths_spectrum:
+    def output_trial_transmission_paths(self):
+        print("\nTrial transmission paths")
+        for path in self.trial_transmission_paths:
             print(path)
 
-    def output_trial_paths_transmission(self):
-        print("\nTrial paths transmission")
-        for path in self.trial_paths_transmission:
+    def output_trial_spectrum_paths(self):
+        print("\nTrial spectrum paths")
+        for path in self.trial_spectrum_paths:
             print(path)
 
-    def set_trial_list(self):
-        self.trial_list = []
+    def set_trial_objects(self):
+        trial_paths_data = zip(self.trial_transmission_paths,
+                               self.trial_spectrum_paths)
+        self.trial_objects = [Trial(self, trial_transmission_path, trial_spectrum_path)
+                              for trial_transmission_path, trial_spectrum_path in trial_paths_data]
+
+    def output_trials_information(self):
+        print("\nTrials information")
+        for trial in self.trial_objects:
+            print(trial)
 
     def __str__(self):
-        string = (f"Data set: {self.data_set}\n"
+        string = (f"Data set: {self.data_set.folder_name}\n"
                   f"Folder name: {self.folder_name}\n"
                   f"Transmission path: {self.transmission_path}\n"
                   f"Spectrum path: {self.spectrum_path}\n"
-                  f"Power: {self.power}")
+                  f"Power: {self.power}\n")
         return string

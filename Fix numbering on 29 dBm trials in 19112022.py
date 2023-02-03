@@ -13,7 +13,6 @@ def fix_names():
 def fix_trial_folders(path):
     delete_trial_0(path)
     for trial_folder_name in sorted(os.listdir(path), key=lambda x: int(x[3:])):
-        print(trial_folder_name)
         update_path(path, trial_folder_name)
 
 def delete_trial_0(path):

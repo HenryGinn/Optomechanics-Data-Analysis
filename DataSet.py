@@ -111,5 +111,5 @@ class DataSet():
                   f"Folder structure type: {self.folder_structure_type}\n" +
                   f"Data set path: {self.data_set_path}\n"
                   f"Repository folder: {self.repository_path}\n" +
-                  f"Parent folder: {self.parent_path}")
+                  f"Parent folder: {self.parent_path}\n")
         return string

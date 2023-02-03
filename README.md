@@ -33,6 +33,14 @@ Find out what folder structure your data set has out of the options listed above
     2: Missing underscores. Underscores are used to find positions in file names to extract information. Sometimes these are missing and need to be added
     3: Folders containing files of different sizes. If these are part of the same data set, they should have the same size. Incorrect sizes should be deleted from the folder (a copy of the data, not the original).
 
+############# FOLDER STRUCTURE DESCRIPTION #############
+
+15112022 has a one folder for each power inside. Inside each of those are the folders "Spectrum" and "Transmission. Inside "Spectrum" is a list of text files with the data inside where each file has all the data for one detuning value.
+
+16112022_overnight has two folders inside, "Spectrum" and "Transmission". Inside each of those are folders for the powers, one folder per power. For "Spectrum", inside of each power folder is a list of folders, one for each detuning. Inside these is the list of text files with the data on the voltage vs frequency. Each file is a separate run for that power at that detuning. For "Transmission", inside each power folder is a list of text files. Each text file corresponds to one of the detuning folders in "Spectrum". They can be matched up by their timestamps
+
+19112022 has two folders inside, "Spectrum" and "Transmission". Inside each of those are folders for the powers, one folder per power. For "Spectrum", inside of each power folder is a list of folders, one for each detuning. Inside each of these for both "Spectrum" and "Transmission" is a list of folders, one for each trial. These are named "{power}_{trial_number}". Inside each of these is the same structure as in 16112022_overnight.
+
 ############# REVIEW OF ANALYSIS IN SIDE BAND FITTING #############
 
 1: How to review the realignment of the plots so that the peak is at the centre before the average.
