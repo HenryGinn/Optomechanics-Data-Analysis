@@ -350,9 +350,9 @@ def get_initial_fitting_parameters(S21, frequency):
     return initial_fitting_parameters
 
 def get_flag_plot(fitting_parameters, initial_fitting_parameters):
-    fit_ratio = fitting_parameters[:3]/initial_fitting_parameters[:3]
+    fit_ratio = fitting_parameters[:2]/initial_fitting_parameters[:2]
     fit_heuristic = sum(fit_ratio + 1/fit_ratio) + abs(fitting_parameters[3] - initial_fitting_parameters[3])
-    if fit_heuristic > 40:
+    if fit_heuristic > 20:
         print(f"Fit heuristic: {fit_heuristic}")
         return True
     return False
