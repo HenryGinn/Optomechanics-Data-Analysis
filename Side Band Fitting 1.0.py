@@ -7,6 +7,7 @@ import glob
 from matplotlib import *
 from pylab import *
 import math
+import numpy as np
 
 import matplotlib.font_manager as fm
 font_names = [f.name for f in fm.fontManager.ttflist]
@@ -149,22 +150,28 @@ def get_S21_average(group_number, group_size, S21_offsets):
     left_index = group_number*group_size
     right_index = (group_number+1)*group_size
     S21_group = S21_offsets[left_index:right_index]
-    #print(len(S21_group))
+    test_group_valid(S21_group)
     group_average = np.mean(S21_group, axis=0)
     return group_average
+
+def test_group_valid(S21_group):
+    if len(S21_group) == 0:
+        input("Group is empty: ")
 
 def process_S21_averages(S21_averages, frequency, detuning, power):
     gamma_list = []
     for average_number, S21_average in enumerate(S21_averages):
-        fitting_parameters, plot_fit = fit(S21_average, frequency)
+        fitting_parameters, initial_fitting_parameters, flag_plot = fit(S21_average, frequency)
         title = f"Detuning: {detuning}, Power: {power}\nAverage number: {average_number}"
         print(title)
         #create_figure_1(S21_average, frequency, fitting=fitting_parameters, title=title)
-        if plot_fit is True:
-            fitting_parameters, data_accepted = fit_plot_manually(S21_average, frequency, fitting_parameters)
+        if flag_plot is True:
+            fitting_parameters, data_accepted = fit_plot_manually(S21_average, frequency, fitting_parameters, initial_fitting_parameters)
             if data_accepted is False:
                 continue
-        gamma_list.append(fitting_parameters[1])
+        gamma_list.append(abs(fitting_parameters[1]))
+    if len(gamma_list) == 0:
+        input("Gamma list is empty: ")
     return mean(gamma_list)
 
 def get_index_maximum(S21):
@@ -285,14 +292,13 @@ def ensure_2D_list(test_list):
 
 def add_plot_labels(title):
     plt.title(title)
-    #plt.xlim(-2*10**7, 3.5*10**7)
     x_ticks = plt.xticks()[0]
-    x_labels = [f'{value:.0f}' for value in plt.xticks()[0]/10**3]
+    max_x_tick = max(abs(x_ticks))
+    prefix_power = math.floor(math.log(max_x_tick, 1000))
+    prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
+    x_labels = [f'{value:.0f}' for value in plt.xticks()[0]/1000**prefix_power]
     plt.xticks(x_ticks, x_labels)
-
-def plot_figure_1(frequency, voltage):
-    plt.plot(frequency, voltage,'.',alpha=1)
-    plt.xlabel('${\omega_c}$ (kHz)')
+    plt.xlabel('${\omega_c}$' + f'({prefix})')
     plt.ylabel('Amplitude')
 
 def peval(freq,p):
@@ -305,21 +311,53 @@ def residuals(p,X,f):
     return res
 
 def fit(S21, frequency):
-    initial_fitting_parameters = [5e-12, 5, 3e-15, 1.5]
+    initial_fitting_parameters = get_initial_fitting_parameters(S21, frequency)
     fitting_results = leastsq(residuals, initial_fitting_parameters, args=(S21,frequency), full_output=1)
     fitting_parameters = fitting_results[0]
     flag_plot = get_flag_plot(fitting_parameters, initial_fitting_parameters)
-    return fitting_parameters, flag_plot
+    return fitting_parameters, initial_fitting_parameters, flag_plot
+
+def get_initial_fitting_parameters(S21, frequency):
+    """
+    We approximate the 4 fitting parameters
+    Noise: most of the points are not at the peak so this is given by the average value
+    Resonant frequency: this should be around 0 because we have centred it, but it usually
+    sits around 2 (note this doesn't mean we have centred it badly - the purpose of that
+    was to be able to average them in a reliable and robust way, having the resonant
+    frequency at exactly 0 was a secondary goal to this)
+    F and Gamma: after fixing the noise and resonant frequency we have two more degrees of
+    freedom and we use two pieces of information from the data to find these.
+    The first of these is the peak which we refer to as K. We assume this happens at
+    resonance, and we say our fit peaks at K which is some fraction of the peak.
+    The second of these is the "width". The fit intersects the line y = k in two places,
+    and the difference of these is sqrt((K-k)/k) * Gamma which can be rearranged for Gamma.
+    Now we know how to extract gamma from a width, we find the width by counting the number
+    of points above y = k and dividing by the resolution of the x axis.
+    Some values are multiplied by constants to get a better fit, and we also use a moving
+    average to make things smoother first
+    """
+    end = int(len(S21)/5)
+    noise, w = mean(S21[:end])/20, 2
+    S21 -= noise
+    K = np.mean(S21[S21 >= np.max(S21)*2/3])
+    k = K * 1/3
+    frequency_resolution = frequency[1] - frequency[0]
+    peak_points = [S21 > k]
+    width = 2 * (np.count_nonzero(peak_points) + 1)/frequency_resolution
+    gamma = width * math.sqrt(k/(K-k))
+    F = gamma**2 * K * 1/2
+    initial_fitting_parameters = [F, gamma, noise, w]
+    return initial_fitting_parameters
 
 def get_flag_plot(fitting_parameters, initial_fitting_parameters):
-    fit_ratio = fitting_parameters/initial_fitting_parameters
-    fit_heuristic = sum(fit_ratio + 1/fit_ratio)
+    fit_ratio = fitting_parameters[:3]/initial_fitting_parameters[:3]
+    fit_heuristic = sum(fit_ratio + 1/fit_ratio) + abs(fitting_parameters[3] - initial_fitting_parameters[3])
     if fit_heuristic > 40:
         print(f"Fit heuristic: {fit_heuristic}")
         return True
     return False
 
-def fit_plot_manually(S21, frequency, fitting_parameters):
+def fit_plot_manually(S21, frequency, fitting_parameters, initial_fitting_parameters):
     while True:
         for i, j in zip(["F", "Gamma", "Noise", "w"], fitting_parameters):
             print(f"{i}: {j}")
@@ -338,10 +376,16 @@ def fit_plot_manually(S21, frequency, fitting_parameters):
             except:
                 pass
         elif fitting_input_choice == "5":
-            fitting_parameters = [5e-12, 5, 3e-15, 1.5]
+            fitting_parameters = list.copy(initial_fitting_parameters)
         elif fitting_input_choice == "6":
             prompt = "Enter all the new values in a list separated by spaces\n"
-            fitting_parameters = [float(parameter_input) for parameter_input in input(prompt).split(" ")]
+            input_wrong = True
+            while input_wrong:
+                try:
+                    fitting_parameters = [float(parameter_input) for parameter_input in input(prompt).split(" ")]
+                    input_wrong = False
+                except:
+                    print("Sorry, you typed it in wrong, try again")
         elif fitting_input_choice == "7":
             fitting_results = leastsq(residuals, fitting_parameters, args=(S21,frequency), full_output=1)
             fitting_parameters = fitting_results[0]
@@ -393,6 +437,11 @@ For data sets in the same format as 15112022, use version 1 of functions
 For data sets in the same format as 16112022, use version 2 of functions
 You should only ever need to change the number on iterate_through_power_levels_i
 """
+
+#initial_fitting_parameters = [1e-9, 70, 1e-16, 2]
+#initial_fitting_parameters = [5e-12, 5, 3e-15, 1.5]
+
 data_set = "16112022_overnight"
+#data_set = "15112022"
 iterate_through_power_levels_2(data_set)
 
