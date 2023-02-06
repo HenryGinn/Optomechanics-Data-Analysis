@@ -103,7 +103,7 @@ class DataSet():
             print(power)
 
     def process_power_folders(self):
-        for power_obj in self.power_objects:
+        for power_obj in self.power_objects[0:1]:
             power_obj.process_power()
 
     def __str__(self):

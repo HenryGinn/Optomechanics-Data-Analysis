@@ -10,9 +10,9 @@ Before using the program, there are several things you need to check
 Details about how to check all of these are given in the README.
 """
 
-#my_data_set = DataSet("15112022", folder_structure_type=1)
+my_data_set = DataSet("15112022", folder_structure_type=1)
 #my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
-my_data_set = DataSet("19112022", folder_structure_type=3)
+#my_data_set = DataSet("19112022", folder_structure_type=3)
 
 #my_data_set.output_power_folder_names()
 #my_data_set.output_transmission_folder_paths()
