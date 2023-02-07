@@ -55,6 +55,10 @@ class Power():
         self.trial_spectrum_paths = [os.path.join(self.spectrum_path, folder_name)
                                      for folder_name in trial_spectrum_folder_names]
 
+    def process_files(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.process_files()
+
     def output_trial_paths(self):
         self.output_trial_transmission_paths()
         self.output_trial_spectrum_path()

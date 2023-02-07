@@ -102,9 +102,13 @@ class DataSet():
         for power in self.power_list:
             print(power)
 
-    def process_power_folders(self):
+    def process_folder_structure(self):
         for power_obj in self.power_objects[0:1]:
             power_obj.process_power()
+
+    def process_files(self):
+        for power_obj in self.power_objects[0:1]:
+            power_obj.process_files()
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 

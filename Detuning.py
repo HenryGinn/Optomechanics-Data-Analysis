@@ -11,10 +11,14 @@ class Detuning():
         self.timestamp = timestamp
         self.transmission_path = transmission_path
         self.spectrum_paths = spectrum_paths
+    
+    def process_files(self):
+        pass
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"
                   f"Timestamp: {self.timestamp}\n"
                   f"Power: {self.trial.power}\n"
-                  f"Transmission path: {self.transmission_path}\n")
+                  f"Transmission path: {self.transmission_path}\n"
+                  f"Spectrum paths count: {len(self.spectrum_paths)}\n")
         return string

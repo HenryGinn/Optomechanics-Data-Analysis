@@ -34,10 +34,6 @@ class Trial():
                                 if character == "_" and index >= limit]
         return underscore_locations
 
-    def get_timestamp_from_file_name(self, file_name):
-        timestamp = self.get_number_from_file_name(file_name, "timestamp")
-        return timestamp
-
     def set_detuning_objects(self):
         set_detuning_objects_functions = {1: self.set_detuning_objects_a,
                                           2: self.set_detuning_objects_b,
@@ -47,8 +43,6 @@ class Trial():
     def set_detuning_objects_a(self):
         self.detuning_objects = [self.get_detuning_object_a(file_name)
                                  for file_name in os.listdir(self.spectrum_path)]
-        for detuning in self.detuning_objects:
-            print(detuning)
 
     def get_detuning_object_a(self, file_name):
         detuning = self.get_number_from_file_name(file_name, "detuning")
@@ -67,7 +61,29 @@ class Trial():
         raise Exception(f"Could not find corresponding transmission for timestamp {timestamp}")
 
     def set_detuning_objects_b(self):
-        pass
+        self.detuning_objects = [self.get_detuning_object_b(folder_name)
+                                 for folder_name in os.listdir(self.spectrum_path)]
+
+    def get_detuning_object_b(self, folder_name):
+        detuning, timestamp = self.get_detuning_and_timestamp_from_folder(folder_name)
+        spectrum_file_paths = self.get_spectrum_file_paths(folder_name)
+        transmission_file_path = self.get_transmission_file_path(timestamp)
+        detuning = Detuning(self, detuning, timestamp, transmission_file_path, spectrum_file_paths)
+        return detuning
+
+    def get_spectrum_file_paths(self, folder_name):
+        folder_path = os.path.join(self.spectrum_path, folder_name)
+        spectrum_file_names = list(os.listdir(folder_path))
+        spectrum_file_paths = [os.path.join(folder_path, file_name)
+                               for file_name in spectrum_file_names]
+        return spectrum_file_paths
+
+    def get_detuning_and_timestamp_from_folder(self, folder_name):
+        folder_path = os.path.join(self.spectrum_path, folder_name)
+        file_name = os.listdir(folder_path)[0]
+        detuning = self.get_number_from_file_name(file_name, "detuning")
+        timestamp = self.get_number_from_file_name(file_name, "timestamp")
+        return detuning, timestamp
 
     def get_number_from_file_name(self, file_name, number_name):
         underscore_locations = self.get_underscore_locations(file_name, len(number_name))
@@ -98,6 +114,14 @@ class Trial():
         except:
             raise Exception((f"Could not convert number to float\n"
                              f"File name: {file_name}\n"))
+
+    def process_files(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.process_files()
+
+    def output_detunings(self):
+        for detuning_obj in self.detuning_objects:
+            print(detuning_obj)
 
     def __str__(self):
         string = (f"Power: {self.power}\n"
