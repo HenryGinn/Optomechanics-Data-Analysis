@@ -61,8 +61,9 @@ class Trial():
         raise Exception(f"Could not find corresponding transmission for timestamp {timestamp}")
 
     def set_detuning_objects_b(self):
+        folder_names = sorted(os.listdir(self.spectrum_path))[0:1]
         self.detuning_objects = [self.get_detuning_object_b(folder_name)
-                                 for folder_name in os.listdir(self.spectrum_path)]
+                                 for folder_name in folder_names]
 
     def get_detuning_object_b(self, folder_name):
         detuning, timestamp = self.get_detuning_and_timestamp_from_folder(folder_name)
@@ -74,6 +75,7 @@ class Trial():
     def get_spectrum_file_paths(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
         spectrum_file_names = list(os.listdir(folder_path))
+        spectrum_file_names = sorted(spectrum_file_names, key = self.get_counter)
         spectrum_file_paths = [os.path.join(folder_path, file_name)
                                for file_name in spectrum_file_names]
         return spectrum_file_paths
@@ -84,6 +86,10 @@ class Trial():
         detuning = self.get_number_from_file_name(file_name, "detuning")
         timestamp = self.get_number_from_file_name(file_name, "timestamp")
         return detuning, timestamp
+
+    def get_counter(self, file_name):
+        counter = self.get_number_from_file_name(file_name, "counter")
+        return counter
 
     def get_number_from_file_name(self, file_name, number_name):
         underscore_locations = self.get_underscore_locations(file_name, len(number_name))
@@ -102,10 +108,15 @@ class Trial():
 
     def get_number_right_index(self, left_index, file_name):
         right_index = left_index
-        decimal_characters = "0123456789.-"
-        while file_name[right_index] in decimal_characters:
+        while self.is_index_valid(right_index, file_name):
             right_index += 1
         return right_index
+
+    def is_index_valid(self, index, file_name):
+        is_number = (file_name[index] in "0123456789.-")
+        is_not_at_end_of_file = (index < len(file_name) - 4)
+        is_valid = is_number and is_not_at_end_of_file
+        return is_valid
 
     def get_number(self, file_name, left_index, right_index):
         try:
@@ -113,7 +124,9 @@ class Trial():
             return number
         except:
             raise Exception((f"Could not convert number to float\n"
-                             f"File name: {file_name}\n"))
+                             f"File name: {file_name}\n"
+                             f"left_index: {left_index}, right index: {right_index}"
+                             f"{file_name[left_index:right_index]}\n"))
 
     def process_files(self):
         for detuning_obj in self.detuning_objects:

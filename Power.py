@@ -17,15 +17,19 @@ class Power():
         self.folder_name = power_folder
         self.transmission_path = transmission_path
         self.spectrum_path = spectrum_path
-        self.power = self.get_power_from_folder_name()
+        self.set_power_from_folder_name()
 
-    def get_power_from_folder_name(self):
+    def set_power_from_folder_name(self):
         try:
-            power = self.folder_name[0:2]
-            power = round(float(power), 1)
+            self.power_string = self.folder_name[0:2]
+            self.power = self.process_power_string()
         except:
             raise Exception(f"Power could not be read from folder name: {folder_name}")
-        return power
+
+    def process_power_string(self):
+        power_dB = round(float(self.power_string), 1)
+        power_mW = (10**(power_dB/10))/1000
+        return power_mW
 
     def process_power(self):
         self.set_trial_paths()
@@ -59,6 +63,12 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_files()
 
+    def set_trial_objects(self):
+        trial_paths_data = zip(self.trial_transmission_paths[0:1],
+                               self.trial_spectrum_paths[0:1])
+        self.trial_objects = [Trial(self, trial_transmission_path, trial_spectrum_path)
+                              for trial_transmission_path, trial_spectrum_path in trial_paths_data]
+
     def output_trial_paths(self):
         self.output_trial_transmission_paths()
         self.output_trial_spectrum_path()
@@ -72,12 +82,6 @@ class Power():
         print("\nTrial spectrum paths")
         for path in self.trial_spectrum_paths:
             print(path)
-
-    def set_trial_objects(self):
-        trial_paths_data = zip(self.trial_transmission_paths,
-                               self.trial_spectrum_paths)
-        self.trial_objects = [Trial(self, trial_transmission_path, trial_spectrum_path)
-                              for trial_transmission_path, trial_spectrum_path in trial_paths_data]
 
     def output_trials_information(self):
         print("\nTrials information")

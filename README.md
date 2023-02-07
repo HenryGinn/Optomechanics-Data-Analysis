@@ -56,6 +56,18 @@ At the end of get_gamma, call the function create_figure_1.
 Deciding if a plot needs to be fitted manually: the initial fitting parameters are assumed to be somewhat reasonable, and a fitting heuristic is computed by how different the computed fitting parameters are from the initial. If this is above a certain threshold, it will be flagged and sent to be handled manually.
 The figure will be plotted with the automatic fit. Close this figure and then a menu will appear asking what changes you want to make to the fitting parameters, or if you want to accept or reject the fit. If the data is wrong, or cannot be fitted sufficiently well, it should be rejected. You need to close the figures manually to move on to the next figure
 
+############# COMPUTATION OF CENTRE OF SPECTRUM #############
+
+We compute the centre of the spectrum so we can shift all spectra within a detuning trial and find the average. We expect this to be around the resonsant frequency, but the value we compute is usually slightly to the left. Note that the purpose of this step is not to find the resonant frequency perfectly, but to assign a number to the centre reliably that leads to all spectra being realigned accurately.
+
+The first step is to get a very rough idea of where the peak is using argmax on the S21 array. We then consider a region around this. The program will output a warning if the peak is near the edge as this can lead to worse results when finding the centre, and is usually from bad data. The peak should be very safetly in the middle of the recorded frequency range.
+
+For a selection of points in the computed region, a heuristic is computed that says how uncentred that point is relative to the distribution, smaller numbers being better. Plotting this gives a curve similar to |x| but with a rounded bottom. This heuristic is just a weighted average of the distance of the other points to x and the squared value of S21 at those points.
+
+A naive choice of centre would be the minimum value of the heuristic described above, but this is biased to the right. The heuristic plot is better behaved away from the centre so on each side we define two lines that are roughly tangent to the curve. We define the centre to be the point where these two lines intersect.
+
+This has a sound mathematical basis as if this process is done with a perfect Lorentzian curve then you get a curve y = A*x*arctan(x/B) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
+
 ############# NOTE ABOUT PLOTTING #############
 
 If you are running in VS code, you need to be plotting in inline mode or it won't display. You won't be able to dynamically interact with the graph (such as reselecting a region).
