@@ -64,9 +64,9 @@ The first step is to get a very rough idea of where the peak is using argmax on 
 
 For a selection of points in the computed region, a heuristic is computed that says how uncentred that point is relative to the distribution, smaller numbers being better. Plotting this gives a curve similar to |x| but with a rounded bottom. This heuristic is just a weighted average of the distance of the other points to x and the squared value of S21 at those points.
 
-A naive choice of centre would be the minimum value of the heuristic described above, but this is biased to the right. The heuristic plot is better behaved away from the centre so on each side we define two lines that are roughly tangent to the curve. We define the centre to be the point where these two lines intersect.
+A naive choice of centre would be the minimum value of the heuristic described above, but this is biased to the right. The heuristic plot is better behaved away from the centre so on each side we define two lines that are roughly tangent to the curve. We define the centre to be the point where these two lines intersect. We currently define these two lines by interpolation through two points per line, but a least squares fit could also be implemented.
 
-This has a sound mathematical basis as if this process is done with a perfect Lorentzian curve then you get a curve y = A*x*arctan(x/B) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
+This has a sound mathematical basis as if this process is done with a perfect Lorentzian then you get a curve y = A*x*arctan(x/B) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
 
 ############# NOTE ABOUT PLOTTING #############
 

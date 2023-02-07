@@ -19,7 +19,7 @@ class Spectrum():
 
     def process_spectrum(self):
         self.set_S21()
-        self.set_find_centre()
+        self.set_S21_centre_index()
 
     def set_S21(self):
         voltage = self.get_voltage_from_file()
@@ -44,74 +44,61 @@ class Spectrum():
 
     def set_S21_centre_index(self):
         peak_index = np.argmax(self.S21)
-        candidate_indexes = self.get_candidate_indexes(peak_index)
-        uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes)
-        self.S21_centre_index = self.process_uncentred_heuristics(uncentred_heuristics)
+        candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
+        uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
+        self.S21_centre_index = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
 
-    def get_candidate_indexes(self, peak_index):
+    def get_candidate_and_region_indexes(self, peak_index):
         semi_width, spacing = 150, 4
         left_limit = self.get_left_limit(peak_index, semi_width)
         right_limit = self.get_right_limit(peak_index, semi_width)
-        candidate_indexes = list(range(left_limit, right_limit, spacing))
-        return candidate_indexes
+        region_points = np.array(range(left_limit, right_limit))
+        candidate_indexes = region_points[[0, spacing, -spacing-1, -1]]
+        return candidate_indexes, region_points
 
     def get_left_limit(self, peak_index, semi_width):
         left_limit = peak_index - semi_width
         if left_limit < 0:
-            print(("WARNING: peak is near left side of range.\n
-                   "Computation of centre may be compromised\n"
-                   f"Spectrum details: {self.spectrum_path}")
+            print((f"WARNING: peak is near left side of range.\n"
+                   f"Computation of centre may be compromised.\n"
+                   f"Spectrum details: {self.spectrum_path}"))
             left_limit = 0
         return left_limit
 
     def get_right_limit(self, peak_index, semi_width):
         right_limit = peak_index + semi_width
         if right_limit >= len(self.S21):
-            print(("WARNING: peak is near right side of range.\n
+            print(("WARNING: peak is near right side of range.\n"
                    "Computation of centre may be compromised\n"
-                   f"Spectrum details: {self.spectrum_path}")
+                   f"Spectrum details: {self.spectrum_path}"))
             right_limit = 0
         return right_limit
 
-##################################################################################################################
-
-    def get_index_maximum(S21):
-        """
-        We get a ballpark guess of where the peak is by using argmax Around this
-        point we find assign a value to how good that point would work as the centre
-        of the points using a weighted sum. The worse the point is, the higher the
-        value of the heuristic. We get something that looks like y=|x| but with a
-        rounded bottom. Using the data in the rounded region was less robust, so we
-        define two lines from each side of the bottom in the region where the
-        heuristic is better behaved and find where they intersect. This point is
-        used as the centre.
-        """
-        first_guess = argmax(S21)
-        left_x, right_x = max(0, first_guess-150), min(first_guess+150, len(S21)-1)
-        candidates = list(range(left_x, right_x, 4))
-        points = array(range(left_x, right_x))
-        uncentred_heuristics = [get_uncentred_heuristic(S21, x, points) for x in candidates]
-        m = argmin(uncentred_heuristics)
-        x_m, y_m = get_heuristic_line_intersection(m, uncentred_heuristics)
-        #plot_index_max_heuristic(candidates, uncentred_heuristics, x_m, y_m,
-        #                         x_1, x_2, x_3, x_4, y_1, y_2, y_3, y_4)
-        return candidates[x_m]
-
-    def get_uncentred_heuristic(S21, x, points):
-        uncentred_heuristic = abs(x-points)*(S21[points])**2
-        uncentred_heuristic = sum(uncentred_heuristic)
+    def get_uncentred_heuristics(self, candidate_indexes, region_points):
+        uncentred_heuristic = [self.get_uncentred_heuristic(point, region_points)
+                               for point in candidate_indexes]
         return uncentred_heuristic
 
-    def get_heuristic_line_intersection(m, uncentred_heuristics):
-        x_1, x_2, x_3, x_4 = m-15, m-14, m+14, m+15
-        y_1, y_2, y_3, y_4 = (uncentred_heuristics[x] for x in [x_1, x_2, x_3, x_4])
-        a, b, e = y_2-y_1, x_1-x_2, x_1*(y_2-y_1)+y_1*(x_1-x_2)
-        c, d, f = y_4-y_3, x_3-x_4, x_3*(y_4-y_3)+y_3*(x_3-x_4)
-        x_m = math.floor((d*e-b*f)/(a*d-b*c))
-        y_m = (-c*e+a*f)/(a*d-b*c)
-        return x_m, y_m
+    def get_uncentred_heuristic(self, point, region_points):
+        widths = abs(point - region_points)
+        heights = self.S21[region_points]
+        uncentred_heuristic = sum(widths*heights**2)
+        return uncentred_heuristic
 
-##################################################################################################################        
+    def process_uncentred_heuristics(self, candidate_indexes, uncentred_heuristics):
+        a_left, b_left, c_left = self.get_linear_equation_coefficients(candidate_indexes[:2], uncentred_heuristics[:2])
+        a_right, b_right, c_right = self.get_linear_equation_coefficients(candidate_indexes[-2:], uncentred_heuristics[-2:])
+        discriminant = a_left*b_right - a_right*b_left
+        x = (b_right*c_left - b_left*c_right)/discriminant
+        # y = (a_left*c_left - a_right*c_right)/(a_left*b_right - a_right*b_left)
+        return round(x)
+
+    def get_linear_equation_coefficients(self, x_values, y_values):
+        x_1, x_2 = x_values
+        y_1, y_2 = y_values
+        a, b = y_2 - y_1, x_1 - x_2
+        c = a*x_1 + b*y_1
+        return a, b, c
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"
