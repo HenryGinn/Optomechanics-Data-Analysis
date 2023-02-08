@@ -106,9 +106,9 @@ class DataSet():
         for power_obj in self.power_objects[0:1]:
             power_obj.process_power()
 
-    def process_files(self):
+    def process_gamma(self):
         for power_obj in self.power_objects[0:1]:
-            power_obj.process_files()
+            power_obj.process_gamma()
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 

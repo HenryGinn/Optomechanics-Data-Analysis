@@ -128,9 +128,9 @@ class Trial():
                              f"left_index: {left_index}, right index: {right_index}"
                              f"{file_name[left_index:right_index]}\n"))
 
-    def process_files(self):
+    def process_gamma(self):
         for detuning_obj in self.detuning_objects:
-            detuning_obj.process_files()
+            detuning_obj.set_gamma()
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:

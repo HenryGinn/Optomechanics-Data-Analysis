@@ -47,6 +47,7 @@ class Spectrum():
         candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         self.S21_centre_index = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
+        self.S21_centre_frequency = self.frequency[self.S21_centre_index]
 
     def get_candidate_and_region_indexes(self, peak_index):
         semi_width, spacing = 150, 4
@@ -86,8 +87,10 @@ class Spectrum():
         return uncentred_heuristic
 
     def process_uncentred_heuristics(self, candidate_indexes, uncentred_heuristics):
-        a_left, b_left, c_left = self.get_linear_equation_coefficients(candidate_indexes[:2], uncentred_heuristics[:2])
-        a_right, b_right, c_right = self.get_linear_equation_coefficients(candidate_indexes[-2:], uncentred_heuristics[-2:])
+        x_values_left, y_values_left = candidate_indexes[:2], uncentred_heuristics[:2]
+        x_values_right, y_values_right = candidate_indexes[-2:], uncentred_heuristics[-2:]
+        a_left, b_left, c_left = self.get_linear_equation_coefficients(x_values_left, y_values_left)
+        a_right, b_right, c_right = self.get_linear_equation_coefficients(x_values_right, y_values_right)
         discriminant = a_left*b_right - a_right*b_left
         x = (b_right*c_left - b_left*c_right)/discriminant
         # y = (a_left*c_left - a_right*c_right)/(a_left*b_right - a_right*b_left)
@@ -99,6 +102,11 @@ class Spectrum():
         a, b = y_2 - y_1, x_1 - x_2
         c = a*x_1 + b*y_1
         return a, b, c
+
+    def set_S21_offset(self):
+        left_index = self.S21_centre_index - self.detuning_obj.min_centre_index
+        right_index = len(self.S21) - (self.detuning_obj.max_centre_index - self.S21_centre_index)
+        self.S21_offset = self.S21[left_index:right_index]
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"

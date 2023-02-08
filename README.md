@@ -1,5 +1,15 @@
 # Optomechanics-Data-Analysis
 
+CONTENTS
+
+1: OVERVIEW
+2: CHECKS TO RUN BEFORE USING
+3: FOLDER STRUCTURE DESCRIPTION
+4: REVIEW OF ANALYSIS IN SIDE BAND FITTING
+5: COMPUTATION OF CENTRE OF SPECTRUM
+6: NOTE ABOUT PLOTTING
+7: TO DO LIST
+
 ############# OVERVIEW #############
 
 There are 3 main sets of programs
@@ -8,7 +18,7 @@ There are 3 main sets of programs
 3: File name correctors
 
 Side Band Fitting
-This has 4 classes: DataSet, Power, Trial, Detuning. Side Band Fitting Interface handles these classes. This is the code that goes through the data and finds the value of gamma for each detuning and outputs to text files.
+This has 5 classes: DataSet, Power, Trial, Detuning, and Spectrum. Side Band Fitting Interface handles these classes. This is the code that goes through the data and finds the value of gamma for each detuning and outputs to text files.
 
 Plot Gamma
 This reads the data from the files produced by the side band fitting code and produces a plot. Each of the powers is shown as a different line, and all data sets are included on one plot.
@@ -66,7 +76,7 @@ For a selection of points in the computed region, a heuristic is computed that s
 
 A naive choice of centre would be the minimum value of the heuristic described above, but this is biased to the right. The heuristic plot is better behaved away from the centre so on each side we define two lines that are roughly tangent to the curve. We define the centre to be the point where these two lines intersect. We currently define these two lines by interpolation through two points per line, but a least squares fit could also be implemented.
 
-This has a sound mathematical basis as if this process is done with a perfect Lorentzian then you get a curve y = A*x*arctan(x/B) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
+This has a sound mathematical basis as if this process is done with a perfect Lorentzian then you get a curve y = A*x*sin(arctan(x/B)) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
 
 ############# NOTE ABOUT PLOTTING #############
 
@@ -74,11 +84,13 @@ If you are running in VS code, you need to be plotting in inline mode or it won'
 If you are running in a browser, you can plot in notebook mode. Be careful as it will plot all of the results and can be very slow to use
 Recommend to convert the notebook to a script - this will produce the plots one at a time and the next one appears when you close a plot.
 
-############# CURRENT TASKS #############
+############# TO DO LIST #############
 
-1: Fix file names so they can be sorted easily DONE
-2: Sort the file names for each detuning
-3: 3 subplots needed.
-Subplot 1: detuning vs time
-Subplot 2: colourplot where each vertical strip is an S21 vs frequency relationship and time is on the horizontal axis
-Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs frequency) and time is on the horizonal axis.  
+1: Finish refactoring Side Band Fitting 1.0
+    Restrict the range of spectra within a detuning trial so they can be averaged
+    Plot the average spectrum and fit the curve
+    Output gamma to folder
+2: 3 subplots needed.
+    Subplot 1: detuning vs time
+    Subplot 2: colourplot where each vertical strip is an S21 vs frequency relationship and time is on the horizontal axis
+    Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs frequency) and time is on the horizonal axis.  

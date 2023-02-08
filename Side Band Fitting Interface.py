@@ -19,4 +19,4 @@ my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
 #my_data_set.output_spectrum_folder_paths()
 
 my_data_set.process_folder_structure()
-my_data_set.process_files()
+my_data_set.process_gamma()
