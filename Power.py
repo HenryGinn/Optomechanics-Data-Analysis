@@ -1,5 +1,6 @@
 from Trial import Trial
 import os
+import numpy as np
 
 class Power():
 
@@ -62,12 +63,22 @@ class Power():
     def process_gamma(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_gamma()
+            print(trial_obj)
+            for detuning_obj in trial_obj.detuning_objects:
+                print(f"Detuning: {detuning_obj.detuning}, Gamma: {detuning_obj.gamma}")
+            print("")
+        self.gammas = np.vstack([trial_obj.gammas
+                                 for trial_obj in self.trial_objects])
+
+    def save_gamma(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.save_gamma()
 
     def set_trial_objects(self):
-        trial_paths_data = zip(self.trial_transmission_paths[0:1],
-                               self.trial_spectrum_paths[0:1])
-        self.trial_objects = [Trial(self, trial_transmission_path, trial_spectrum_path)
-                              for trial_transmission_path, trial_spectrum_path in trial_paths_data]
+        trial_paths_data = zip(self.trial_transmission_paths,
+                               self.trial_spectrum_paths)
+        self.trial_objects = [Trial(self, trial_number, trial_transmission_path, trial_spectrum_path)
+                              for trial_number, (trial_transmission_path, trial_spectrum_path) in enumerate(trial_paths_data)]
 
     def output_trial_paths(self):
         self.output_trial_transmission_paths()

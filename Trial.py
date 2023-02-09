@@ -12,11 +12,11 @@ class Trial():
     15112022 is type a, 16112022_overnight and 19112022 are type b.
     """
     
-    def __init__(self, power_obj, transmission_path, spectrum_path):
+    def __init__(self, power_obj, trial_number, transmission_path, spectrum_path):
         self.set_parent_information(power_obj)
         self.transmission_path = transmission_path
         self.spectrum_path = spectrum_path
-        self.set_trial_number()
+        self.trial_number = trial_number
         self.set_detuning_objects()
 
     def set_parent_information(self, power_obj):
@@ -24,33 +24,49 @@ class Trial():
         self.power = power_obj.power
         self.data_set = power_obj.data_set
 
-    def set_trial_number(self):
-        underscore_locations = self.get_underscore_locations(self.transmission_path, 0)
-        trial_number_starting_index = underscore_locations[-1] + 1
-        self.trial_number = self.transmission_path[trial_number_starting_index:]
-            
-    def get_underscore_locations(self, file_name, limit=0):
-        underscore_locations = [index for index, character in enumerate(file_name)
-                                if character == "_" and index >= limit]
-        return underscore_locations
-
     def set_detuning_objects(self):
         set_detuning_objects_functions = {1: self.set_detuning_objects_a,
                                           2: self.set_detuning_objects_b,
                                           3: self.set_detuning_objects_b}
         set_detuning_objects_functions[self.data_set.folder_structure_type]()
+        self.detuning_objects = sorted(self.detuning_objects,
+                                       key = lambda detuning_obj: detuning_obj.detuning)
 
     def set_detuning_objects_a(self):
-        self.detuning_objects = [self.get_detuning_object_a(file_name)
-                                 for file_name in os.listdir(self.spectrum_path)]
+        spectrum_files = self.get_spectrum_files()
+        self.detuning_objects = [self.get_detuning_object_a(detuning, spectrum_files)
+                                 for detuning, spectrum_files in spectrum_files.items()]
 
-    def get_detuning_object_a(self, file_name):
-        detuning = self.get_number_from_file_name(file_name, "detuning")
-        timestamp = self.get_number_from_file_name(file_name, "timestamp")
-        spectrum_file_paths = [os.path.join(self.spectrum_path, file_name)]
+    def get_spectrum_files(self):
+        spectrum_files = self.initialise_spectrum_files()
+        spectrum_files = self.populate_spectrum_files(spectrum_files)
+        spectrum_files = self.sort_spectrum_files(spectrum_files)
+        return spectrum_files
+
+    def initialise_spectrum_files(self):
+        spectrum_files = {self.get_number_from_file_name(file_name, "detuning"): []
+                          for file_name in os.listdir(self.spectrum_path)}
+        return spectrum_files
+
+    def populate_spectrum_files(self, spectrum_files):
+        for file_name in os.listdir(self.spectrum_path):
+            detuning = self.get_number_from_file_name(file_name, "detuning")
+            spectrum_files[detuning].append(file_name)
+        return spectrum_files
+
+    def sort_spectrum_files(self, spectrum_files):
+        for detuning in spectrum_files.keys():
+            spectrum_files[detuning] = sorted(spectrum_files[detuning],
+                                              key=lambda x:x[-7:])
+        return spectrum_files
+
+    def get_detuning_object_a(self, detuning, spectrum_files):
+        timestamp = self.get_number_from_file_name(spectrum_files[0], "timestamp")
+        spectrum_file_paths = [os.path.join(self.spectrum_path, file_name)
+                               for file_name in spectrum_files]
         transmission_file_path = self.get_transmission_file_path(timestamp)
-        detuning = Detuning(self, detuning, timestamp, transmission_file_path, spectrum_file_paths)
-        return detuning
+        detuning_obj = Detuning(self, detuning, timestamp, transmission_file_path, spectrum_file_paths)
+        return detuning_obj
 
     def get_transmission_file_path(self, timestamp):
         for file_name in os.listdir(self.transmission_path):
@@ -61,7 +77,7 @@ class Trial():
         raise Exception(f"Could not find corresponding transmission for timestamp {timestamp}")
 
     def set_detuning_objects_b(self):
-        folder_names = sorted(os.listdir(self.spectrum_path))[0:1]
+        folder_names = sorted(os.listdir(self.spectrum_path))
         self.detuning_objects = [self.get_detuning_object_b(folder_name)
                                  for folder_name in folder_names]
 
@@ -90,6 +106,11 @@ class Trial():
     def get_counter(self, file_name):
         counter = self.get_number_from_file_name(file_name, "counter")
         return counter
+            
+    def get_underscore_locations(self, file_name, limit=0):
+        underscore_locations = [index for index, character in enumerate(file_name)
+                                if character == "_" and index >= limit]
+        return underscore_locations
 
     def get_number_from_file_name(self, file_name, number_name):
         underscore_locations = self.get_underscore_locations(file_name, len(number_name))
@@ -131,9 +152,25 @@ class Trial():
     def process_gamma(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.set_gamma()
+        self.gammas = [detuning_obj.gamma
+                       for detuning_obj in self.detuning_objects]
+
+    def save_gamma(self):
+        gamma_file_name = f"power_{self.power_obj.folder_name}_dBm_trial_{self.trial_number}.txt"
+        gamma_file_path = os.path.join(self.power_obj.data_set.gamma_path,
+                                       gamma_file_name)
+        with open(gamma_file_path, "w") as file:
+            for detuning_obj in self.detuning_objects:
+                file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.gamma}\n")
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:
+            print(detuning_obj)
+
+    def output_gammas(self):
+        for detuning_obj in self.detuning_objects:
+            print("Outputting gamma")
+            print(detuning_obj.gamma)
             print(detuning_obj)
 
     def __str__(self):

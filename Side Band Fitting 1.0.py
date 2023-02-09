@@ -396,8 +396,8 @@ def fit_plot_manually(S21, frequency, fitting_parameters, initial_fitting_parame
 
 def output_gamma(detunings, gamma_list, data_set, power_folder):
     output_path = prepare_output_path()
-    file_name = os.path.join(output_path, f"gamma_vs_detuning_{data_set}_{power_folder}")
-    with open(file_name, "w+") as file:
+    file_path = os.path.join(output_path, f"gamma_vs_detuning_{data_set}_{power_folder}")
+    with open(file_path, "w+") as file:
         file.writelines("Detuning\tGamma\n")
         for detuning, gamma, in zip(detunings, gamma_list):
             file.writelines(f"{detuning}\t{gamma}\n")

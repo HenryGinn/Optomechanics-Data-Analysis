@@ -72,7 +72,7 @@ class Spectrum():
             print(("WARNING: peak is near right side of range.\n"
                    "Computation of centre may be compromised\n"
                    f"Spectrum details: {self.spectrum_path}"))
-            right_limit = 0
+            right_limit = len(self.S21)
         return right_limit
 
     def get_uncentred_heuristics(self, candidate_indexes, region_points):

@@ -103,12 +103,23 @@ class DataSet():
             print(power)
 
     def process_folder_structure(self):
-        for power_obj in self.power_objects[0:1]:
+        for power_obj in self.power_objects:
             power_obj.process_power()
 
     def process_gamma(self):
-        for power_obj in self.power_objects[0:1]:
+        for power_obj in self.power_objects:
+            print(f"Processing power: {power_obj.power_string}")
             power_obj.process_gamma()
+
+    def save_gamma(self):
+        self.create_gamma_folder()
+        for power_obj in self.power_objects:
+            power_obj.save_gamma()
+
+    def create_gamma_folder(self):
+        self.gamma_path = os.path.join(self.repository_path, "Gamma Results")
+        if os.path.isdir(self.gamma_path) == False:
+            os.mkdir(self.gamma_path)
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 
