@@ -106,9 +106,19 @@ class DataSet():
         for power_obj in self.power_objects:
             power_obj.process_power()
 
+    def process_transmission(self):
+        for power_obj in self.power_objects:
+            print(f"Processing transmission: {power_obj.folder_name}")
+            power_obj.process_transmission()
+
+    def process_S21(self):
+        for power_obj in self.power_objects:
+            print(f"Processing S21: {power_obj.folder_name}")
+            power_obj.process_S21()
+
     def process_gamma(self):
         for power_obj in self.power_objects:
-            print(f"Processing power: {power_obj.power_string}")
+            print(f"Finding gamma: {power_obj.folder_name}")
             power_obj.process_gamma()
 
     def save_gamma(self):
@@ -120,6 +130,10 @@ class DataSet():
         self.gamma_path = os.path.join(self.repository_path, "Gamma Results")
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
+
+    def create_trend_plots(self):
+        for power_obj in self.power_objects:
+            power_obj.create_trend_plots()
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 

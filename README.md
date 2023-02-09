@@ -93,4 +93,6 @@ Recommend to convert the notebook to a script - this will produce the plots one 
 2: 3 subplots needed.
     Subplot 1: detuning vs time
     Subplot 2: colourplot where each vertical strip is an S21 vs frequency relationship and time is on the horizontal axis
-    Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs frequency) and time is on the horizonal axis.  
+    Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs frequency) and time is on the horizonal axis.
+
+    resonant frequency of the cavity (found from transmission data) - 1 plot per power (trial). 

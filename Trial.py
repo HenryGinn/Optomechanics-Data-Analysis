@@ -1,5 +1,6 @@
-import os
 from Detuning import Detuning
+import os
+import matplotlib.pyplot as plt
 
 class Trial():
 
@@ -149,6 +150,14 @@ class Trial():
                              f"left_index: {left_index}, right index: {right_index}"
                              f"{file_name[left_index:right_index]}\n"))
 
+    def process_S21(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.process_S21()
+
+    def process_transmission(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.process_transmission()
+            
     def process_gamma(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.set_gamma()
@@ -163,6 +172,61 @@ class Trial():
             for detuning_obj in self.detuning_objects:
                 file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.gamma}\n")
 
+    def create_trend_plots(self):
+        #self.plot_detuning_vs_time()
+        #self.plot_frequency_of_peak()
+        self.plot_transmission_peak()
+
+    def plot_detuning_vs_time(self):
+        detunings, timestamps = self.get_detunings_and_timestamps()
+        plt.plot(timestamps, detunings)
+        self.add_detuning_vs_time_labels()
+        plt.show()
+
+    def get_detunings_and_timestamps(self):
+        detuning_time_data = [(detuning_obj.detuning, detuning_obj.timestamp)
+                              for detuning_obj in self.detuning_objects]
+        detunings, timestamps = zip(*detuning_time_data)
+        return detunings, timestamps
+
+    def add_detuning_vs_time_labels(self):
+        plt.xlabel("Timestamp (s)")
+        plt.ylabel("Detuning (Hz)")
+        plt.title(f"Detuning vs Time for {self.power_obj.folder_name}")
+
+    def plot_frequency_of_peak(self):
+        peak_frequencies = [spectrum_obj.S21_centre_frequency
+                            for detuning_obj in self.detuning_objects
+                            for spectrum_obj in detuning_obj.spectrum_objects]
+        plt.plot(peak_frequencies)
+        self.add_frequency_of_peak_labels()
+        plt.show()
+
+    def add_frequency_of_peak_labels(self):
+        plt.xlabel("Spectrum number")
+        plt.ylabel("Frequency (Hz)")
+        plt.title((f"Peak Frequency vs Spectrum Number\n"
+                   f"for {self.power_obj.folder_name}"))
+
+    def plot_transmission_peak(self):
+        timestamps, transmission_peaks = self.get_transmission_peaks()
+        plt.plot(timestamps, transmission_peaks, '.-')
+        self.add_transmission_peak_labels()
+        plt.show()
+
+    def get_transmission_peaks(self):
+        transmission_data = [(detuning_obj.timestamp,
+                              detuning_obj.transmission.S21_centre_frequency)
+                             for detuning_obj in self.detuning_objects]
+        timestamps, transmission_peaks = zip(*transmission_data)
+        return timestamps, transmission_peaks
+
+    def add_transmission_peak_labels(self):
+        plt.xlabel("Timestamp (s)")
+        plt.ylabel("Frequency (Hz)")
+        plt.title((f"Peak Frequency of Transmission\n"
+                   f"vs Time for {self.power_obj.folder_name}"))
+
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:
             print(detuning_obj)
@@ -174,7 +238,7 @@ class Trial():
             print(detuning_obj)
 
     def __str__(self):
-        string = (f"Power: {self.power}\n"
+        string = (f"Power: {self.power_obj.power_string}\n"
                   f"Transmission path: {self.transmission_path}\n"
                   f"Spectrum path: {self.spectrum_path}\n"
                   f"Trial number: {self.trial_number}\n")

@@ -60,6 +60,14 @@ class Power():
         self.trial_spectrum_paths = [os.path.join(self.spectrum_path, folder_name)
                                      for folder_name in trial_spectrum_folder_names]
 
+    def process_transmission(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.process_transmission()
+
+    def process_S21(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.process_S21()
+
     def process_gamma(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_gamma()
@@ -67,12 +75,14 @@ class Power():
             for detuning_obj in trial_obj.detuning_objects:
                 print(f"Detuning: {detuning_obj.detuning}, Gamma: {detuning_obj.gamma}")
             print("")
-        self.gammas = np.vstack([trial_obj.gammas
-                                 for trial_obj in self.trial_objects])
 
     def save_gamma(self):
         for trial_obj in self.trial_objects:
             trial_obj.save_gamma()
+
+    def create_trend_plots(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.create_trend_plots()
 
     def set_trial_objects(self):
         trial_paths_data = zip(self.trial_transmission_paths,

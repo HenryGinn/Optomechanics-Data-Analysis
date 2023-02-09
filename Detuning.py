@@ -16,7 +16,7 @@ class Detuning():
     """
 
     parameter_names = ["F", "Gamma", "Noise", "w"]
-    bad_fit_threshold = 2000
+    bad_fit_threshold = 20
     
     def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
         self.initialise_attributes(trial, detuning, timestamp,
@@ -62,19 +62,23 @@ class Detuning():
                                          "7": (self.reattempt_automatic_fit, ),
                                          "8": (self.accept_fit, ),
                                          "": (self.reject_fit, )}
+
+    def process_transmission(self):
+        self.transmission = Spectrum(self, self.transmission_path)
+        self.transmission.process_spectrum()
+
+    def process_S21(self):
+        for spectrum_obj in self.spectrum_objects:
+            spectrum_obj.process_spectrum()
+        self.set_S21_and_frequency_offset()
+        self.S21 = np.mean([spectrum_obj.S21_offset
+                            for spectrum_obj in self.spectrum_objects], axis=0)
     
     def set_gamma(self):
         self.set_average_S21()
         self.initial_fitting_parameters = self.get_initial_fitting_parameters()
         self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = self.get_gamma_from_fit()
-    
-    def set_average_S21(self):
-        for spectrum_obj in self.spectrum_objects:
-            spectrum_obj.process_spectrum()
-        self.set_S21_and_frequency_offset()
-        self.S21 = np.mean([spectrum_obj.S21_offset
-                            for spectrum_obj in self.spectrum_objects], axis=0)
 
     def set_S21_and_frequency_offset(self):
         self.set_centre_indexes()
