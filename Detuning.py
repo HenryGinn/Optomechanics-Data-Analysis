@@ -21,7 +21,7 @@ class Detuning():
     def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
         self.initialise_attributes(trial, detuning, timestamp,
                                    transmission_path, spectrum_paths)
-        self.set_frequency()
+        self.set_spectrum_frequency()
         self.create_spectrum_objects()
         self.set_fitting_choice_functions()
 
@@ -33,7 +33,7 @@ class Detuning():
         self.transmission_path = transmission_path
         self.spectrum_paths = spectrum_paths
 
-    def set_frequency(self):
+    def set_spectrum_frequency(self):
         with open(self.spectrum_paths[0], "r") as file:
             file.readline()
             self.frequency = np.array([self.get_frequency_from_file_line(line)

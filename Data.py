@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Data():
 
@@ -7,6 +8,9 @@ class Data():
     This class handles all the data for one file of one detuning for one trial.
     Processing the raw data happens here.
     """
+
+    review_centre_heuristic = False
+    review_centre_results = True
     
     def __init__(self, detuning_obj, file_path):
         self.detuning_obj = detuning_obj
@@ -14,7 +18,6 @@ class Data():
         self.power = self.detuning_obj.trial.power
         self.timestamp = self.detuning_obj.timestamp
         self.file_path = file_path
-        self.frequency = self.detuning_obj.frequency
 
     def process_S21(self):
         self.set_S21()
@@ -45,19 +48,21 @@ class Data():
         peak_index = np.argmax(self.S21)
         candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
-        self.S21_centre_index = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
+        self.S21_centre_index, heuristic_intercept = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
         self.S21_centre_frequency = self.frequency[self.S21_centre_index]
+        self.output_review_centre_heuristic(peak_index, candidate_indexes, region_points, heuristic_intercept)
+        self.output_review_centre_results(peak_index, region_points)
 
     def get_candidate_and_region_indexes(self, peak_index):
-        semi_width, spacing = 150, 4
-        left_limit = self.get_left_limit(peak_index, semi_width)
-        right_limit = self.get_right_limit(peak_index, semi_width)
+        spacing = 4
+        left_limit = self.get_left_limit(peak_index)
+        right_limit = self.get_right_limit(peak_index)
         region_points = np.array(range(left_limit, right_limit))
         candidate_indexes = region_points[[0, spacing, -spacing-1, -1]]
         return candidate_indexes, region_points
 
-    def get_left_limit(self, peak_index, semi_width):
-        left_limit = peak_index - semi_width
+    def get_left_limit(self, peak_index):
+        left_limit = peak_index - self.semi_width
         if left_limit < 0:
             print((f"WARNING: peak is near left side of range.\n"
                    f"Computation of centre may be compromised.\n"
@@ -65,8 +70,8 @@ class Data():
             left_limit = 0
         return left_limit
 
-    def get_right_limit(self, peak_index, semi_width):
-        right_limit = peak_index + semi_width
+    def get_right_limit(self, peak_index):
+        right_limit = peak_index + self.semi_width
         if right_limit >= len(self.S21):
             print(("WARNING: peak is near right side of range.\n"
                    "Computation of centre may be compromised\n"
@@ -92,8 +97,8 @@ class Data():
         a_right, b_right, c_right = self.get_linear_equation_coefficients(x_values_right, y_values_right)
         discriminant = a_left*b_right - a_right*b_left
         x = (b_right*c_left - b_left*c_right)/discriminant
-        # y = (a_left*c_left - a_right*c_right)/(a_left*b_right - a_right*b_left)
-        return round(x)
+        y = (a_left*c_left - a_right*c_right)/(a_left*b_right - a_right*b_left)
+        return round(x), round(y)
 
     def get_linear_equation_coefficients(self, x_values, y_values):
         x_1, x_2 = x_values
@@ -101,6 +106,59 @@ class Data():
         a, b = y_2 - y_1, x_1 - x_2
         c = a*x_1 + b*y_1
         return a, b, c
+
+    def output_review_centre_heuristic(self, peak_index, candidate_indexes, region_points, heuristic_intercept):
+        if self.review_centre_heuristic:
+            self.output_centre_data(peak_index, candidate_indexes, region_points)
+            self.plot_review_centre_heuristic(region_points, candidate_indexes, heuristic_intercept)
+            self.add_review_centre_heuristic_labels()
+            plt.show()
+
+    def output_centre_data(self, peak_index, candidate_indexes, region_points):
+        print((f"Peak index: {peak_index}\n"
+               f"Frequency min, max, and len: {min(self.frequency)}, {max(self.frequency)}, {len(self.frequency)}\n"
+               f"S21 len: {len(self.S21)}\n"
+               f"Candidate indices: {candidate_indexes}\n"
+               f"Region points: {region_points}\n"))
+    
+    def get_review_heuristics_data(self, region_points):
+        filter_indices = list(range(0, len(region_points), 4))
+        filter_indices = sorted(list(set(filter_indices + [len(region_points) - 1])))
+        region_points_filtered = [region_points[i] for i in filter_indices]
+        uncentred_heuristics = self.get_uncentred_heuristics(region_points_filtered,
+                                                             region_points)
+        return region_points_filtered, uncentred_heuristics
+
+    def plot_review_centre_heuristic(self, region_points, candidate_indexes, heuristic_intercept):
+        plt.plot(*self.get_review_heuristics_data(region_points))
+        plt.plot(self.S21_centre_index, heuristic_intercept, 'b*')
+        for index in candidate_indexes:
+            plt.plot(index, self.get_uncentred_heuristic(index, region_points), 'r*')
+
+    def add_review_centre_heuristic_labels(self):
+        power_folder = self.detuning_obj.trial.power_obj.folder_name
+        trial = self.detuning_obj.trial.trial_number
+        plt.xlabel("Index")
+        plt.ylabel("Centre heuristic value")
+        plt.title((f"Computation of centre of data for\n"
+                   f"power {power_folder}, trial {trial}, detuning {self.detuning}"))
+
+    def output_review_centre_results(self, peak_index, region_points):
+        if self.review_centre_results:
+            plt.plot(self.frequency, self.S21)
+            frequency_range = np.linspace(0, self.S21[peak_index], 100)
+            plt.plot(self.frequency[peak_index], self.S21[peak_index], '*k')
+            plt.plot([self.S21_centre_frequency] * 100, frequency_range, 'r')
+            self.add_review_centre_results_labels()
+            plt.show()
+
+    def add_review_centre_results_labels(self):
+        power_folder = self.detuning_obj.trial.power_obj.folder_name
+        trial = self.detuning_obj.trial.trial_number
+        plt.xlabel("Frequency (Hz)")
+        plt.ylabel("S21")
+        plt.title((f"Computation of centre of data for\n"
+                   f"power {power_folder}, trial {trial}, detuning {self.detuning}"))
 
     def set_S21_offset(self):
         left_index = self.S21_centre_index - self.detuning_obj.min_centre_index
