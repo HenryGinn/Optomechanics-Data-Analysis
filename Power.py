@@ -56,7 +56,7 @@ class Power():
                                          for folder_name in trial_transmission_folder_names]
 
     def set_trial_spectrum_paths_B(self):
-        trial_spectrum_folder_names = list(sorted(os.listdir(self.transmission_path)))
+        trial_spectrum_folder_names = list(sorted(os.listdir(self.spectrum_path)))
         self.trial_spectrum_paths = [os.path.join(self.spectrum_path, folder_name)
                                      for folder_name in trial_spectrum_folder_names]
 

@@ -1,23 +1,22 @@
 import os
 import numpy as np
 
-class Spectrum():
+class Data():
 
     """
-    This class handles all the data for one spectrum of one detuning for one trial.
+    This class handles all the data for one file of one detuning for one trial.
     Processing the raw data happens here.
     """
     
-    def __init__(self, detuning_obj, spectrum_path):
+    def __init__(self, detuning_obj, file_path):
         self.detuning_obj = detuning_obj
         self.detuning = detuning_obj.detuning
         self.power = self.detuning_obj.trial.power
         self.timestamp = self.detuning_obj.timestamp
-        self.transmission_path = self.detuning_obj.transmission_path
+        self.file_path = file_path
         self.frequency = self.detuning_obj.frequency
-        self.spectrum_path = spectrum_path
 
-    def process_spectrum(self):
+    def process_S21(self):
         self.set_S21()
         self.set_S21_centre_index()
 
@@ -27,7 +26,7 @@ class Spectrum():
         self.S21 = voltage/self.power
 
     def get_voltage_from_file(self):
-        with open(self.spectrum_path, "r") as file:
+        with open(self.file_path, "r") as file:
             file.readline()
             voltage = [self.get_voltage_from_file_line(line)
                        for line in file]
@@ -62,7 +61,7 @@ class Spectrum():
         if left_limit < 0:
             print((f"WARNING: peak is near left side of range.\n"
                    f"Computation of centre may be compromised.\n"
-                   f"Spectrum details: {self.spectrum_path}"))
+                   f"Spectrum details: {self.file_path}"))
             left_limit = 0
         return left_limit
 
@@ -71,7 +70,7 @@ class Spectrum():
         if right_limit >= len(self.S21):
             print(("WARNING: peak is near right side of range.\n"
                    "Computation of centre may be compromised\n"
-                   f"Spectrum details: {self.spectrum_path}"))
+                   f"Spectrum details: {self.file_path}"))
             right_limit = len(self.S21)
         return right_limit
 
@@ -112,6 +111,5 @@ class Spectrum():
         string = (f"Detuning: {self.detuning}\n"
                   f"Power: {self.power}\n"
                   f"Timestamp: {self.timestamp}\n"
-                  f"Transmission path: {self.transmission_path}\n"
-                  f"Spectrum path: {self.spectrum_path}\n")
+                  f"File path: {self.file_path}\n")
         return string

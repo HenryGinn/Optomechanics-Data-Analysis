@@ -29,7 +29,7 @@ These are preprocessing programs that help make the file and folder names consis
 ############# CHECKS TO RUN BEFORE USING #############
 
 Main Folder Structure
-All folder locations are defined relatively. The parent folder contains any data sets and a folder called "Repo". Inside "Repo" are one or two folders: one where all the files in the repository should be saved, and the other where the results are saved to (this is called "Gamma Results" but may not exist)
+All folder locations are defined relatively. The parent folder contains a folder called "Data Sets" and a folder called "Repo". Inside "Data Sets" are folders where each folder is one experiment (these are the folders such as 15112022). Inside "Repo" are one or two folders: one where all the files in the repository should be saved, and the other where the results are saved to (this is called "Gamma Results" but may not exist)
 
 Data Set Folder Structure
 Different data sets have different folder structures.
@@ -52,6 +52,8 @@ Find out what folder structure your data set has out of the options listed above
 19112022 has two folders inside, "Spectrum" and "Transmission". Inside each of those are folders for the powers, one folder per power. For "Spectrum", inside of each power folder is a list of folders, one for each detuning. Inside each of these for both "Spectrum" and "Transmission" is a list of folders, one for each trial. These are named "{power}_{trial_number}". Inside each of these is the same structure as in 16112022_overnight.
 
 ############# REVIEW OF ANALYSIS IN SIDE BAND FITTING #############
+
+These instructions are relevant for Side Band Fitting 1.0. Documention for Side Band Fitting Interface do not exist yet.
 
 1: How to review the realignment of the plots so that the peak is at the centre before the average.
 Go to the get_frequency_and_S21_detunings function and call the function plot_detunings_raw. For a given detuning, this will iterate through all the data that will be averaged together to make that detuning and plot each one, with a vertical red line drawn showing where it thinks the peak is.

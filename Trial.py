@@ -80,7 +80,8 @@ class Trial():
     def set_detuning_objects_b(self):
         folder_names = sorted(os.listdir(self.spectrum_path))
         self.detuning_objects = [self.get_detuning_object_b(folder_name)
-                                 for folder_name in folder_names]
+                                 for folder_name in folder_names
+                                 if self.detuning_folder_non_empty(folder_name)]
 
     def get_detuning_object_b(self, folder_name):
         detuning, timestamp = self.get_detuning_and_timestamp_from_folder(folder_name)
@@ -103,6 +104,14 @@ class Trial():
         detuning = self.get_number_from_file_name(file_name, "detuning")
         timestamp = self.get_number_from_file_name(file_name, "timestamp")
         return detuning, timestamp
+
+    def detuning_folder_non_empty(self, folder_name):
+        folder_path = os.path.join(self.spectrum_path, folder_name)
+        if len(os.listdir(folder_path)) != 0:
+            return True
+        else:
+            print(f"UNEXPECTED: Folder is empty: {folder_path}")
+            return False
 
     def get_counter(self, file_name):
         counter = self.get_number_from_file_name(file_name, "counter")
@@ -225,7 +234,7 @@ class Trial():
         plt.xlabel("Timestamp (s)")
         plt.ylabel("Frequency (Hz)")
         plt.title((f"Peak Frequency of Transmission\n"
-                   f"vs Time for {self.power_obj.folder_name}"))
+                   f"vs Time for {self.power_obj.folder_name}, Trial {self.trial_number}"))
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:

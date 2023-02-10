@@ -5,8 +5,8 @@ import shutil
 def fix_names():
     script_path = sys.path[0]
     parent_path = os.path.dirname(os.path.dirname(script_path))
-    data_set_path_spectrum = os.path.join(parent_path, "19112022", "Spectrum", "29")
-    data_set_path_transmission = os.path.join(parent_path, "19112022", "Transmission", "29")
+    data_set_path_spectrum = os.path.join(parent_path, "Data Sets", "19112022", "Spectrum", "29")
+    data_set_path_transmission = os.path.join(parent_path, "Data Sets", "19112022", "Transmission", "29")
     fix_trial_folders(data_set_path_spectrum)
     fix_trial_folders(data_set_path_transmission)
 

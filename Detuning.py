@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import scipy as sc
-from Spectrum import Spectrum
+from DataTypes import *
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -64,12 +64,12 @@ class Detuning():
                                          "": (self.reject_fit, )}
 
     def process_transmission(self):
-        self.transmission = Spectrum(self, self.transmission_path)
-        self.transmission.process_spectrum()
+        self.transmission = Transmission(self, self.transmission_path)
+        self.transmission.process_S21()
 
     def process_S21(self):
         for spectrum_obj in self.spectrum_objects:
-            spectrum_obj.process_spectrum()
+            spectrum_obj.process_S21()
         self.set_S21_and_frequency_offset()
         self.S21 = np.mean([spectrum_obj.S21_offset
                             for spectrum_obj in self.spectrum_objects], axis=0)

@@ -1,6 +1,7 @@
 import os
 import sys
 from Power import Power
+import PutTrialsInFolders
 
 class DataSet():
 
@@ -24,7 +25,7 @@ class DataSet():
         script_path = sys.path[0]
         self.repository_path = os.path.dirname(script_path)
         self.parent_path = os.path.dirname(self.repository_path)
-        self.data_set_path = os.path.join(self.parent_path, self.folder_name)
+        self.data_set_path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
 
     def process_power_structures(self):
         self.set_power_folder_path_data()
@@ -101,6 +102,10 @@ class DataSet():
         print("\nPower list")
         for power in self.power_list:
             print(power)
+
+    def fix_folder_structure(self):
+        if self.folder_structure_type == 3:
+            PutTrialsInFolders.put_trials_in_folders(self.folder_name)
 
     def process_folder_structure(self):
         for power_obj in self.power_objects:
