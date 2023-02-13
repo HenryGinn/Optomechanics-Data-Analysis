@@ -17,11 +17,14 @@ class Detuning():
 
     parameter_names = ["F", "Gamma", "Noise", "w"]
     bad_fit_threshold = 20
+    offset_reasonable_threshold = 0.2
+    reject_bad_fits = True
+    flag_bad_offsets = False
     
     def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
         self.initialise_attributes(trial, detuning, timestamp,
                                    transmission_path, spectrum_paths)
-        self.set_spectrum_frequency()
+        self.set_frequency()
         self.create_spectrum_objects()
         self.set_fitting_choice_functions()
 
@@ -33,7 +36,7 @@ class Detuning():
         self.transmission_path = transmission_path
         self.spectrum_paths = spectrum_paths
 
-    def set_spectrum_frequency(self):
+    def set_frequency(self):
         with open(self.spectrum_paths[0], "r") as file:
             file.readline()
             self.frequency = np.array([self.get_frequency_from_file_line(line)
@@ -73,15 +76,10 @@ class Detuning():
         self.set_S21_and_frequency_offset()
         self.S21 = np.mean([spectrum_obj.S21_offset
                             for spectrum_obj in self.spectrum_objects], axis=0)
-    
-    def set_gamma(self):
-        self.set_average_S21()
-        self.initial_fitting_parameters = self.get_initial_fitting_parameters()
-        self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
-        self.gamma = self.get_gamma_from_fit()
 
     def set_S21_and_frequency_offset(self):
         self.set_centre_indexes()
+        self.is_offset_reasonable()
         for spectrum_obj in self.spectrum_objects:
             spectrum_obj.set_S21_offset()
         self.set_frequency_offset()
@@ -91,6 +89,25 @@ class Detuning():
                                         for spectrum_obj in self.spectrum_objects]
         self.min_centre_index = min(self.spectrum_centre_indexes)
         self.max_centre_index = max(self.spectrum_centre_indexes)
+
+    def is_offset_reasonable(self):
+        centre_index_range = self.max_centre_index - self.min_centre_index
+        range_ratio = centre_index_range / len(self.frequency)
+        if range_ratio > self.offset_reasonable_threshold:
+            self.try_flag_offset(range_ratio)
+
+    def try_flag_offset(self, range_ratio):
+        if self.flag_bad_offsets:
+            self.flag_offset(range_ratio)
+        else:
+            print(f"Ignored bad offset. Detuning: {self.detuning}, trial: {self.trial.trial_number}")
+
+    def flag_offset(self, range_ratio):
+        print((f"WARNING: aligning the curves involves cutting off an unusual amount of the plots\n"
+               f"Range ratio: {range_ratio}, centre index_extrema: {self.min_centre_index}, {self.max_centre_index}\n"
+               f"Trial: {self.trial.trial_number}, detuning: {self.detuning}\n"))
+        self.spectrum_objects[np.argmin(self.spectrum_centre_indexes)].review_centre_results()
+        self.spectrum_objects[np.argmax(self.spectrum_centre_indexes)].review_centre_results()
 
     def plot_peak_S21_drift(self):
         plt.plot(self.frequency[np.array(self.spectrum_centre_indexes)])
@@ -105,6 +122,21 @@ class Detuning():
         frequency_offset_length = len(self.frequency) - cutoff_size
         self.frequency_offset = np.copy(self.frequency[:frequency_offset_length])
         self.frequency_offset -= self.frequency_offset[self.min_centre_index]
+
+    def set_omega(self):
+        resonant_frequency = self.transmission.S21_centre_frequency
+        centre_frequencies = self.frequency[self.spectrum_centre_indexes]
+        omegas = centre_frequencies - resonant_frequency - self.detuning + 1000000
+        print("Resonant frequency", resonant_frequency)
+        print("Detuning", self.detuning)
+        print("Omegas", omegas)
+        self.plot_omegas(omegas)
+        self.omega = np.mean(omegas)
+        
+    def set_gamma(self):
+        self.initial_fitting_parameters = self.get_initial_fitting_parameters()
+        self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
+        self.gamma = self.get_gamma_from_fit()
 
     def get_initial_fitting_parameters(self):
         end = int(len(self.S21)/5)
@@ -135,7 +167,7 @@ class Detuning():
 
     def get_gamma_from_fit(self):
         if self.is_plot_badly_fitted():
-            fit_rejected = self.fit_plot_manually()
+            fit_rejected = self.fit_plot_manually_filter()
             if fit_rejected:
                 return None
         gamma = self.fitting_parameters[1]
@@ -144,7 +176,8 @@ class Detuning():
     def is_plot_badly_fitted(self):
         fit_heuristic = self.get_fit_heuristic()
         if fit_heuristic > self.bad_fit_threshold:
-            print(f"Fit heuristic: {fit_heuristic}")
+            if self.reject_bad_fits == False:
+                print(f"Fit heuristic: {fit_heuristic}")
             return True
         return False
 
@@ -154,6 +187,13 @@ class Detuning():
         fit_heuristic_additive = abs(self.fitting_parameters[3] - self.initial_fitting_parameters[3])
         fit_heuristic = fit_heuristic_multiplicative + fit_heuristic_additive
         return fit_heuristic
+
+    def fit_plot_manually_filter(self):
+        if self.reject_bad_fits:
+            print("Rejecting fit")
+            return None
+        else:
+            return self.fit_plot_manually()
 
     def fit_plot_manually(self):
         continue_looping = True
@@ -283,6 +323,30 @@ class Detuning():
         plt.xticks(x_ticks, x_labels)
         plt.xlabel('${\omega_c}$' + f'({prefix})')
         plt.ylabel('Amplitude')
+
+    def plot_omegas(self, omegas):
+        plt.plot(omegas)
+        plt.title(f"Omega vs Spectrum Number for {self.trial.power_obj.folder_name}, {self.detuning} Hz")
+        plt.xlabel("Spectrum Number")
+        plt.ylabel("Frequency (Hz)")
+        plt.show()
+
+    def create_detuning_plots(self, plot_name):
+        {"Frequency of peak": self.plot_frequency_of_peak}[plot_name]()
+
+    def plot_frequency_of_peak(self):
+        peak_frequencies = [spectrum_obj.S21_centre_frequency
+                            for spectrum_obj in self.spectrum_objects]
+        print(self.spectrum_objects[0])
+        plt.plot(peak_frequencies)
+        self.add_frequency_of_peak_labels()
+        plt.show()
+
+    def add_frequency_of_peak_labels(self):
+        plt.xlabel("Spectrum number")
+        plt.ylabel("Frequency (Hz)")
+        plt.title((f"Peak Frequency vs Spectrum Number\n"
+                   f"for {self.trial.power_obj.folder_name}, {self.detuning} Hz"))
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"

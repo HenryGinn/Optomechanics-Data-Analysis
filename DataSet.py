@@ -92,7 +92,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data]
+                              for power_folder, transmission_path, spectrum_path in power_data][0:1]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
@@ -121,6 +121,21 @@ class DataSet():
             print(f"Processing S21: {power_obj.folder_name}")
             power_obj.process_S21()
 
+    def process_omega(self):
+        for power_obj in self.power_objects:
+            print(f"Finding omega: {power_obj.folder_name}")
+            power_obj.process_omega()
+
+    def save_omega(self):
+        self.create_omega_folder()
+        for power_obj in self.power_objects:
+            power_obj.save_omega()
+
+    def create_omega_folder(self):
+        self.omega_path = os.path.join(self.repository_path, "Omega Results")
+        if os.path.isdir(self.omega_path) == False:
+            os.mkdir(self.omega_path)
+
     def process_gamma(self):
         for power_obj in self.power_objects:
             print(f"Finding gamma: {power_obj.folder_name}")
@@ -136,9 +151,13 @@ class DataSet():
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
 
-    def create_trend_plots(self):
+    def create_trial_plots(self, plot_name):
         for power_obj in self.power_objects:
-            power_obj.create_trend_plots()
+            power_obj.create_trial_plots(plot_name)
+
+    def create_detuning_plots(self, plot_name):
+        for power_obj in self.power_objects:
+            power_obj.create_detuning_plots(plot_name)
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 

@@ -68,6 +68,19 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_S21()
 
+    def process_omega(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.process_omega()
+            print(trial_obj)
+            for detuning_obj in trial_obj.detuning_objects:
+                if hasattr(detuning_obj, "omega"):
+                    print(f"Detuning: {detuning_obj.detuning}, Omega: {detuning_obj.omega}")
+            print("")
+
+    def save_omega(self):
+        for trial_obj in self.trial_objects:
+            trial_obj.save_omega()
+
     def process_gamma(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_gamma()
@@ -80,15 +93,20 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.save_gamma()
 
-    def create_trend_plots(self):
+    def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:
-            trial_obj.create_trend_plots()
+            trial_obj.create_trial_plots(plot_name)
+
+    def create_detuning_plots(self, plot_name):
+        for trial_obj in self.trial_objects:
+            trial_obj.create_detuning_plots(plot_name)
 
     def set_trial_objects(self):
         trial_paths_data = zip(self.trial_transmission_paths,
                                self.trial_spectrum_paths)
         self.trial_objects = [Trial(self, trial_number, trial_transmission_path, trial_spectrum_path)
-                              for trial_number, (trial_transmission_path, trial_spectrum_path) in enumerate(trial_paths_data)]
+                              for trial_number, (trial_transmission_path, trial_spectrum_path)
+                              in enumerate(trial_paths_data)][0:1]
 
     def output_trial_paths(self):
         self.output_trial_transmission_paths()

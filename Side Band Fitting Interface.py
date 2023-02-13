@@ -8,6 +8,11 @@ Before using the program, there are several things you need to check
    data set?
 
 Details about how to check all of these are given in the README.
+
+Options for creating plots by trial are "Detuning vs time", "Frequency
+of peak", "Transmission peak", and "Colour plots". Options for creating
+plots by detuning are "Frequency of peak"
+
 """
 
 #my_data_set = DataSet("15112022", folder_structure_type=1)
@@ -17,7 +22,10 @@ my_data_set = DataSet("22112022", folder_structure_type=3)
 my_data_set.fix_folder_structure()
 my_data_set.process_folder_structure()
 my_data_set.process_transmission()
-#my_data_set.process_S21()
+my_data_set.process_S21()
+my_data_set.process_omega()
 #my_data_set.process_gamma()
+#my_data_set.save_omega()
 #my_data_set.save_gamma()
-my_data_set.create_trend_plots()
+#my_data_set.create_trial_plots("Transmission peak")
+#my_data_set.create_detuning_plots("Frequency of peak")

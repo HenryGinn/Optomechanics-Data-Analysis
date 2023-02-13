@@ -31,7 +31,7 @@ class Trial():
                                           3: self.set_detuning_objects_b}
         set_detuning_objects_functions[self.data_set.folder_structure_type]()
         self.detuning_objects = sorted(self.detuning_objects,
-                                       key = lambda detuning_obj: detuning_obj.detuning)
+                                       key = lambda detuning_obj: detuning_obj.detuning)[10:11]
 
     def set_detuning_objects_a(self):
         spectrum_files = self.get_spectrum_files()
@@ -166,25 +166,48 @@ class Trial():
     def process_transmission(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.process_transmission()
+    
+    def process_omega(self):
+        for detuning_obj in self.detuning_objects:
+            if detuning_obj.detuning <= 0:
+                detuning_obj.set_omega()
+
+    def save_omega(self):
+        omega_file_path = self.get_omega_file_path()
+        with open(omega_file_path, "w") as file:
+            for detuning_obj in self.detuning_objects:
+                if hasattr(detuning_obj, "omega"):
+                    file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.omega}\n")
+
+    def get_omega_file_path(self):
+        parent_path = self.power_obj.data_set.omega_path
+        data_set = self.power_obj.data_set.folder_name
+        omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        omega_file_path = os.path.join(parent_path, omega_file_name)
+        return omega_file_path
             
     def process_gamma(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.set_gamma()
-        self.gammas = [detuning_obj.gamma
-                       for detuning_obj in self.detuning_objects]
 
     def save_gamma(self):
-        gamma_file_name = f"power_{self.power_obj.folder_name}_dBm_trial_{self.trial_number}.txt"
-        gamma_file_path = os.path.join(self.power_obj.data_set.gamma_path,
-                                       gamma_file_name)
+        gamma_file_path = self.get_gamma_file_path()
         with open(gamma_file_path, "w") as file:
             for detuning_obj in self.detuning_objects:
                 file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.gamma}\n")
 
-    def create_trend_plots(self):
-        #self.plot_detuning_vs_time()
-        #self.plot_frequency_of_peak()
-        self.plot_transmission_peak()
+    def get_gamma_file_path(self):
+        parent_path = self.power_obj.data_set.gamma_path
+        data_set = self.power_obj.data_set.folder_name
+        gamma_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        gamma_file_path = os.path.join(parent_path, gamma_file_name)
+        return gamma_file_path
+
+    def create_trial_plots(self, plot_name):
+        {"Detuning vs time": self.plot_detuning_vs_time,
+         "Frequency of peak": self.plot_frequency_of_peak,
+         "Transmission peak": self.plot_transmission_peak,
+         "Colour plots": self.plot_colour_plots}[plot_name]()
 
     def plot_detuning_vs_time(self):
         detunings, timestamps = self.get_detunings_and_timestamps()
@@ -235,6 +258,14 @@ class Trial():
         plt.ylabel("Frequency (Hz)")
         plt.title((f"Peak Frequency of Transmission\n"
                    f"vs Time for {self.power_obj.folder_name}, Trial {self.trial_number}"))
+
+    def plot_colour_plots(self):
+        for i in self.detuning_objects:
+            print(len(i.S21), len(i.frequency))
+
+    def create_detuning_plots(self, plot_name):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.create_detuning_plots(plot_name)
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:

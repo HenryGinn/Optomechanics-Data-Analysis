@@ -61,6 +61,8 @@ that data set. The main causes of error are as follows
     same data set, they should have the same size. Incorrect sizes should be
     deleted from the folder (a copy of the data, not the original).
 
+It can be useful to only consider a single power, trial, detuning, or spectra. Currently this is done manually by adding [0:1] on the end of the list comprehension where the lists of objects are defined in set_power_objects (in DataSet), set_trial_objects (in Power), set_detuning_objects (in Trial), and set_spectrum_objects (in Detuning). These may have been left in for debugging purposes.
+
 ############# FOLDER STRUCTURE DESCRIPTION #############
 
 15112022 has a one folder for each power inside. Inside each of those are the
@@ -88,7 +90,8 @@ same structure as in 16112022_overnight.
 1: How to review the realignment of the plots so that the peak is at the centre
 before the average. In the Data class there is a class attribute called
 "review_centre_results". Change this to true to review how well the computed
-centre matches with the shape of the plot.
+centre matches with the shape of the plot for all plots.
+When the data is offsetted and realigned, it is necessary to chop off a bit from each end of the range so that only the overlap region is considered. When this region is smaller than expected, the plot will be reviewed.
 
 2: How to review the computation of where the peak is. In the Data class there
 is a class attribute called review_centre_heuristic. Change this to true to see
@@ -161,12 +164,3 @@ Recommend to run as a script - this will produce the plots one at a time and the
 next one appears when you close a plot.
 
 ############# TO DO LIST #############
-
-1: 3 subplots needed. Each of these is needed per trial
-Subplot 1: detuning vs time
-Subplot 2: colourplot where each vertical strip is an S21 vs frequency
-relationship and time is on the horizontal axis
-Subplot 3: colourplot where each vertical strip is a sideband plot (S21 vs
-frequency) and time is on the horizonal axis.
-
-Resonant frequency of the cavity (found from transmission data)

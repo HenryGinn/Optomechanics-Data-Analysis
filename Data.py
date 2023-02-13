@@ -7,10 +7,13 @@ class Data():
     """
     This class handles all the data for one file of one detuning for one trial.
     Processing the raw data happens here.
+
+    Spectrum and Transmission are subclasses of this.
     """
 
-    review_centre_heuristic = False
-    review_centre_results = True
+    review_centre_heuristic_plot = False
+    review_centre_results_plot = False
+    suppress_centre_computation_warnings = True
     
     def __init__(self, detuning_obj, file_path):
         self.detuning_obj = detuning_obj
@@ -50,8 +53,8 @@ class Data():
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         self.S21_centre_index, heuristic_intercept = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
         self.S21_centre_frequency = self.frequency[self.S21_centre_index]
-        self.output_review_centre_heuristic(peak_index, candidate_indexes, region_points, heuristic_intercept)
-        self.output_review_centre_results(peak_index, region_points)
+        self.if_review_centre_heuristic()
+        self.if_review_centre_results()
 
     def get_candidate_and_region_indexes(self, peak_index):
         spacing = 4
@@ -64,20 +67,22 @@ class Data():
     def get_left_limit(self, peak_index):
         left_limit = peak_index - self.semi_width
         if left_limit < 0:
-            print((f"WARNING: peak is near left side of range.\n"
-                   f"Computation of centre may be compromised.\n"
-                   f"Spectrum details: {self.file_path}"))
+            self.warning_computation_of_centre("left")
             left_limit = 0
         return left_limit
 
     def get_right_limit(self, peak_index):
         right_limit = peak_index + self.semi_width
         if right_limit >= len(self.S21):
-            print(("WARNING: peak is near right side of range.\n"
-                   "Computation of centre may be compromised\n"
-                   f"Spectrum details: {self.file_path}"))
+            self.warning_computation_of_centre("right")
             right_limit = len(self.S21)
         return right_limit
+
+    def warning_computation_of_centre(self, side):
+        if self.suppress_centre_computation_warnings == False:
+            print((f"WARNING: peak is near {side} side of range.\n"
+                   f"Computation of centre may be compromised.\n"
+                   f"Spectrum details: {self.file_path}"))
 
     def get_uncentred_heuristics(self, candidate_indexes, region_points):
         uncentred_heuristic = [self.get_uncentred_heuristic(point, region_points)
@@ -107,12 +112,22 @@ class Data():
         c = a*x_1 + b*y_1
         return a, b, c
 
+    def if_review_centre_heuristic(self):
+        if self.review_centre_heuristic_plot:
+            self.review_centre_heuristic()
+
+    def review_centre_heuristic(self):
+        peak_index = np.argmax(self.S21)
+        candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
+        uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
+        _, heuristic_intercept = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
+        self.output_review_centre_heuristic(peak_index, candidate_indexes, region_points, heuristic_intercept)
+
     def output_review_centre_heuristic(self, peak_index, candidate_indexes, region_points, heuristic_intercept):
-        if self.review_centre_heuristic:
-            self.output_centre_data(peak_index, candidate_indexes, region_points)
-            self.plot_review_centre_heuristic(region_points, candidate_indexes, heuristic_intercept)
-            self.add_review_centre_heuristic_labels()
-            plt.show()
+        self.output_centre_data(peak_index, candidate_indexes, region_points)
+        self.plot_review_centre_heuristic(region_points, candidate_indexes, heuristic_intercept)
+        self.add_review_centre_heuristic_labels()
+        plt.show()
 
     def output_centre_data(self, peak_index, candidate_indexes, region_points):
         print((f"Peak index: {peak_index}\n"
@@ -143,15 +158,23 @@ class Data():
         plt.title((f"Computation of centre of data for\n"
                    f"power {power_folder}, trial {trial}, detuning {self.detuning}"))
 
-    def output_review_centre_results(self, peak_index, region_points):
-        if self.review_centre_results:
-            plt.plot(self.frequency, self.S21)
-            frequency_range = np.linspace(0, self.S21[peak_index], 100)
-            plt.plot(self.frequency[peak_index], self.S21[peak_index], '*k')
-            plt.plot([self.S21_centre_frequency] * 100, frequency_range, 'r')
-            self.add_review_centre_results_labels()
-            plt.show()
+    def if_review_centre_results(self):
+        if self.review_centre_results_plot:
+            self.review_centre_results()
 
+    def review_centre_results(self):
+        peak_index = np.argmax(self.S21)
+        _, region_points = self.get_candidate_and_region_indexes(peak_index)
+        self.output_review_centre_results(peak_index, region_points)
+
+    def output_review_centre_results(self, peak_index, region_points):
+        plt.plot(self.frequency, self.S21)
+        frequency_range = np.linspace(0, self.S21[peak_index], 100)
+        plt.plot(self.frequency[peak_index], self.S21[peak_index], '*k')
+        plt.plot([self.S21_centre_frequency] * 100, frequency_range, 'r')
+        self.add_review_centre_results_labels()
+        plt.show()
+    
     def add_review_centre_results_labels(self):
         power_folder = self.detuning_obj.trial.power_obj.folder_name
         trial = self.detuning_obj.trial.trial_number
