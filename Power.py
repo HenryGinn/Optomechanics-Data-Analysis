@@ -60,6 +60,13 @@ class Power():
         self.trial_spectrum_paths = [os.path.join(self.spectrum_path, folder_name)
                                      for folder_name in trial_spectrum_folder_names]
 
+    def set_trial_objects(self):
+        trial_paths_data = zip(self.trial_transmission_paths,
+                               self.trial_spectrum_paths)
+        self.trial_objects = [Trial(self, trial_number, trial_transmission_path, trial_spectrum_path)
+                              for trial_number, (trial_transmission_path, trial_spectrum_path)
+                              in enumerate(trial_paths_data)]
+
     def process_transmission(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_transmission()
@@ -100,13 +107,6 @@ class Power():
     def create_detuning_plots(self, plot_name):
         for trial_obj in self.trial_objects:
             trial_obj.create_detuning_plots(plot_name)
-
-    def set_trial_objects(self):
-        trial_paths_data = zip(self.trial_transmission_paths,
-                               self.trial_spectrum_paths)
-        self.trial_objects = [Trial(self, trial_number, trial_transmission_path, trial_spectrum_path)
-                              for trial_number, (trial_transmission_path, trial_spectrum_path)
-                              in enumerate(trial_paths_data)][0:1]
 
     def output_trial_paths(self):
         self.output_trial_transmission_paths()

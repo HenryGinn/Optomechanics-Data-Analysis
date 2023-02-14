@@ -1,19 +1,19 @@
 # Optomechanics-Data-Analysis
 
-CONTENTS
+################################### CONTENTS ###################################
 
 1: OVERVIEW
 2: CHECKS TO RUN BEFORE USING
 3: FOLDER STRUCTURE DESCRIPTION
 4: REVIEW OF ANALYSIS IN SIDE BAND FITTING
 5: COMPUTATION OF CENTRE OF DATA
-6: NOTE ABOUT PLOTTING
+6: COMPUTATION OF GAMMA AND OMEGA
 7: TO DO LIST
 
-############# OVERVIEW #############
+################################### OVERVIEW ###################################
 
-There are 3 main sets of programs 1: Side band fitting 2: Plot gamma 3: File
-name correctors
+There are 3 main sets of programs 1: Side band fitting 2: Plot gamma and omega
+3: File name correctors
 
 Side Band Fitting
 This has 5 main classes: DataSet, Power, Trial, Detuning, and Data, of which
@@ -21,10 +21,9 @@ Spectrum and Transmission are subclasses. Side Band Fitting Interface handles
 these classes. This code centres the plots, extracts gamma from the data and
 saves it to files, and produces various plots about the data.
 
-Plot Gamma
+Plot Gamma and Omega
 This reads the data from the files produced by the side band fitting code and
-produces a plot. Each of the powers is shown as a different line, and all data
-sets are included on one plot.
+produces a plot. Each of the trials from a data set is shown as a different line
 
 File Name Correctors
 These are preprocessing programs that help make the file and folder names
@@ -32,16 +31,29 @@ consistent and easily processed by other programs. The main issues are with
 folder_structure_type=3 data sets, and these are fixed automatically by calling
 the fix_folder_structure method of DataSet.
 
-############# CHECKS TO RUN BEFORE USING #############
+Main Folder Structure
 
-Main Folder Structure All folder locations are defined relatively. The parent
-folder contains a folder called "Data Sets" and a folder called "Repo". Inside
-"Data Sets" are folders where each folder is one experiment (these are the
-folders such as 15112022). Inside "Repo" are one or two folders: one where all
-the files in the repository should be saved, and the other where the results are
-saved to (this is called "Gamma Results" but may not exist)
+Parent folder: everything is contained inside this one
+    Repo: when saving the repository, this is the folder you want to clone to.
+        Optomechanics-Data-Analysis: this is where all the scripts are saved.
+        This folder will be made when you clone the repository to Repo
+    Data Sets: contains all the raw data
+        15112022: this contains all the information from that day of data
+        collection
+    Results: this folder will be created automatically when
+    create_results_folder is called
+        15112022: this is where all the results for that data set will be stored
+            Omega results
+                Text files: these contain the results for each trial
+                Omega Plot: this is a plot of omega
+            Gamma results
+                Text files: these contain the results for each trial
+                Gamma Plot: this is a plot of gamma
 
-Data Set Folder Structure Different data sets have different folder structures.
+########################## CHECKS TO RUN BEFORE USING ##########################
+
+Data Set Folder Structure:
+Different data sets have different folder structures.
     For data sets in the same format as 15112022, use folder_structure_type=1
     For data sets in the same format as 16112022_overnight, use
     folder_structure_type=2
@@ -49,7 +61,8 @@ Data Set Folder Structure Different data sets have different folder structures.
 There are 3 areas in which the folder structure can change, see the doc string
 in DataSet, Power, and Trial classes for more details.
 
-File Names Find out what folder structure your data set has out of the options
+File Names:
+Find out what folder structure your data set has out of the options
 listed above. In the program you are using, check the notes that are made about
 that data set. The main causes of error are as follows
     1: Numberings such as 0, 1, ..., 10, 11. When sorting as a string this will
@@ -61,9 +74,14 @@ that data set. The main causes of error are as follows
     same data set, they should have the same size. Incorrect sizes should be
     deleted from the folder (a copy of the data, not the original).
 
-It can be useful to only consider a single power, trial, detuning, or spectra. Currently this is done manually by adding [0:1] on the end of the list comprehension where the lists of objects are defined in set_power_objects (in DataSet), set_trial_objects (in Power), set_detuning_objects (in Trial), and set_spectrum_objects (in Detuning). These may have been left in for debugging purposes.
+It can be useful to only consider a single power, trial, detuning, or spectra.
+Currently this is done manually by adding [0:1] on the end of the list
+comprehension where the lists of objects are defined in set_power_objects (in
+DataSet), set_trial_objects (in Power), set_detuning_objects (in Trial), and
+set_spectrum_objects (in Detuning). These may have been left in for debugging
+purposes.
 
-############# FOLDER STRUCTURE DESCRIPTION #############
+######################### FOLDER STRUCTURE DESCRIPTION #########################
 
 15112022 has a one folder for each power inside. Inside each of those are the
 folders "Spectrum" and "Transmission. Inside "Spectrum" is a list of text files
@@ -85,13 +103,15 @@ these for both "Spectrum" and "Transmission" is a list of folders, one for each
 trial. These are named "{power}_{trial_number}". Inside each of these is the
 same structure as in 16112022_overnight.
 
-############# REVIEW OF ANALYSIS IN SIDE BAND FITTING #############
+################### REVIEW OF ANALYSIS IN SIDE BAND FITTING ###################
 
 1: How to review the realignment of the plots so that the peak is at the centre
 before the average. In the Data class there is a class attribute called
 "review_centre_results". Change this to true to review how well the computed
-centre matches with the shape of the plot for all plots.
-When the data is offsetted and realigned, it is necessary to chop off a bit from each end of the range so that only the overlap region is considered. When this region is smaller than expected, the plot will be reviewed.
+centre matches with the shape of the plot for all plots. When the data is
+offsetted and realigned, it is necessary to chop off a bit from each end of the
+range so that only the overlap region is considered. When this region is smaller
+than expected, the plot will be reviewed.
 
 2: How to review the computation of where the peak is. In the Data class there
 is a class attribute called review_centre_heuristic. Change this to true to see
@@ -120,7 +140,7 @@ to make to the fitting parameters, or if you want to accept or reject the fit.
 If the data is wrong, or cannot be fitted sufficiently well, it should be
 rejected. You need to close the figures manually to move on to the next figure
 
-############# COMPUTATION OF CENTRE OF DATA #############
+######################## COMPUTATION OF CENTRE OF DATA ########################
 
 We compute the centre of the spectrum so we can shift all spectra within a
 detuning trial and find the average. We expect this to be around the resonsant
@@ -154,13 +174,26 @@ dependence but this is negligible and unimportant). If we approximate arctan(x)
 as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we
 see that our curve looks like |x| + c in the region we are interested in.
 
-############# NOTE ABOUT PLOTTING #############
+######################## COMPUTATION OF GAMMA AND OMEGA ########################
 
-If you are running in VS code, you need to be plotting in inline mode or it
-won't display. You won't be able to dynamically interact with the graph (such as
-reselecting a region). If you are running in a browser, you can plot in notebook
-mode. Be careful as it will plot all of the results and can be very slow to use
-Recommend to run as a script - this will produce the plots one at a time and the
-next one appears when you close a plot.
+Each spectrum is approximately in the shape of a Lorentzian curve. This has the
+form of F/(gamma² + 4(frequency - resonant frequency)²) + noise. Gamma affects
+how wide the peak is and we find this value by fitting a Lorentzian to it.
 
-############# TO DO LIST #############
+Fill in: explanation of how intial fitting parameters are found
+
+
+
+################################## TO DO LIST ##################################
+
+Split the averaging of omega and gamma up into smaller pieces. For each detuning
+there can be many spectra that are currently all averaged together. Averaging 50
+numbers together means that the whole average can be ruined by bad values, so we
+want to average maybe 3 at a time, and be able to control this averaging size
+with a parameter.
+
+Interpolate the value of the detuning. The transmission is taken, then some
+number of spectra are recorded, and then the transmission is taken again. The
+peak of the transmission has moved in that time. We can interpolate the
+transmission to approximate what the true value of the transmission is, and this
+will go on the x axis for the plots of omega and gamma.

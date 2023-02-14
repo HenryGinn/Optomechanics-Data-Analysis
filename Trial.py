@@ -31,7 +31,7 @@ class Trial():
                                           3: self.set_detuning_objects_b}
         set_detuning_objects_functions[self.data_set.folder_structure_type]()
         self.detuning_objects = sorted(self.detuning_objects,
-                                       key = lambda detuning_obj: detuning_obj.detuning)[10:11]
+                                       key = lambda detuning_obj: detuning_obj.detuning)
 
     def set_detuning_objects_a(self):
         spectrum_files = self.get_spectrum_files()
@@ -90,6 +90,13 @@ class Trial():
         detuning = Detuning(self, detuning, timestamp, transmission_file_path, spectrum_file_paths)
         return detuning
 
+    def get_detuning_and_timestamp_from_folder(self, folder_name):
+        folder_path = os.path.join(self.spectrum_path, folder_name)
+        file_name = os.listdir(folder_path)[0]
+        detuning = self.get_number_from_file_name(file_name, "detuning")
+        timestamp = self.get_number_from_file_name(file_name, "timestamp")
+        return detuning, timestamp
+
     def get_spectrum_file_paths(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
         spectrum_file_names = list(os.listdir(folder_path))
@@ -97,13 +104,6 @@ class Trial():
         spectrum_file_paths = [os.path.join(folder_path, file_name)
                                for file_name in spectrum_file_names]
         return spectrum_file_paths
-
-    def get_detuning_and_timestamp_from_folder(self, folder_name):
-        folder_path = os.path.join(self.spectrum_path, folder_name)
-        file_name = os.listdir(folder_path)[0]
-        detuning = self.get_number_from_file_name(file_name, "detuning")
-        timestamp = self.get_number_from_file_name(file_name, "timestamp")
-        return detuning, timestamp
 
     def detuning_folder_non_empty(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
@@ -169,8 +169,7 @@ class Trial():
     
     def process_omega(self):
         for detuning_obj in self.detuning_objects:
-            if detuning_obj.detuning <= 0:
-                detuning_obj.set_omega()
+            detuning_obj.set_omega()
 
     def save_omega(self):
         omega_file_path = self.get_omega_file_path()

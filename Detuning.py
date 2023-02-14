@@ -124,14 +124,25 @@ class Detuning():
         self.frequency_offset -= self.frequency_offset[self.min_centre_index]
 
     def set_omega(self):
-        resonant_frequency = self.transmission.S21_centre_frequency
+        resonant_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
         centre_frequencies = self.frequency[self.spectrum_centre_indexes]
-        omegas = centre_frequencies - resonant_frequency - self.detuning + 1000000
-        print("Resonant frequency", resonant_frequency)
-        print("Detuning", self.detuning)
-        print("Omegas", omegas)
-        self.plot_omegas(omegas)
+        omegas = centre_frequencies - resonant_frequency - self.detuning
+        omegas = self.remove_extreme_values(omegas)
         self.omega = np.mean(omegas)
+
+    def remove_extreme_values(self, data):
+        if data.size > 2:
+            data_filtered = self.get_data_filtered(data)
+        else:
+            data_filtered = data
+        return data
+
+    def get_data_filtered(self, data):
+        deviations = np.abs(data - np.median(data))
+        modified_deviation = np.average(deviations**(1/4))**4
+        accepted_indexes = np.abs(deviations) < 4 * modified_deviation
+        data_filtered = data[accepted_indexes]
+        return data_filtered
         
     def set_gamma(self):
         self.initial_fitting_parameters = self.get_initial_fitting_parameters()

@@ -15,17 +15,21 @@ plots by detuning are "Frequency of peak"
 
 """
 
-#my_data_set = DataSet("15112022", folder_structure_type=1)
+my_data_set = DataSet("15112022", folder_structure_type=1)
 #my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
-my_data_set = DataSet("22112022", folder_structure_type=3)
+#my_data_set = DataSet("21112022", folder_structure_type=3)
+#my_data_set = DataSet("22112022", folder_structure_type=3)
 
 my_data_set.fix_folder_structure()
 my_data_set.process_folder_structure()
-my_data_set.process_transmission()
+my_data_set.create_results_folders()
+#my_data_set.process_transmission()
 my_data_set.process_S21()
 my_data_set.process_omega()
-#my_data_set.process_gamma()
-#my_data_set.save_omega()
-#my_data_set.save_gamma()
+my_data_set.process_gamma()
+my_data_set.save_omega()
+my_data_set.save_gamma()
 #my_data_set.create_trial_plots("Transmission peak")
 #my_data_set.create_detuning_plots("Frequency of peak")
+my_data_set.plot_omega("pdf")
+my_data_set.plot_gamma("pdf")

@@ -2,6 +2,7 @@ import os
 import sys
 from Power import Power
 import PutTrialsInFolders
+import PlotGammaAndOmega
 
 class DataSet():
 
@@ -92,7 +93,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data][0:1]
+                              for power_folder, transmission_path, spectrum_path in power_data]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
@@ -126,15 +127,30 @@ class DataSet():
             print(f"Finding omega: {power_obj.folder_name}")
             power_obj.process_omega()
 
+    def create_results_folders(self):
+        self.create_data_set_results_folder()
+        self.create_omega_folder()
+        self.create_gamma_folder()
+
+    def create_results_folder(self):
+        self.results_path = os.path.join(self.parent_path, "Results")
+        if os.path.isdir(self.results_path) == False:
+            os.mkdir(self.results_path)
+
+    def create_omega_folder(self):
+        self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
+        if os.path.isdir(self.omega_path) == False:
+            os.mkdir(self.omega_path)
+
+    def create_gamma_folder(self):
+        self.gamma_path = os.path.join(self.data_set_results_path, "Gamma Results")
+        if os.path.isdir(self.gamma_path) == False:
+            os.mkdir(self.gamma_path)
+
     def save_omega(self):
         self.create_omega_folder()
         for power_obj in self.power_objects:
             power_obj.save_omega()
-
-    def create_omega_folder(self):
-        self.omega_path = os.path.join(self.repository_path, "Omega Results")
-        if os.path.isdir(self.omega_path) == False:
-            os.mkdir(self.omega_path)
 
     def process_gamma(self):
         for power_obj in self.power_objects:
@@ -146,10 +162,11 @@ class DataSet():
         for power_obj in self.power_objects:
             power_obj.save_gamma()
 
-    def create_gamma_folder(self):
-        self.gamma_path = os.path.join(self.repository_path, "Gamma Results")
-        if os.path.isdir(self.gamma_path) == False:
-            os.mkdir(self.gamma_path)
+    def create_data_set_results_folder(self):
+        self.create_results_folder()
+        self.data_set_results_path = os.path.join(self.results_path, self.folder_name)
+        if os.path.isdir(self.data_set_results_path) == False:
+            os.mkdir(self.data_set_results_path)
 
     def create_trial_plots(self, plot_name):
         for power_obj in self.power_objects:
@@ -158,6 +175,16 @@ class DataSet():
     def create_detuning_plots(self, plot_name):
         for power_obj in self.power_objects:
             power_obj.create_detuning_plots(plot_name)
+
+    def plot_omega(self, format_type="pdf"):
+        PlotGammaAndOmega.generate_plot("Omega",
+                                        self.omega_path,
+                                        format_type)
+
+    def plot_gamma(self, format_type="pdf"):
+        PlotGammaAndOmega.generate_plot("Gamma",
+                                        self.gamma_path,
+                                        format_type)
 
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 
