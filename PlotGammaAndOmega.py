@@ -22,7 +22,7 @@ def plot_detuning_vs_greek(path):
             label = file_name[:-4]
             detuning, greek = get_detuning_and_greek(file_contents)
             if detuning is not None:
-                plt.plot(detuning, greek, label = label)
+                plt.plot(detuning, greek, '.-', label = label)
 
 def get_underscore_locations(file):
     underscore_locations = [index for index, character in enumerate(file)

@@ -174,7 +174,11 @@ dependence but this is negligible and unimportant). If we approximate arctan(x)
 as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we
 see that our curve looks like |x| + c in the region we are interested in.
 
-######################## COMPUTATION OF GAMMA AND OMEGA ########################
+######################## COMPUTATION OF OMEGA AND GAMMA ########################
+
+Each spectrum has a value of omega and each omega has an associated drift. We can take smaller groups of omega and average them, as this helps us account for the drift. We take the transmission before each spectrum to recalibrate the system to ensure it is being driven at the resonant frequency. When the spectrum data is taken, energy is put into the system which changes the resonant frequency so it needs to be recalibrated. As the spectra are taken, the system is becoming uncalibrated as the resonant frequency drifts. We find this drift by linear interpolation.
+
+We note that it takes the same time to take each spectrum, so the spectrum files are linear in time. This means we need to be careful when we reject the values of omega from certain spectra as we need to interpolate based on what time it was taken.
 
 Each spectrum is approximately in the shape of a Lorentzian curve. This has the
 form of F/(gamma² + 4(frequency - resonant frequency)²) + noise. Gamma affects
@@ -182,18 +186,6 @@ how wide the peak is and we find this value by fitting a Lorentzian to it.
 
 Fill in: explanation of how intial fitting parameters are found
 
-
-
 ################################## TO DO LIST ##################################
 
-Split the averaging of omega and gamma up into smaller pieces. For each detuning
-there can be many spectra that are currently all averaged together. Averaging 50
-numbers together means that the whole average can be ruined by bad values, so we
-want to average maybe 3 at a time, and be able to control this averaging size
-with a parameter.
-
-Interpolate the value of the detuning. The transmission is taken, then some
-number of spectra are recorded, and then the transmission is taken again. The
-peak of the transmission has moved in that time. We can interpolate the
-transmission to approximate what the true value of the transmission is, and this
-will go on the x axis for the plots of omega and gamma.
+Record all values of omega before averaging. Each row in the file will need to have the value of omega, the drift, and also it's time interpolation value as this will be needed later. The plotting code will need to be changed drastically, it was from the old version and has been crowbarred into the new class based structure so this is not unexpected.

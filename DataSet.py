@@ -93,7 +93,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data]
+                              for power_folder, transmission_path, spectrum_path in power_data][0:1]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
@@ -122,10 +122,10 @@ class DataSet():
             print(f"Processing S21: {power_obj.folder_name}")
             power_obj.process_S21()
 
-    def process_omega(self):
+    def process_omega(self, average_size = None):
         for power_obj in self.power_objects:
             print(f"Finding omega: {power_obj.folder_name}")
-            power_obj.process_omega()
+            power_obj.process_omega(average_size)
 
     def create_results_folders(self):
         self.create_data_set_results_folder()
@@ -147,10 +147,10 @@ class DataSet():
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
 
-    def save_omega(self):
+    def save_omega(self, label=None):
         self.create_omega_folder()
         for power_obj in self.power_objects:
-            power_obj.save_omega()
+            power_obj.save_omega(label)
 
     def process_gamma(self):
         for power_obj in self.power_objects:

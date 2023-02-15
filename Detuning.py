@@ -41,6 +41,7 @@ class Detuning():
             file.readline()
             self.frequency = np.array([self.get_frequency_from_file_line(line)
                                        for line in file])
+        self.cavity_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
 
     def get_frequency_from_file_line(self, line):
         line_components = line.strip().split("\t")
@@ -123,27 +124,68 @@ class Detuning():
         self.frequency_offset = np.copy(self.frequency[:frequency_offset_length])
         self.frequency_offset -= self.frequency_offset[self.min_centre_index]
 
-    def set_omega(self):
-        resonant_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
-        centre_frequencies = self.frequency[self.spectrum_centre_indexes]
-        omegas = centre_frequencies - resonant_frequency - self.detuning
-        omegas = self.remove_extreme_values(omegas)
-        self.omega = np.mean(omegas)
+    def set_omega(self, average_size):
+        omegas_all, acceptable_indexes = self.get_omegas_all()
+        self.average_omegas(omegas_all, average_size)
+        self.omega_spacing = self.get_group_spacing(self.omega_group_indexes, acceptable_indexes)
+        self.omega_detunings = self.get_interpolated_detunings(self.omega_spacing)
 
-    def remove_extreme_values(self, data):
+    def get_omegas_all(self):
+        centre_frequencies = self.frequency[self.spectrum_centre_indexes]
+        omegas_all = centre_frequencies - self.cavity_frequency - self.detuning
+        acceptable_indexes = self.get_acceptable_indexes(omegas_all)
+        omegas_all = omegas_all[acceptable_indexes]
+        return omegas_all, acceptable_indexes
+
+    def get_acceptable_indexes(self, data):
         if data.size > 2:
-            data_filtered = self.get_data_filtered(data)
+            acceptable_indexes = np.arange(len(data))
         else:
-            data_filtered = data
-        return data
+            acceptable_indexes = self.get_acceptable_indexes_non_trivial(data)
+        return acceptable_indexes
 
     def get_data_filtered(self, data):
+        acceptable_indexes = self.get_acceptable_indexes_non_trivial(data)
+        data_filtered = data[accepted_indexes]
+        return data_filtered
+
+    def get_acceptable_indexes_non_trivial(self, data):
         deviations = np.abs(data - np.median(data))
         modified_deviation = np.average(deviations**(1/4))**4
         accepted_indexes = np.abs(deviations) < 4 * modified_deviation
-        data_filtered = data[accepted_indexes]
-        return data_filtered
-        
+        return accepted_indexes
+
+    def average_omegas(self, omegas, average_size):
+        if average_size is None:
+            average_size = len(omegas)
+        self.average_omegas_not_none(omegas, average_size)
+
+    def average_omegas_not_none(self, omegas, average_size):
+        self.omega_group_indexes = self.get_group_indexes(len(omegas), average_size)
+        self.omegas = [np.mean(omegas[indexes])
+                       for indexes in self.omega_group_indexes]
+
+    def get_group_indexes(self, length, group_size):
+        group_count = math.floor(length/group_size)
+        real_group_size = length/group_count
+        end_point_indexes = np.ceil(np.arange(0, group_count + 1) * real_group_size)
+        group_indexes = [np.arange(end_point_indexes[group_number],
+                                   end_point_indexes[group_number + 1]).astype('int')
+                         for group_number in range(group_count)]
+        return group_indexes
+
+    def get_group_spacing(self, group_indexes, indexes):
+        mean_group_indexes = [np.mean(indexes[group]) for group in group_indexes]
+        group_spacing = np.array(mean_group_indexes)/indexes[-1]
+        return group_spacing
+
+    def get_interpolated_detunings(self, spacings):
+        current_detuning = self.cavity_frequency
+        next_detuning = self.next_detuning.cavity_frequency
+        difference = next_detuning - current_detuning
+        interpolated_detunings = self.detuning - difference*spacings
+        return interpolated_detunings
+    
     def set_gamma(self):
         self.initial_fitting_parameters = self.get_initial_fitting_parameters()
         self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)

@@ -75,26 +75,19 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_S21()
 
-    def process_omega(self):
+    def process_omega(self, average_size):
         for trial_obj in self.trial_objects:
-            trial_obj.process_omega()
-            print(trial_obj)
-            for detuning_obj in trial_obj.detuning_objects:
-                if hasattr(detuning_obj, "omega"):
-                    print(f"Detuning: {detuning_obj.detuning}, Omega: {detuning_obj.omega}")
-            print("")
+            trial_obj.process_omega(average_size)
+            trial_obj.output_omegas()
 
-    def save_omega(self):
+    def save_omega(self, label):
         for trial_obj in self.trial_objects:
-            trial_obj.save_omega()
+            trial_obj.save_omega(label)
 
     def process_gamma(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_gamma()
-            print(trial_obj)
-            for detuning_obj in trial_obj.detuning_objects:
-                print(f"Detuning: {detuning_obj.detuning}, Gamma: {detuning_obj.gamma}")
-            print("")
+            trial_obj.output_gamma()
 
     def save_gamma(self):
         for trial_obj in self.trial_objects:

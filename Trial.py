@@ -30,9 +30,8 @@ class Trial():
                                           2: self.set_detuning_objects_b,
                                           3: self.set_detuning_objects_b}
         set_detuning_objects_functions[self.data_set.folder_structure_type]()
-        self.detuning_objects = sorted(self.detuning_objects,
-                                       key = lambda detuning_obj: detuning_obj.detuning)
-
+        self.process_detuning_objects()
+    
     def set_detuning_objects_a(self):
         spectrum_files = self.get_spectrum_files()
         self.detuning_objects = [self.get_detuning_object_a(detuning, spectrum_files)
@@ -89,6 +88,16 @@ class Trial():
         transmission_file_path = self.get_transmission_file_path(timestamp)
         detuning = Detuning(self, detuning, timestamp, transmission_file_path, spectrum_file_paths)
         return detuning
+
+    def process_detuning_objects(self):
+        self.detuning_objects = sorted(self.detuning_objects,
+                                       key = lambda detuning_obj: detuning_obj.detuning)
+        self.set_next_detuning_objects()
+
+    def set_next_detuning_objects(self):
+        for index in range(len(self.detuning_objects) - 1):
+            self.detuning_objects[index].next_detuning = self.detuning_objects[index + 1]
+        self.detuning_objects[-1].next_detuning = self.detuning_objects[-1]
 
     def get_detuning_and_timestamp_from_folder(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
@@ -167,27 +176,60 @@ class Trial():
         for detuning_obj in self.detuning_objects:
             detuning_obj.process_transmission()
     
-    def process_omega(self):
+    def process_omega(self, average_size):
         for detuning_obj in self.detuning_objects:
-            detuning_obj.set_omega()
+            detuning_obj.set_omega(average_size)
 
-    def save_omega(self):
-        omega_file_path = self.get_omega_file_path()
+    def output_omegas(self):
+        print(self)
+        for detuning_obj in self.detuning_objects:
+            if hasattr(detuning_obj, "omegas"):
+                print(f"\nMain detuning: {detuning_obj.detuning}")
+                for omega, detuning in zip(detuning_obj.omegas, detuning_obj.omega_detunings):
+                    print(f"Detuning: {detuning}, Omega: {omega}")
+        print("")
+
+    def save_omega(self, label):
+        omega_file_path = self.get_omega_file_path(label)
         with open(omega_file_path, "w") as file:
             for detuning_obj in self.detuning_objects:
-                if hasattr(detuning_obj, "omega"):
-                    file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.omega}\n")
+                file = self.save_detuning_omega(file, detuning_obj)
 
-    def get_omega_file_path(self):
+    def save_detuning_omega(self, file, detuning_obj):
+        if hasattr(detuning_obj, "omegas"):
+            for omega, detuning in zip(detuning_obj.omegas,
+                                       detuning_obj.omega_detunings):
+                file.writelines(f"{detuning}\t{omega}\n")
+        return file
+
+    def get_omega_file_path(self, label):
         parent_path = self.power_obj.data_set.omega_path
         data_set = self.power_obj.data_set.folder_name
-        omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        omega_file_name = self.get_omega_file_name(data_set, label)
         omega_file_path = os.path.join(parent_path, omega_file_name)
         return omega_file_path
+
+    def get_omega_file_name(self, data_set, label):
+        print(label)
+        if label is None:
+            print("Label was None")
+            omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+            print(omega_file_name)
+        else:
+            print("Label was not None")
+            omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{label}.txt"
+            print(omega_file_name)
+        return omega_file_name
             
     def process_gamma(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.set_gamma()
+
+    def output_gamma(self):
+            print(self)
+            for detuning_obj in self.detuning_objects:
+                print(f"Detuning: {detuning_obj.detuning}, Gamma: {detuning_obj.gamma}")
+            print("")
 
     def save_gamma(self):
         gamma_file_path = self.get_gamma_file_path()
@@ -268,12 +310,6 @@ class Trial():
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:
-            print(detuning_obj)
-
-    def output_gammas(self):
-        for detuning_obj in self.detuning_objects:
-            print("Outputting gamma")
-            print(detuning_obj.gamma)
             print(detuning_obj)
 
     def __str__(self):
