@@ -7,7 +7,7 @@
 3: FOLDER STRUCTURE DESCRIPTION
 4: REVIEW OF ANALYSIS IN SIDE BAND FITTING
 5: COMPUTATION OF CENTRE OF DATA
-6: COMPUTATION OF GAMMA AND OMEGA
+6: TREATEMENT OF GAMMA AND OMEGA
 7: TO DO LIST
 
 ################################### OVERVIEW ###################################
@@ -174,11 +174,17 @@ dependence but this is negligible and unimportant). If we approximate arctan(x)
 as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we
 see that our curve looks like |x| + c in the region we are interested in.
 
-######################## COMPUTATION OF OMEGA AND GAMMA ########################
+######################## TREATEMENT OF OMEGA AND GAMMA ########################
 
 Each spectrum has a value of omega and each omega has an associated drift. We can take smaller groups of omega and average them, as this helps us account for the drift. We take the transmission before each spectrum to recalibrate the system to ensure it is being driven at the resonant frequency. When the spectrum data is taken, energy is put into the system which changes the resonant frequency so it needs to be recalibrated. As the spectra are taken, the system is becoming uncalibrated as the resonant frequency drifts. We find this drift by linear interpolation.
 
-We note that it takes the same time to take each spectrum, so the spectrum files are linear in time. This means we need to be careful when we reject the values of omega from certain spectra as we need to interpolate based on what time it was taken.
+We note that it takes the same time to take each spectrum, so the spectrum files are linear in time. This means we need to be careful when we reject the values of omega from certain spectra as we need to interpolate based on what time it was taken. To avoid issues with this, the index of the spectrum file should be taken with respect to the original list of spectra, and you cannot get the index of an omega by finding it's index in the list of valid omega.
+
+When taking the average of a group of omegas there are two ways of finding the drift of the average. The first is by taking the indexes of the spectra that the omegas within the group were taking from (the original set of spectra, including the omegas that have been rejected as outliers), taking the average of these indexes, dividing by the total number of spectra, and interpolating based on this. The second is take the index of each spectrum file the omega was calculated from, dividing by the total number of spectra, interpolating this to get the drift for that omega, and then averaging the drifts. These processes get the same results because the interpolation process is linear.
+
+All the non-outlier omegas are stored in a text file where each row contains omega, it's detuning, and it's interpolated drift. As noted above we can find the average drift of the group by taking the average of these drifts and we do not run into issues. This means we don't need to include the index of the file that each omega was taken from, and we no longer need to be careful about whether the index is with respect to the list of all spectra, or the list of the spectra with the outlier omegas removed.
+
+We split the omegas into groups and average each group of omegas. These are then saved in a file (one file per trial per group size) along with their detuning and average drift. When they are plotted, the files of all averages that have been found are plotted. These averages are found using the data saved in the original omega file described above. We note that the original file is not plotted, but if you want to plot it then you can compute the averaged omega with a group size of 1. The group size is indicated in the file name, and the original file is distinguished from the others by not having this.
 
 Each spectrum is approximately in the shape of a Lorentzian curve. This has the
 form of F/(gamma² + 4(frequency - resonant frequency)²) + noise. Gamma affects
@@ -189,3 +195,9 @@ Fill in: explanation of how intial fitting parameters are found
 ################################## TO DO LIST ##################################
 
 Record all values of omega before averaging. Each row in the file will need to have the value of omega, the drift, and also it's time interpolation value as this will be needed later. The plotting code will need to be changed drastically, it was from the old version and has been crowbarred into the new class based structure so this is not unexpected.
+
+Save the S21 results to files
+
+Process gamma in a similar way to omega
+
+Make subplots of gamma and omega

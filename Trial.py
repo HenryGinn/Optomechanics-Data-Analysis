@@ -175,31 +175,36 @@ class Trial():
     def process_transmission(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.process_transmission()
-    
-    def process_omega(self, average_size):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.set_omega(average_size)
 
-    def output_omegas(self):
-        print(self)
-        for detuning_obj in self.detuning_objects:
-            if hasattr(detuning_obj, "omegas"):
-                print(f"\nMain detuning: {detuning_obj.detuning}")
-                for omega, detuning in zip(detuning_obj.omegas, detuning_obj.omega_detunings):
-                    print(f"Detuning: {detuning}, Omega: {omega}")
+    def process_omega_all(self):
+        self.set_omega_all_file_path()
+        with open(self.omega_all_file_path, "w") as file:
+            file.writelines(f"Detuning\tDrift\tOmega")
+            for detuning_obj in self.detuning_objects:
+                drifts, omegas = detuning_obj.get_omegas_all()
+                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
+
+    def set_omega_all_file_path(self):
+        self.omega_all_file_path = self.get_omega_file_path("All")
+
+    def output_omegas(self, omegas, drifts, detuning):
+        print(f"\nMain detuning: {detuning}")
+        for omega, drift in zip(omegas, drifts):
+            print(f"Drift: {drift}, Omega: {omega}")
         print("")
 
-    def save_omega(self, label):
-        omega_file_path = self.get_omega_file_path(label)
+    def omega_average(self, average_size):
+        self.set_omega_all_file_path()
+        omega_file_path = self.get_omega_file_path(average_size)
         with open(omega_file_path, "w") as file:
+            file.writelines(f"Detuning\tDrift\tOmega")
             for detuning_obj in self.detuning_objects:
-                file = self.save_detuning_omega(file, detuning_obj)
+                omegas, drifts = detuning_obj.get_omegas_averages(average_size)
+                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
 
-    def save_detuning_omega(self, file, detuning_obj):
-        if hasattr(detuning_obj, "omegas"):
-            for omega, detuning in zip(detuning_obj.omegas,
-                                       detuning_obj.omega_detunings):
-                file.writelines(f"{detuning}\t{omega}\n")
+    def save_detuning_omega(self, file, omegas, drifts, detuning):
+        for omega, drift in zip(omegas, drifts):
+            file.writelines(f"{detuning}\t{drift}\t{omega}\n")
         return file
 
     def get_omega_file_path(self, label):
@@ -210,15 +215,10 @@ class Trial():
         return omega_file_path
 
     def get_omega_file_name(self, data_set, label):
-        print(label)
         if label is None:
-            print("Label was None")
             omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
-            print(omega_file_name)
         else:
-            print("Label was not None")
             omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{label}.txt"
-            print(omega_file_name)
         return omega_file_name
             
     def process_gamma(self):

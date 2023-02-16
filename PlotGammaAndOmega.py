@@ -17,12 +17,12 @@ def generate_plot(variable_name, parent_path, format_type):
 
 def plot_detuning_vs_greek(path):
     for file_name in sorted(os.listdir(path)):
-        if file_name.endswith(".txt"):
+        if file_name.endswith(".txt") and not file_name.endswith("All.txt"):
             file_contents = get_file_contents(path, file_name)
             label = file_name[:-4]
-            detuning, greek = get_detuning_and_greek(file_contents)
+            detuning, drift, greek = get_detuning_and_greek(file_contents)
             if detuning is not None:
-                plt.plot(detuning, greek, '.-', label = label)
+                plt.plot(detuning - drift, greek, '.-', label = label)
 
 def get_underscore_locations(file):
     underscore_locations = [index for index, character in enumerate(file)
@@ -31,7 +31,6 @@ def get_underscore_locations(file):
 
 def get_file_contents(path, file_name):
     file_path = os.path.join(path, file_name)
-    
     with open(file_path, "r") as file:
         file.readline()
         file_contents = file.readlines()
@@ -39,21 +38,22 @@ def get_file_contents(path, file_name):
 
 def get_detuning_and_greek(file_contents):
     if len(file_contents) != 0:
-        detuning, greek = get_detuning_and_greek_from_file(file_contents)
+        detuning, drift, greek = get_detuning_and_greek_from_file(file_contents)
     else:
         print("Warning: no data could be extracted from file")
-        detuning, greek = None, None
-    return detuning, greek
+        detuning, drift, greek = None, None, None
+    return detuning, drift, greek
 
 def get_detuning_and_greek_from_file(file_contents):
     file_lines_decomposed = [[float(number) for number in line.strip().split('\t')]
                              for line in file_contents]
-    detuning, greek = zip(*file_lines_decomposed)
+    detuning, drift, greek = zip(*file_lines_decomposed)
     greek = np.abs(greek)
     acceptable_indices = get_acceptable_indices(greek)
     detuning = np.array(detuning)[acceptable_indices]
+    drift = np.array(drift)[acceptable_indices]
     greek = np.array(greek)[acceptable_indices]
-    return detuning, greek
+    return detuning, drift, greek
 
 def get_acceptable_indices(data):
     if len(data) > 2:

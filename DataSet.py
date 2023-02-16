@@ -122,10 +122,10 @@ class DataSet():
             print(f"Processing S21: {power_obj.folder_name}")
             power_obj.process_S21()
 
-    def process_omega(self, average_size = None):
+    def process_omega(self):
         for power_obj in self.power_objects:
             print(f"Finding omega: {power_obj.folder_name}")
-            power_obj.process_omega(average_size)
+            power_obj.process_omega()
 
     def create_results_folders(self):
         self.create_data_set_results_folder()
@@ -147,11 +147,18 @@ class DataSet():
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
 
-    def save_omega(self, label=None):
-        self.create_omega_folder()
-        for power_obj in self.power_objects:
-            power_obj.save_omega(label)
+    def average_omega(self, average_size = None):
+        if self.omega_folder_exists():
+            for power_obj in self.power_objects:
+                power_obj.average_omega(average_size)
 
+    def omega_folder_exists(self):
+        if hasattr(self, "omega_path"):
+            return True
+        else:
+            raise Exception(("Omega folder does not exist\n"
+                             "Run process_omega method first"))
+        
     def process_gamma(self):
         for power_obj in self.power_objects:
             print(f"Finding gamma: {power_obj.folder_name}")
