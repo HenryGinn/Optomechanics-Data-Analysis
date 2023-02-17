@@ -80,7 +80,7 @@ class Trial():
         folder_names = sorted(os.listdir(self.spectrum_path))
         self.detuning_objects = [self.get_detuning_object_b(folder_name)
                                  for folder_name in folder_names
-                                 if self.detuning_folder_non_empty(folder_name)]
+                                 if self.detuning_folder_non_empty(folder_name)][0:5]
 
     def get_detuning_object_b(self, folder_name):
         detuning, timestamp = self.get_detuning_and_timestamp_from_folder(folder_name)
@@ -168,9 +168,46 @@ class Trial():
                              f"left_index: {left_index}, right index: {right_index}"
                              f"{file_name[left_index:right_index]}\n"))
 
+    def get_file_contents(self, path):
+        with open(path, "r") as file:
+            file.readline()
+            file_contents = [[float(value) for value in line.strip().split("\t")]
+                             for line in file]
+        return file_contents
+
     def process_S21(self):
+        self.set_S21_file_path()
+        with open(self.S21_file_path, "w+") as file:
+            file.writelines(f"Detuning\tS21_peak_index\tS21_peak_frequency\tIndex\n")
+            for detuning_obj in self.detuning_objects:
+                file = self.write_S21_peaks_to_file(file, detuning_obj)
+
+    def set_S21_file_path(self):
+        S21_folder_path = self.data_set.S21_path
+        file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        self.S21_file_path = os.path.join(S21_folder_path, file_name)
+
+    def write_S21_peaks_to_file(self, file, detuning_obj):
+        S21_peak_indexes, S21_peak_frequencies = detuning_obj.get_S21_peaks()
+        for index, (peak_index, frequency) in enumerate(zip(S21_peak_indexes, S21_peak_frequencies)):
+            file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{frequency}\t{index}\n")
+        return file
+
+    def set_S21(self):
+        self.set_S21_file_path()
+        if os.path.exists(self.S21_file_path) == False:
+            raise Exception((f"S21 data could not be found for {self.trial_number}\n"
+                             f"Run process_S21 method first"))
+        else:
+            self.extract_S21_from_file()
+
+    def extract_S21_from_file(self):
+        S21_file_contents = self.get_file_contents(self.S21_file_path)
         for detuning_obj in self.detuning_objects:
-            detuning_obj.process_S21()
+            properties = [(centre_indexes, centre_frequencies, indexes) for
+                          detuning, centre_indexes, centre_frequencies, indexes in S21_file_contents
+                          if detuning == detuning_obj.detuning]
+            detuning_obj.set_spectrum_properties_from_file(properties)
 
     def process_transmission(self):
         for detuning_obj in self.detuning_objects:
@@ -178,11 +215,16 @@ class Trial():
 
     def process_omega_all(self):
         self.set_omega_all_file_path()
+        self.set_S21()
         with open(self.omega_all_file_path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tOmega")
-            for detuning_obj in self.detuning_objects:
-                drifts, omegas = detuning_obj.get_omegas_all()
-                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
+            file.writelines(f"Detuning\tDrift\tOmega\n")
+            file = self.write_omega_to_file(file)
+
+    def write_omega_to_file(self, file):
+        for detuning_obj in self.detuning_objects:
+            omegas, drifts = detuning_obj.get_omegas_all()
+            file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
+        return file
 
     def set_omega_all_file_path(self):
         self.omega_all_file_path = self.get_omega_file_path("All")

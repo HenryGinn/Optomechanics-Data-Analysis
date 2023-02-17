@@ -13,7 +13,9 @@ class Spectrum(Data):
     def __init__(self, detuning_obj, spectrum_path):
         Data.__init__(self, detuning_obj, spectrum_path)
         self.frequency = self.detuning_obj.frequency
-        
+
+    def is_spectrum_valid(self):
+        return True
 
 class Transmission(Data):
 

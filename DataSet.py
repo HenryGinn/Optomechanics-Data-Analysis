@@ -93,7 +93,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data][0:1]
+                              for power_folder, transmission_path, spectrum_path in power_data][1:2]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
@@ -104,6 +104,11 @@ class DataSet():
         for power in self.power_list:
             print(power)
 
+    def process_folders(self):
+        self.fix_folder_structure()
+        self.process_folder_structure()
+        self.create_results_folders()
+
     def fix_folder_structure(self):
         if self.folder_structure_type == 3:
             PutTrialsInFolders.put_trials_in_folders(self.folder_name)
@@ -111,31 +116,22 @@ class DataSet():
     def process_folder_structure(self):
         for power_obj in self.power_objects:
             power_obj.process_power()
-
-    def process_transmission(self):
-        for power_obj in self.power_objects:
-            print(f"Processing transmission: {power_obj.folder_name}")
-            power_obj.process_transmission()
-
-    def process_S21(self):
-        for power_obj in self.power_objects:
-            print(f"Processing S21: {power_obj.folder_name}")
-            power_obj.process_S21()
-
-    def process_omega(self):
-        for power_obj in self.power_objects:
-            print(f"Finding omega: {power_obj.folder_name}")
-            power_obj.process_omega()
-
+    
     def create_results_folders(self):
         self.create_data_set_results_folder()
+        self.create_S21_folder()
         self.create_omega_folder()
         self.create_gamma_folder()
-
+    
     def create_results_folder(self):
         self.results_path = os.path.join(self.parent_path, "Results")
         if os.path.isdir(self.results_path) == False:
             os.mkdir(self.results_path)
+
+    def create_S21_folder(self):
+        self.S21_path = os.path.join(self.data_set_results_path, "S21 Peaks")
+        if os.path.isdir(self.S21_path) == False:
+            os.mkdir(self.S21_path)
 
     def create_omega_folder(self):
         self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
@@ -158,6 +154,21 @@ class DataSet():
         else:
             raise Exception(("Omega folder does not exist\n"
                              "Run process_omega method first"))
+
+    def process_transmission(self):
+        for power_obj in self.power_objects:
+            print(f"Processing transmission: {power_obj.folder_name}")
+            power_obj.process_transmission()
+
+    def process_S21(self):
+        for power_obj in self.power_objects:
+            print(f"Processing S21: {power_obj.folder_name}")
+            power_obj.process_S21()
+
+    def process_omega(self):
+        for power_obj in self.power_objects:
+            print(f"Finding omega: {power_obj.folder_name}")
+            power_obj.process_omega()
         
     def process_gamma(self):
         for power_obj in self.power_objects:

@@ -71,25 +71,56 @@ class Detuning():
         self.transmission = Transmission(self, self.transmission_path)
         self.transmission.process_S21()
 
+    def get_S21_peaks(self):
+        for spectrum_obj in self.spectrum_objects:
+            spectrum_obj.process_S21()
+        self.set_valid_spectrum_indexes()
+        spectrum_centre_indexes, spectrum_centre_frequencies = self.get_centre_information()
+        return spectrum_centre_indexes, spectrum_centre_frequencies
+
+    def set_valid_spectrum_indexes(self):
+        #self.valid_spectrum_indexes = np.arange(len(self.spectrum_objects))
+        self.valid_spectrum_indexes = [spectrum_obj.is_spectrum_valid()
+                                       for spectrum_obj in self.spectrum_objects]
+
     def process_S21(self):
         for spectrum_obj in self.spectrum_objects:
             spectrum_obj.process_S21()
         self.set_S21_and_frequency_offset()
-        self.S21 = np.mean([spectrum_obj.S21_offset
-                            for spectrum_obj in self.spectrum_objects], axis=0)
+        S21s = [spectrum_obj.S21_offset
+                for spectrum_obj in self.spectrum_objects]
+        self.S21 = np.mean(S21s, axis=0)
+
+    def set_spectrum_properties_from_file(self, variables):
+        centre_indexes, centre_frequencies, indexes = zip(*variables)
+        self.spectrum_centre_indexes = np.array(centre_indexes)
+        self.spectrum_centre_frequencies = np.array(centre_frequencies)
+        self.spectrum_indexes = np.array(indexes).astype("int")
 
     def set_S21_and_frequency_offset(self):
-        self.set_centre_indexes()
+        self.min_centre_index = min(self.spectrum_centre_indexes)
+        self.max_centre_index = max(self.spectrum_centre_indexes)
         self.is_offset_reasonable()
         for spectrum_obj in self.spectrum_objects:
             spectrum_obj.set_S21_offset()
         self.set_frequency_offset()
 
-    def set_centre_indexes(self):
-        self.spectrum_centre_indexes = [spectrum_obj.S21_centre_index
-                                        for spectrum_obj in self.spectrum_objects]
-        self.min_centre_index = min(self.spectrum_centre_indexes)
-        self.max_centre_index = max(self.spectrum_centre_indexes)
+    def get_centre_information(self):
+        spectrum_centre_indexes = self.get_spectrum_centre_indexes()
+        spectrum_centre_frequencies = self.get_spectrum_centre_frequencies()
+        return spectrum_centre_indexes, spectrum_centre_frequencies
+
+    def get_spectrum_centre_indexes(self):
+        spectrum_centre_indexes = [spectrum_obj.S21_centre_index
+                                   for index, spectrum_obj in enumerate(self.spectrum_objects)
+                                   if index in self.valid_spectrum_indexes]
+        return spectrum_centre_indexes
+
+    def get_spectrum_centre_frequencies(self):
+        spectrum_centre_frequencies = [spectrum_obj.S21_centre_frequency
+                                       for index, spectrum_obj in enumerate(self.spectrum_objects)
+                                       if index in self.valid_spectrum_indexes]
+        return spectrum_centre_frequencies
 
     def is_offset_reasonable(self):
         centre_index_range = self.max_centre_index - self.min_centre_index
@@ -125,18 +156,19 @@ class Detuning():
         self.frequency_offset -= self.frequency_offset[self.min_centre_index]
 
     def get_omegas_all(self):
-        centre_frequencies = self.frequency[self.spectrum_centre_indexes]
+        centre_frequencies = self.spectrum_centre_frequencies
         omegas_all = centre_frequencies - self.cavity_frequency - self.detuning
-        acceptable_indexes = self.get_acceptable_indexes(omegas_all)
+        acceptable_indexes = self.get_acceptable_indexes(omegas_all, self.spectrum_indexes)
         omegas_all = omegas_all[acceptable_indexes]
         drifts = self.get_drifts(acceptable_indexes, len(self.spectrum_objects))
         return omegas_all, drifts
 
-    def get_acceptable_indexes(self, data):
-        if data.size > 2:
+    def get_acceptable_indexes(self, data, filter_indexes):
+        if data.size < 3:
             acceptable_indexes = np.arange(len(data))
         else:
             acceptable_indexes = self.get_acceptable_indexes_non_trivial(data)
+        acceptable_indexes = filter_indexes[acceptable_indexes]
         return acceptable_indexes
 
     def get_data_filtered(self, data):
