@@ -11,6 +11,7 @@ class Data():
     Spectrum and Transmission are subclasses of this.
     """
 
+    peak_ratio_threshold = 11.5
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
     suppress_centre_computation_warnings = True
@@ -24,7 +25,9 @@ class Data():
 
     def process_S21(self):
         self.set_S21()
-        self.set_S21_centre_index()
+        self.set_S21_has_valid_peak()
+        if self.S21_has_valid_peak:
+            self.set_S21_centre_index()
 
     def set_S21(self):
         voltage = self.get_voltage_from_file()
@@ -46,6 +49,12 @@ class Data():
         except:
             raise Exception((f"Could not read voltage from file line '{line}'"
                              f"while attempting to process spectrum:\n{self}"))
+
+    def set_S21_has_valid_peak(self):
+        peak = np.max(self.S21)
+        noise = np.median(self.S21)
+        peak_ratio = peak / noise
+        self.S21_has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
 
     def set_S21_centre_index(self):
         peak_index = np.argmax(self.S21)
@@ -182,6 +191,18 @@ class Data():
         plt.ylabel("S21")
         plt.title((f"Computation of centre of data for\n"
                    f"power {power_folder}, trial {trial}, detuning {self.detuning}"))
+
+    def get_S21_centre_index(self):
+        if self.S21_has_valid_peak:
+            return self.S21_centre_index
+        else:
+            return None
+
+    def get_S21_centre_frequency(self):
+        if self.S21_has_valid_peak:
+            return self.S21_centre_frequency
+        else:
+            return None
 
     def set_S21_offset(self):
         left_index = self.S21_centre_index - self.detuning_obj.min_centre_index

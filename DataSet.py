@@ -93,7 +93,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data][1:2]
+                              for power_folder, transmission_path, spectrum_path in power_data][0:1]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
