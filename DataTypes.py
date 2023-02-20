@@ -11,7 +11,8 @@ class Spectrum(Data):
     semi_width = 150
     
     def __init__(self, detuning_obj, spectrum_path):
-        Data.__init__(self, detuning_obj, spectrum_path)
+        Data.__init__(self, detuning_obj)
+        self.file_path = spectrum_path
         self.frequency = self.detuning_obj.frequency
 
     def is_spectrum_valid(self):
@@ -26,7 +27,8 @@ class Transmission(Data):
     semi_width = 30
     
     def __init__(self, detuning_obj, transmission_path):
-        Data.__init__(self, detuning_obj, transmission_path)
+        Data.__init__(self, detuning_obj)
+        self.file_path = transmission_path
         self.set_frequency()
 
     def set_frequency(self):
