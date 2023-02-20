@@ -188,9 +188,9 @@ class Trial():
         self.S21_file_path = os.path.join(S21_folder_path, file_name)
 
     def write_S21_peaks_to_file(self, file, detuning_obj):
-        S21_peak_indexes, S21_peak_frequencies = detuning_obj.get_S21_peaks()
-        for index, (peak_index, frequency) in enumerate(zip(S21_peak_indexes, S21_peak_frequencies)):
-            file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{frequency}\t{index}\n")
+        S21_peak_indexes, S21_peak_frequencies, file_indexes = detuning_obj.get_S21_peaks()
+        for (peak_index, frequency, file_index) in zip(S21_peak_indexes, S21_peak_frequencies, file_indexes):
+            file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{frequency}\t{file_index}\n")
         return file
 
     def set_S21(self):
@@ -214,16 +214,21 @@ class Trial():
             detuning_obj.process_transmission()
 
     def process_omega_all(self):
-        self.set_omega_all_file_path()
-        self.set_S21()
+        self.setup_omega_all()
         with open(self.omega_all_file_path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\n")
             file = self.write_omega_to_file(file)
 
+    def setup_omega_all(self):
+        self.set_omega_all_file_path()
+        self.set_S21()
+        self.process_transmission()
+
     def write_omega_to_file(self, file):
         for detuning_obj in self.detuning_objects:
-            omegas, drifts = detuning_obj.get_omegas_all()
-            file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
+            if detuning_obj.valid:
+                omegas, drifts = detuning_obj.get_omegas_all()
+                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
         return file
 
     def set_omega_all_file_path(self):
@@ -239,7 +244,7 @@ class Trial():
         self.set_omega_all_file_path()
         omega_file_path = self.get_omega_file_path(average_size)
         with open(omega_file_path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tOmega")
+            file.writelines(f"Detuning\tDrift\tOmega\n")
             for detuning_obj in self.detuning_objects:
                 omegas, drifts = detuning_obj.get_omegas_averages(average_size)
                 file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
@@ -250,9 +255,9 @@ class Trial():
         return file
 
     def get_omega_file_path(self, label):
-        parent_path = self.power_obj.data_set.omega_path
         data_set = self.power_obj.data_set.folder_name
         omega_file_name = self.get_omega_file_name(data_set, label)
+        parent_path = self.power_obj.data_set.omega_path
         omega_file_path = os.path.join(parent_path, omega_file_name)
         return omega_file_path
 
@@ -263,9 +268,26 @@ class Trial():
             omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{label}.txt"
         return omega_file_name
             
-    def process_gamma(self):
+    def process_gamma(self, average_size):
+        gamma_file_path = self.get_gamma_file_path(average_size)
+        self.set_S21()
         for detuning_obj in self.detuning_objects:
-            detuning_obj.set_gamma()
+            print(f"Detuning: {detuning_obj.detuning}")
+            detuning_obj.set_gamma_averages(average_size)
+
+    def get_gamma_file_path(self, average_size):
+        data_set = self.power_obj.data_set.folder_name
+        gamma_file_name = self.get_gamma_file_name(data_set, average_size)
+        parent_path = self.power_obj.data_set.gamma_path
+        gamma_file_path = os.path.join(parent_path, gamma_file_name)
+        return gamma_file_path
+
+    def get_gamma_file_name(self, data_set, average_size):
+        if average_size is None:
+            gamma_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        else:
+            gamma_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{average_size}.txt"
+        return gamma_file_name
 
     def output_gamma(self):
             print(self)
@@ -278,13 +300,6 @@ class Trial():
         with open(gamma_file_path, "w") as file:
             for detuning_obj in self.detuning_objects:
                 file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.gamma}\n")
-
-    def get_gamma_file_path(self):
-        parent_path = self.power_obj.data_set.gamma_path
-        data_set = self.power_obj.data_set.folder_name
-        gamma_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
-        gamma_file_path = os.path.join(parent_path, gamma_file_name)
-        return gamma_file_path
 
     def create_trial_plots(self, plot_name):
         {"Detuning vs time": self.plot_detuning_vs_time,

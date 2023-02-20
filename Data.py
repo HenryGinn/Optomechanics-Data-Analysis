@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 
 class Data():
@@ -60,10 +61,10 @@ class Data():
         peak_index = np.argmax(self.S21)
         candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
-        self.S21_centre_index, heuristic_intercept = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
-        self.S21_centre_frequency = self.frequency[self.S21_centre_index]
-        self.if_review_centre_heuristic()
-        self.if_review_centre_results()
+        heuristic_intercept_x, heuristic_intercept_y = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
+        self.S21_centre_index = round(heuristic_intercept_x)
+        self.set_S21_centre_frequency_fit()
+        self.review_centre()
 
     def get_candidate_and_region_indexes(self, peak_index):
         spacing = 4
@@ -112,7 +113,7 @@ class Data():
         discriminant = a_left*b_right - a_right*b_left
         x = (b_right*c_left - b_left*c_right)/discriminant
         y = (a_left*c_left - a_right*c_right)/(a_left*b_right - a_right*b_left)
-        return round(x), round(y)
+        return x, y
 
     def get_linear_equation_coefficients(self, x_values, y_values):
         x_1, x_2 = x_values
@@ -120,6 +121,26 @@ class Data():
         a, b = y_2 - y_1, x_1 - x_2
         c = a*x_1 + b*y_1
         return a, b, c
+
+    def set_S21_centre_frequency_index(self):
+        self.S21_centre_frequency = self.frequency[self.S21_centre_index]
+
+    def set_S21_centre_frequency_interpolate(self, heuristic_intercept):
+        lower_index = math.floor(heuristic_intercept)
+        upper_index = math.ceil(heuristic_intercept)
+        lower_frequency = self.frequency[lower_index]
+        upper_frequency = self.frequency[upper_index]
+        fractional_part = heuristic_intercept % 1
+        self.S21_centre_frequency = lower_frequency + (upper_frequency - lower_frequency)*fractional_part
+
+    def set_S21_centre_frequency_fit(self):
+        initial_fitting_parameters = self.trial.get_initial_fitting_parameters(self.frequency, self.S21)
+        print(initial_fitting_parameters)
+        
+
+    def review_centre(self):
+        self.if_review_centre_heuristic()
+        self.if_review_centre_results()
 
     def if_review_centre_heuristic(self):
         if self.review_centre_heuristic_plot:

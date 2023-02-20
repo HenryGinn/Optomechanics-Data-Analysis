@@ -83,9 +83,9 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.omega_average(average_size)
 
-    def process_gamma(self):
+    def process_gamma(self, average_size):
         for trial_obj in self.trial_objects:
-            trial_obj.process_gamma()
+            trial_obj.process_gamma(average_size)
             trial_obj.output_gamma()
 
     def save_gamma(self):

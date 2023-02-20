@@ -170,10 +170,10 @@ class DataSet():
             print(f"Finding omega: {power_obj.folder_name}")
             power_obj.process_omega()
         
-    def process_gamma(self):
+    def process_gamma(self, average_size = None):
         for power_obj in self.power_objects:
             print(f"Finding gamma: {power_obj.folder_name}")
-            power_obj.process_gamma()
+            power_obj.process_gamma(average_size)
 
     def save_gamma(self):
         self.create_gamma_folder()

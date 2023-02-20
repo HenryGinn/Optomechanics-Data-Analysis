@@ -16,7 +16,7 @@ class Detuning():
     """
 
     parameter_names = ["F", "Gamma", "Noise", "w"]
-    output_rejected_spectra = True
+    output_rejected_spectra = False
     bad_fit_threshold = 20
     reject_bad_fits = True
     flag_bad_offsets = False
@@ -37,11 +37,14 @@ class Detuning():
         self.spectrum_paths = spectrum_paths
 
     def set_frequency(self):
+        self.set_spectrum_frequency()
+        self.cavity_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
+
+    def set_spectrum_frequency(self):
         with open(self.spectrum_paths[0], "r") as file:
             file.readline()
             self.frequency = np.array([self.get_frequency_from_file_line(line)
                                        for line in file])
-        self.cavity_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
 
     def get_frequency_from_file_line(self, line):
         line_components = line.strip().split("\t")
@@ -70,13 +73,15 @@ class Detuning():
     def process_transmission(self):
         self.transmission = Transmission(self, self.transmission_path)
         self.transmission.process_S21()
+        self.transmission.set_S21_centre_index()
+        self.actual_frequency = self.transmission.S21_centre_frequency
 
     def get_S21_peaks(self):
         self.process_S21()
         self.set_valid_spectrum_indexes()
         self.filter_bad_offsets()
         spectrum_centre_indexes, spectrum_centre_frequencies = self.get_centre_information()
-        return spectrum_centre_indexes, spectrum_centre_frequencies
+        return spectrum_centre_indexes, spectrum_centre_frequencies, self.valid_spectrum_indexes
 
     def process_S21(self):
         for spectrum_obj in self.spectrum_objects:
@@ -110,10 +115,23 @@ class Detuning():
                 self.spectrum_objects[index].S21_has_valid_peak = False
 
     def set_spectrum_properties_from_file(self, variables):
+        if variables != []:
+            self.valid = True
+            self.set_spectrum_properties_from_file_valid(variables)
+        else:
+            self.valid = False
+
+    def set_spectrum_properties_from_file_valid(self, variables):
         centre_indexes, centre_frequencies, indexes = zip(*variables)
         self.spectrum_centre_indexes = np.array(centre_indexes)
         self.spectrum_centre_frequencies = np.array(centre_frequencies)
         self.spectrum_indexes = np.array(indexes).astype("int")
+        self.set_spectrum_object_properties_from_file()
+
+    def set_spectrum_object_properties_from_file(self):
+        for index in self.spectrum_indexes:
+            spectrum_obj = self.spectrum_objects[index]
+            #print(dir(spectrum_obj))
 
     def set_S21_and_frequency_offset(self):
         self.min_centre_index = min(self.spectrum_centre_indexes)
@@ -138,22 +156,9 @@ class Detuning():
     def get_spectrum_centre_frequencies(self):
         spectrum_centre_frequencies = [spectrum_obj.get_S21_centre_frequency()
                                        for index, spectrum_obj in enumerate(self.spectrum_objects)
-                                       if index in self.valid_spectrum_indexes]
+                                       if spectrum_obj.S21_has_valid_peak]
         spectrum_centre_frequencies = np.array(spectrum_centre_frequencies)
         return spectrum_centre_frequencies
-
-    def try_flag_offset(self, range_ratio):
-        if self.flag_bad_offsets:
-            self.flag_offset(range_ratio)
-        else:
-            print(f"Ignored bad offset. Detuning: {self.detuning}, trial: {self.trial.trial_number}")
-
-    def flag_offset(self, range_ratio):
-        print((f"WARNING: aligning the curves involves cutting off an unusual amount of the plots\n"
-               f"Range ratio: {range_ratio}, centre index_extrema: {self.min_centre_index}, {self.max_centre_index}\n"
-               f"Trial: {self.trial.trial_number}, detuning: {self.detuning}\n"))
-        self.spectrum_objects[np.argmin(self.spectrum_centre_indexes)].review_centre_results()
-        self.spectrum_objects[np.argmax(self.spectrum_centre_indexes)].review_centre_results()
 
     def plot_peak_S21_drift(self):
         plt.plot(self.frequency[np.array(self.spectrum_centre_indexes)])
@@ -172,17 +177,17 @@ class Detuning():
     def get_omegas_all(self):
         centre_frequencies = self.spectrum_centre_frequencies
         omegas_all = centre_frequencies - self.cavity_frequency - self.detuning
-        acceptable_indexes = self.get_acceptable_indexes(omegas_all, self.spectrum_indexes)
+        acceptable_indexes = self.get_acceptable_indexes(omegas_all)
+        self.spectrum_indexes = self.spectrum_indexes[acceptable_indexes]
         omegas_all = omegas_all[acceptable_indexes]
-        drifts = self.get_drifts(acceptable_indexes, len(self.spectrum_objects))
+        drifts = self.get_drifts(self.spectrum_indexes, len(self.spectrum_objects))
         return omegas_all, drifts
 
-    def get_acceptable_indexes(self, data, filter_indexes, tolerance = 4):
+    def get_acceptable_indexes(self, data, tolerance = 4):
         if data.size < 3:
             acceptable_indexes = np.arange(len(data))
         else:
             acceptable_indexes = self.get_acceptable_indexes_non_trivial(data, tolerance)
-        acceptable_indexes = filter_indexes[acceptable_indexes]
         return acceptable_indexes
 
     def get_data_filtered(self, data, tolerance = 4):
@@ -198,14 +203,14 @@ class Detuning():
 
     def get_drifts(self, indexes, total):
         spacings = indexes / total
-        current_detuning = self.cavity_frequency
-        next_detuning = self.next_detuning.cavity_frequency
+        current_detuning = self.actual_frequency
+        next_detuning = self.next_detuning.actual_frequency
         difference = next_detuning - current_detuning
         drifts = difference*spacings
         return drifts
 
     def get_omegas_averages(self, average_size):
-        omegas_all, drifts_all = self.get_omegas_all_from_file()
+        drifts_all, omegas_all = self.get_omegas_all_from_file()
         average_size = self.get_average_size(average_size, len(omegas_all))
         omegas_averages = self.average_list(omegas_all, average_size)
         drifts_averages = self.average_list(drifts_all, average_size)
@@ -234,11 +239,12 @@ class Detuning():
 
     def average_list(self, list_full, average_size):
         group_indexes = self.get_group_indexes(len(list_full), average_size)
-        list_averages = [np.mean(list_full[indexes])
+        list_averages = [np.mean(list_full[indexes], axis = 0)
                          for indexes in group_indexes]
         return list_averages
-
+    
     def get_group_indexes(self, length, group_size):
+        group_size = self.get_modified_group_size(length, group_size)
         group_count = math.floor(length/group_size)
         real_group_size = length/group_count
         end_point_indexes = np.ceil(np.arange(0, group_count + 1) * real_group_size)
@@ -246,20 +252,36 @@ class Detuning():
                                    end_point_indexes[group_number + 1]).astype('int')
                          for group_number in range(group_count)]
         return group_indexes
+
+    def get_modified_group_size(self, list_size, average_size):
+        if list_size < average_size:
+            average_size = list_size
+        return average_size
     
-    def set_gamma(self):
-        self.initial_fitting_parameters = self.get_initial_fitting_parameters()
+    def set_gamma_averages(self, average_size):
+        average_size = self.get_average_size(average_size, len(self.spectrum_objects))
+        S21_averages = self.get_S21_averages(average_size)
+        print(S21_averages)
+        self.initial_fitting_parameters = self.get_initial_fitting_parameters(self.frequency, self.S21)
         self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = self.get_gamma_from_fit()
 
-    def get_initial_fitting_parameters(self):
-        end = int(len(self.S21)/5)
-        noise, w = np.mean(self.S21[:end])/20, 2
-        K = np.mean(self.S21[self.S21 >= np.max(self.S21)*2/3])
+    def get_S21_averages(self, average_size):
+        for index in self.spectrum_indexes:
+            spectrum_obj = self.spectrum_objects[index]
+            spectrum_obj.set_S21()
+            print(spectrum_obj.S21)
+        input()
+        return S21_averages
+
+    def get_initial_fitting_parameters(self, data_x, data_y):
+        end = int(len(data_y)/5)
+        noise, w = np.mean(data_y[:end])/20, 2
+        K = np.mean(data_y[data_y >= np.max(data_y)*2/3])
         k = K * 1/3
-        frequency_resolution = self.frequency[1] - self.frequency[0]
-        peak_points = [self.S21 > k]
-        width = 2 * (np.count_nonzero(peak_points) + 1)/frequency_resolution
+        x_axis_resolution = data_x[1] - data_x[0]
+        peak_points = [data_y > k]
+        width = 2 * (np.count_nonzero(peak_points) + 1)/x_axis_resolution
         gamma = width * math.sqrt(k/(K-k))
         F = gamma**2 * K * 1/2
         initial_fitting_parameters = [F, gamma, noise, w]
@@ -349,7 +371,7 @@ class Detuning():
         return True, None
 
     def reset_fitting_parameters(self):
-        self.fitting_parameters = self.get_initial_fitting_parameters()
+        self.fitting_parameters = self.get_initial_fitting_parameters(self.frequency, self.S21)
         continue_looping = True
         fit_rejected = None
         return continue_looping, fit_rejected
