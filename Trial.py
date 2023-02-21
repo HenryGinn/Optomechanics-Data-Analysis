@@ -204,10 +204,7 @@ class Trial():
     def extract_S21_from_file(self):
         S21_file_contents = self.get_file_contents(self.S21_file_path)
         for detuning_obj in self.detuning_objects:
-            properties = [(centre_indexes, centre_frequencies, indexes) for
-                          detuning, centre_indexes, centre_frequencies, indexes in S21_file_contents
-                          if detuning == detuning_obj.detuning]
-            detuning_obj.set_spectrum_properties_from_file(properties)
+            detuning_obj.extract_S21_from_file_detuning(S21_file_contents)
 
     def process_transmission(self):
         for detuning_obj in self.detuning_objects:

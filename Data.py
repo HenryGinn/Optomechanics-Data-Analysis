@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 import scipy as sc
 import math
@@ -17,7 +18,7 @@ class Data():
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
     suppress_centre_computation_warnings = True
-    reject_bad_fits = False
+    reject_bad_fits = True
     
     def __init__(self, detuning_obj):
         self.detuning_obj = detuning_obj
@@ -226,11 +227,6 @@ class Data():
             return self.S21_centre_frequency
         else:
             return None
-
-    def set_S21_offset(self):
-        left_index = self.S21_centre_index - self.detuning_obj.min_centre_index
-        right_index = len(self.S21) - (self.detuning_obj.max_centre_index - self.S21_centre_index)
-        self.S21_offset = self.S21[left_index:right_index]
 
     def set_fitting_choice_functions(self):
         self.fitting_choice_functions = {"1": (self.update_fitting_parameter, 0),

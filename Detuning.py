@@ -81,11 +81,10 @@ class Detuning():
 
     def filter_bad_offsets(self):
         spectrum_centres = self.get_spectrum_centre_indexes()
-        acceptable_indexes = self.get_acceptable_indexes(spectrum_centres,
-                                                         self.valid_spectrum_indexes, 5)
+        acceptable_indexes = self.get_acceptable_indexes(spectrum_centres, 5)
         self.output_rejected_spectrum_data(acceptable_indexes)
-        self.update_valid_peaks(acceptable_indexes)
-        self.valid_spectrum_indexes = acceptable_indexes
+        self.valid_spectrum_indexes = self.valid_spectrum_indexes[acceptable_indexes]
+        self.update_valid_peaks(self.valid_spectrum_indexes)
 
     def output_rejected_spectrum_data(self, acceptable_indexes):
         if self.output_rejected_spectra:
@@ -100,32 +99,52 @@ class Detuning():
             if index not in acceptable_indexes:
                 self.spectrum_objects[index].S21_has_valid_peak = False
 
-    def set_spectrum_properties_from_file(self, variables):
+    def extract_S21_from_file_detuning(self, S21_file_contents):
+        properties = [(centre_indexes, centre_frequencies, indexes) for
+                      detuning, centre_indexes, centre_frequencies, indexes in S21_file_contents
+                      if detuning == self.detuning]
+        self.set_spectra_properties_from_file(properties)
+
+    def set_spectra_properties_from_file(self, variables):
         if variables != []:
             self.valid = True
-            self.set_spectrum_properties_from_file_valid(variables)
+            self.set_spectra_properties_from_file_valid(variables)
         else:
             self.valid = False
 
-    def set_spectrum_properties_from_file_valid(self, variables):
+    def set_spectra_properties_from_file_valid(self, variables):
         centre_indexes, centre_frequencies, indexes = zip(*variables)
         self.spectrum_centre_indexes = np.array(centre_indexes)
         self.spectrum_centre_frequencies = np.array(centre_frequencies)
         self.spectrum_indexes = np.array(indexes).astype("int")
-        self.set_spectrum_object_properties_from_file()
+        self.set_spectrum_objects_valid()
 
-    def set_spectrum_object_properties_from_file(self):
-        for index in self.spectrum_indexes:
-            spectrum_obj = self.spectrum_objects[index]
-            #print(dir(spectrum_obj))
+    def set_spectrum_objects_valid(self):
+        self.spectrum_objects_valid = [spectrum_obj
+                                       for index, spectrum_obj in enumerate(self.spectrum_objects)
+                                       if index in self.spectrum_indexes]
+        self.update_spectrum_valid_peaks()
+        self.set_spectrum_objects_centre_data()
+        self.set_spectrum_objects_S21()
 
-    def set_S21_and_frequency_offset(self):
-        self.min_centre_index = min(self.spectrum_centre_indexes)
-        self.max_centre_index = max(self.spectrum_centre_indexes)
-        self.is_offset_reasonable()
+    def update_spectrum_valid_peaks(self):
         for spectrum_obj in self.spectrum_objects:
-            spectrum_obj.set_S21_offset()
-        self.set_frequency_offset()
+            if spectrum_obj in self.spectrum_objects_valid:
+                spectrum_obj.S21_has_valid_peak = True
+            else:
+                spectrum_obj.S21_has_valid_peak = False
+
+    def set_spectrum_objects_centre_data(self):
+        spectrum_centre_zip = zip(self.spectrum_objects_valid,
+                                  self.spectrum_centre_indexes,
+                                  self.spectrum_centre_frequencies)
+        for spectrum_obj, centre_index, centre_frequency in spectrum_centre_zip:
+            spectrum_obj.S21_centre_index = int(centre_index)
+            spectrum_obj.S21_centre_frequency = centre_frequency
+
+    def set_spectrum_objects_S21(self):
+        for spectrum_obj in self.spectrum_objects_valid:
+            spectrum_obj.set_S21()
 
     def get_centre_information(self):
         spectrum_centre_indexes = self.get_spectrum_centre_indexes()
@@ -153,12 +172,6 @@ class Detuning():
         plt.title((f"Frequency of Peak S21 vs Spectrum\n"
                    f"Number at {self.trial.power_obj.power_string} dBm"))
         plt.show()
-
-    def set_frequency_offset(self):
-        cutoff_size = self.max_centre_index - self.min_centre_index
-        frequency_offset_length = len(self.frequency) - cutoff_size
-        self.frequency_offset = np.copy(self.frequency[:frequency_offset_length])
-        self.frequency_offset -= self.frequency_offset[self.min_centre_index]
 
     def get_omegas_all(self):
         centre_frequencies = self.spectrum_centre_frequencies
@@ -230,35 +243,45 @@ class Detuning():
         return list_averages
     
     def get_group_indexes(self, length, group_size):
-        group_size = self.get_modified_group_size(length, group_size)
-        group_count = math.floor(length/group_size)
-        real_group_size = length/group_count
-        end_point_indexes = np.ceil(np.arange(0, group_count + 1) * real_group_size)
+        group_size, group_count = self.get_group_data(length, group_size)
+        end_point_indexes = self.get_end_point_indexes(length, group_size, group_count)
         group_indexes = [np.arange(end_point_indexes[group_number],
                                    end_point_indexes[group_number + 1]).astype('int')
                          for group_number in range(group_count)]
         return group_indexes
 
+    def get_group_data(self, length, group_size):
+        group_size = self.get_modified_group_size(length, group_size)
+        group_count = math.floor(length/group_size)
+        return group_size, group_count
+
     def get_modified_group_size(self, list_size, average_size):
         if list_size < average_size:
             average_size = list_size
         return average_size
+
+    def get_end_point_indexes(self, length, group_size, group_count):
+        real_group_size = length/group_count
+        real_group_end_points = np.round(np.arange(0, group_count + 1) * real_group_size, 5)
+        end_point_indexes = np.ceil(real_group_end_points)
+        return end_point_indexes
     
     def set_gamma_averages(self, average_size):
-        average_size = self.get_average_size(average_size, len(self.spectrum_objects))
-        S21_averages = self.get_S21_averages(average_size)
-        print(S21_averages)
-        self.initial_fitting_parameters = self.get_initial_fitting_parameters(self.frequency, self.S21)
-        self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
-        self.gamma = self.get_gamma_from_fit()
+        self.set_S21_average_objects(average_size)
+        for S21_average_obj in self.S21_average_objects:
+            S21_average_obj.set_gamma()
 
-    def get_S21_averages(self, average_size):
-        for index in self.spectrum_indexes:
-            spectrum_obj = self.spectrum_objects[index]
-            spectrum_obj.set_S21()
-            print(spectrum_obj.S21)
-        input()
-        return S21_averages
+    def set_S21_average_objects(self, average_size):
+        average_size = self.get_average_size(average_size, len(self.spectrum_objects_valid))
+        group_indexes_all = self.get_group_indexes(len(self.spectrum_indexes), average_size)
+        self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
+                                    for group_indexes in group_indexes_all]
+
+    def get_S21_average_obj(self, group_indexes):
+        spectrum_indexes = self.spectrum_indexes[group_indexes]
+        S21_group = [self.spectrum_objects_valid[index] for index in group_indexes]
+        S21_average_obj = Average(self, S21_group, spectrum_indexes)
+        return S21_average_obj
 
     def add_plot_labels(self):
         plt.title("My Title")

@@ -127,21 +127,25 @@ class DataSet():
         self.results_path = os.path.join(self.parent_path, "Results")
         if os.path.isdir(self.results_path) == False:
             os.mkdir(self.results_path)
+            print(f"Creating results folder at {self.results_path}")
 
     def create_S21_folder(self):
         self.S21_path = os.path.join(self.data_set_results_path, "S21 Peaks")
         if os.path.isdir(self.S21_path) == False:
             os.mkdir(self.S21_path)
+            print(f"Creating S21 folder at {self.S21_path}")
 
     def create_omega_folder(self):
         self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
         if os.path.isdir(self.omega_path) == False:
+            print(f"Creating omega folder at {self.omega_path}")
             os.mkdir(self.omega_path)
 
     def create_gamma_folder(self):
         self.gamma_path = os.path.join(self.data_set_results_path, "Gamma Results")
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
+            print(f"Creating gamma folder at {self.gamma_path}")
 
     def average_omega(self, average_size = None):
         if self.omega_folder_exists():
