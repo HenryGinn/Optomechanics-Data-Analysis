@@ -286,17 +286,12 @@ class Trial():
             gamma_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{average_size}.txt"
         return gamma_file_name
 
-    def output_gamma(self):
-            print(self)
-            for detuning_obj in self.detuning_objects:
-                print(f"Detuning: {detuning_obj.detuning}, Gamma: {detuning_obj.gamma}")
-            print("")
-
-    def save_gamma(self):
-        gamma_file_path = self.get_gamma_file_path()
+    def save_gamma(self, average_size):
+        gamma_file_path = self.get_gamma_file_path(average_size)
         with open(gamma_file_path, "w") as file:
+            file.writelines(f"Detuning\tDrift\tGamma\n")
             for detuning_obj in self.detuning_objects:
-                file.writelines(f"{detuning_obj.detuning}\t{detuning_obj.gamma}\n")
+                file = detuning_obj.save_gamma(file)
 
     def create_trial_plots(self, plot_name):
         {"Detuning vs time": self.plot_detuning_vs_time,

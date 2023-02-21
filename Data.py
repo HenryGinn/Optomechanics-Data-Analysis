@@ -18,7 +18,9 @@ class Data():
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
     suppress_centre_computation_warnings = True
-    reject_bad_fits = True
+    reject_bad_fits = False
+    bad_fit_threshold = 2000
+    parameter_names = ["F", "Gamma", "Noise", "w"]
     
     def __init__(self, detuning_obj):
         self.detuning_obj = detuning_obj
@@ -241,15 +243,15 @@ class Data():
 
     def get_initial_fitting_parameters(self):
         end = int(len(self.S21)/5)
-        noise = np.mean(self.S21[:end])/20
-        w = self.frequency[self.S21_centre_index]
+        noise = np.mean(self.S21[:end])
+        w = self.frequency[np.argmax(self.S21)]
         K = np.mean(self.S21[self.S21 >= np.max(self.S21)*2/3])
-        k = K * 1/3
+        k = K * 1/2
         frequency_resolution = self.frequency[1] - self.frequency[0]
         peak_points = [self.S21 > k]
         width = 2 * (np.count_nonzero(peak_points) + 1)*frequency_resolution
         gamma = width * math.sqrt(k/(K-k))
-        F = gamma**2 * K * 1/2
+        F = gamma**2 * K * 2/3
         initial_fitting_parameters = [F, gamma, noise, w]
         return initial_fitting_parameters
 
@@ -272,7 +274,7 @@ class Data():
             fit_rejected = self.fit_plot_manually_filter()
             if fit_rejected:
                 return None
-        gamma = self.fitting_parameters[1]
+        gamma = abs(self.fitting_parameters[1])
         return gamma
 
     def is_plot_badly_fitted(self):
@@ -284,10 +286,8 @@ class Data():
         return False
 
     def get_fit_heuristic(self):
-        fit_ratio = self.fitting_parameters[:2]/np.array(self.initial_fitting_parameters[:2])
-        fit_heuristic_multiplicative = sum(fit_ratio + 1/fit_ratio)
-        fit_heuristic_additive = abs(self.fitting_parameters[3] - self.initial_fitting_parameters[3])
-        fit_heuristic = fit_heuristic_multiplicative + fit_heuristic_additive
+        fit_ratio = abs(self.fitting_parameters[:1]/np.array(self.initial_fitting_parameters[:1]))
+        fit_heuristic = sum(fit_ratio + 1/fit_ratio)
         return fit_heuristic
 
     def fit_plot_manually_filter(self):

@@ -54,7 +54,7 @@ class Average(Data):
 
     def set_average_S21(self):
         self.offset_data()
-        group_S21_offsets = [data_obj.S21 for data_obj in self.data_objects]
+        group_S21_offsets = [data_obj.S21_offset for data_obj in self.data_objects]
         self.S21 = np.mean(group_S21_offsets, axis = 0)
 
     def offset_data(self):
@@ -80,7 +80,7 @@ class Average(Data):
         self.frequency -= self.frequency[self.min_centre_index]
     
     def set_gamma(self):
-        self.initial_fitting_parameters = self.get_initial_fitting_parameters(self.frequency, self.S21)
+        self.initial_fitting_parameters = self.get_initial_fitting_parameters()
         self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = self.get_gamma_from_fit()
 

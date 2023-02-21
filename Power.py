@@ -86,11 +86,7 @@ class Power():
     def process_gamma(self, average_size):
         for trial_obj in self.trial_objects:
             trial_obj.process_gamma(average_size)
-            trial_obj.output_gamma()
-
-    def save_gamma(self):
-        for trial_obj in self.trial_objects:
-            trial_obj.save_gamma()
+            trial_obj.save_gamma(average_size)
 
     def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:

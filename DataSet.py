@@ -179,11 +179,6 @@ class DataSet():
             print(f"Finding gamma: {power_obj.folder_name}")
             power_obj.process_gamma(average_size)
 
-    def save_gamma(self):
-        self.create_gamma_folder()
-        for power_obj in self.power_objects:
-            power_obj.save_gamma()
-
     def create_data_set_results_folder(self):
         self.create_results_folder()
         self.data_set_results_path = os.path.join(self.results_path, self.folder_name)

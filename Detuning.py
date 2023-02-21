@@ -14,9 +14,7 @@ class Detuning():
     Processing of spectra happens here.
     """
 
-    parameter_names = ["F", "Gamma", "Noise", "w"]
     output_rejected_spectra = False
-    bad_fit_threshold = 20
     flag_bad_offsets = False
     
     def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
@@ -201,6 +199,13 @@ class Detuning():
         return accepted_indexes
 
     def get_drifts(self, indexes, total):
+        if hasattr(self, 'actual_frequency'):
+            return self.do_get_drifts(indexes, total)
+        else:
+            raise Exception(("Interpolation requires information about the transmission\n"
+                             "Run the process_transmission method first"))
+
+    def do_get_drifts(self, indexes, total):
         spacings = indexes / total
         current_detuning = self.actual_frequency
         next_detuning = self.next_detuning.actual_frequency
@@ -262,7 +267,8 @@ class Detuning():
 
     def get_end_point_indexes(self, length, group_size, group_count):
         real_group_size = length/group_count
-        real_group_end_points = np.round(np.arange(0, group_count + 1) * real_group_size, 5)
+        real_group_end_points = np.arange(0, group_count + 1) * real_group_size
+        real_group_end_points = np.round(real_group_end_points, 5)
         end_point_indexes = np.ceil(real_group_end_points)
         return end_point_indexes
     
@@ -270,6 +276,7 @@ class Detuning():
         self.set_S21_average_objects(average_size)
         for S21_average_obj in self.S21_average_objects:
             S21_average_obj.set_gamma()
+            self.set_drifts_average(S21_average_obj)
 
     def set_S21_average_objects(self, average_size):
         average_size = self.get_average_size(average_size, len(self.spectrum_objects_valid))
@@ -282,6 +289,19 @@ class Detuning():
         S21_group = [self.spectrum_objects_valid[index] for index in group_indexes]
         S21_average_obj = Average(self, S21_group, spectrum_indexes)
         return S21_average_obj
+
+    def set_drifts_average(self, average_obj):
+        indexes = average_obj.group_indexes
+        spectra_count = len(self.spectrum_objects)
+        drifts = self.get_drifts(indexes, spectra_count)
+        average_obj.drift = np.mean(drifts)
+
+    def save_gamma(self, file):
+        for S21_average_obj in self.S21_average_objects:
+            drift = S21_average_obj.drift
+            gamma = S21_average_obj.gamma
+            file.writelines(f"{self.detuning}\t{drift}\t{gamma}\n")
+        return file
 
     def add_plot_labels(self):
         plt.title("My Title")
