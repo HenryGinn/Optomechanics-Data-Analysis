@@ -47,7 +47,7 @@ class Detuning():
             frequency = float(line_components[1])
             return frequency
         except:
-            raise Exception((f"Could not read frequency from file line '{line}'"
+            self.detuning. Exception((f"Could not read frequency from file line '{line}'"
                              f"while attempting to process detuning:\n{self}"))
 
     def create_spectrum_objects(self):
@@ -171,70 +171,30 @@ class Detuning():
                    f"Number at {self.trial.power_obj.power_string} dBm"))
         plt.show()
 
-    def get_omegas_all(self):
-        centre_frequencies = self.spectrum_centre_frequencies
-        omegas_all = centre_frequencies - self.cavity_frequency - self.detuning
-        acceptable_indexes = self.get_acceptable_indexes(omegas_all)
-        self.spectrum_indexes = self.spectrum_indexes[acceptable_indexes]
-        omegas_all = omegas_all[acceptable_indexes]
-        drifts = self.get_drifts(self.spectrum_indexes, len(self.spectrum_objects))
-        return omegas_all, drifts
+    def set_S21_average_objects(self, average_size):
+        average_size = self.get_average_size(average_size, len(self.spectrum_objects_valid))
+        group_indexes_all = self.get_group_indexes(len(self.spectrum_indexes), average_size)
+        self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
+                                    for group_indexes in group_indexes_all]
 
-    def get_acceptable_indexes(self, data, tolerance = 4):
+    def get_S21_average_obj(self, group_indexes):
+        spectrum_indexes = self.spectrum_indexes[group_indexes]
+        S21_group = [self.spectrum_objects_valid[index] for index in group_indexes]
+        S21_average_obj = Average(self, S21_group, spectrum_indexes)
+        return S21_average_obj
+    
+    def get_acceptable_indexes(self, data, tolerance=4):
         if data.size < 3:
             acceptable_indexes = np.arange(len(data))
         else:
             acceptable_indexes = self.get_acceptable_indexes_non_trivial(data, tolerance)
         return acceptable_indexes
 
-    def get_data_filtered(self, data, tolerance = 4):
-        acceptable_indexes = self.get_acceptable_indexes_non_trivial(data, tolerance)
-        data_filtered = data[accepted_indexes]
-        return data_filtered
-
     def get_acceptable_indexes_non_trivial(self, data, tolerance):
         deviations = np.abs(data - np.median(data))
         modified_deviation = np.average(deviations**(1/4))**4
         accepted_indexes = np.abs(deviations) < tolerance * modified_deviation
         return accepted_indexes
-
-    def get_drifts(self, indexes, total):
-        if hasattr(self, 'actual_frequency'):
-            return self.do_get_drifts(indexes, total)
-        else:
-            raise Exception(("Interpolation requires information about the transmission\n"
-                             "Run the process_transmission method first"))
-
-    def do_get_drifts(self, indexes, total):
-        spacings = indexes / total
-        current_detuning = self.actual_frequency
-        next_detuning = self.next_detuning.actual_frequency
-        difference = next_detuning - current_detuning
-        drifts = difference*spacings
-        return drifts
-
-    def get_omegas_averages(self, average_size):
-        drifts_all, omegas_all = self.get_omegas_all_from_file()
-        average_size = self.get_average_size(average_size, len(omegas_all))
-        omegas_averages = self.average_list(omegas_all, average_size)
-        drifts_averages = self.average_list(drifts_all, average_size)
-        return omegas_averages, drifts_averages
-
-    def get_omegas_all_from_file(self):
-        with open(self.trial.omega_all_file_path, "r") as file:
-            file.readline()
-            file_contents = [[float(value) for value in line.strip().split("\t")]
-                              for line in file]
-            drifts, omegas = self.get_drift_and_omega_from_file(file_contents)
-        return drifts, omegas
-
-    def get_drift_and_omega_from_file(self, file_contents):
-        drifts_and_omegas = [(drift, omega) for detuning, drift, omega in file_contents
-                             if detuning == self.detuning]
-        drifts, omegas = zip(*drifts_and_omegas)
-        drifts = np.array(drifts)
-        omegas = np.array(omegas)
-        return drifts, omegas
 
     def get_average_size(self, average_size, total_count):
         if average_size is None:
@@ -271,30 +231,33 @@ class Detuning():
         real_group_end_points = np.round(real_group_end_points, 5)
         end_point_indexes = np.ceil(real_group_end_points)
         return end_point_indexes
-    
-    def set_gamma_averages(self, average_size):
-        self.set_S21_average_objects(average_size)
-        for S21_average_obj in self.S21_average_objects:
-            S21_average_obj.set_gamma()
-            self.set_drifts_average(S21_average_obj)
 
-    def set_S21_average_objects(self, average_size):
-        average_size = self.get_average_size(average_size, len(self.spectrum_objects_valid))
-        group_indexes_all = self.get_group_indexes(len(self.spectrum_indexes), average_size)
-        self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
-                                    for group_indexes in group_indexes_all]
+    def get_drifts(self, indexes, total):
+        if hasattr(self, 'actual_frequency'):
+            return self.do_get_drifts(indexes, total)
+        else:
+            raise Exception(("Interpolation requires information about the transmission\n"
+                             "Run the process_transmission method first"))
 
-    def get_S21_average_obj(self, group_indexes):
-        spectrum_indexes = self.spectrum_indexes[group_indexes]
-        S21_group = [self.spectrum_objects_valid[index] for index in group_indexes]
-        S21_average_obj = Average(self, S21_group, spectrum_indexes)
-        return S21_average_obj
+    def do_get_drifts(self, indexes, total):
+        spacings = indexes / total
+        current_detuning = self.actual_frequency
+        next_detuning = self.next_detuning.actual_frequency
+        difference = next_detuning - current_detuning
+        drifts = difference*spacings
+        return drifts
 
     def set_drifts_average(self, average_obj):
         indexes = average_obj.group_indexes
         spectra_count = len(self.spectrum_objects)
         drifts = self.get_drifts(indexes, spectra_count)
         average_obj.drift = np.mean(drifts)
+    
+    def set_gamma_averages(self, average_size):
+        self.set_S21_average_objects(average_size)
+        for S21_average_obj in self.S21_average_objects:
+            S21_average_obj.set_gamma()
+            self.set_drifts_average(S21_average_obj)
 
     def save_gamma(self, file):
         for S21_average_obj in self.S21_average_objects:
@@ -303,31 +266,9 @@ class Detuning():
             file.writelines(f"{self.detuning}\t{drift}\t{gamma}\n")
         return file
 
-    def add_plot_labels(self):
-        plt.title("My Title")
-        x_ticks = plt.xticks()[0]
-        max_x_tick = max(abs(x_ticks))
-        prefix_power = math.floor(math.log(max_x_tick, 1000))
-        prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
-        x_labels = [f'{value:.0f}' for value in plt.xticks()[0]/1000**prefix_power]
-        plt.xticks(x_ticks, x_labels)
-        plt.xlabel('${\omega_c}$' + f'({prefix})')
-        plt.ylabel('Amplitude')
-
-    def plot_omegas(self, omegas):
-        plt.plot(omegas)
-        plt.title(f"Omega vs Spectrum Number for {self.trial.power_obj.folder_name}, {self.detuning} Hz")
-        plt.xlabel("Spectrum Number")
-        plt.ylabel("Frequency (Hz)")
-        plt.show()
-
-    def create_detuning_plots(self, plot_name):
-        {"Frequency of peak": self.plot_frequency_of_peak}[plot_name]()
-
     def plot_frequency_of_peak(self):
         peak_frequencies = [spectrum_obj.S21_centre_frequency
                             for spectrum_obj in self.spectrum_objects]
-        print(self.spectrum_objects[0])
         plt.plot(peak_frequencies)
         self.add_frequency_of_peak_labels()
         plt.show()

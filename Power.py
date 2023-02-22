@@ -1,6 +1,7 @@
-from Trial import Trial
-import os
 import numpy as np
+import os
+from Trial import Trial
+from OmegaTrial import OmegaTrial
 
 class Power():
 
@@ -75,13 +76,17 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_S21()
 
+    def create_omega_objects(self):
+        self.omega_objects = [OmegaTrial(trial_obj)
+                              for trial_obj in self.trial_objects]
+
     def process_omega(self):
-        for trial_obj in self.trial_objects:
-            trial_obj.process_omega_all()
+        for omega_obj in self.omega_objects:
+            omega_obj.process_omega_all()
 
     def average_omega(self, average_size):
-        for trial_obj in self.trial_objects:
-            trial_obj.omega_average(average_size)
+        for omega_obj in self.omega_objects:
+            omega_obj.omega_average(average_size)
 
     def process_gamma(self, average_size):
         for trial_obj in self.trial_objects:

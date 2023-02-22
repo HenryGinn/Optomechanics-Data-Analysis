@@ -1,6 +1,6 @@
-from Detuning import Detuning
-import os
 import matplotlib.pyplot as plt
+import os
+from Detuning import Detuning
 
 class Trial():
 
@@ -210,61 +210,6 @@ class Trial():
         for detuning_obj in self.detuning_objects:
             detuning_obj.process_transmission()
 
-    def process_omega_all(self):
-        self.setup_omega_all()
-        with open(self.omega_all_file_path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tOmega\n")
-            file = self.write_omega_to_file(file)
-
-    def setup_omega_all(self):
-        self.set_omega_all_file_path()
-        self.set_S21()
-        self.process_transmission()
-
-    def write_omega_to_file(self, file):
-        for detuning_obj in self.detuning_objects:
-            if detuning_obj.valid:
-                omegas, drifts = detuning_obj.get_omegas_all()
-                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
-        return file
-
-    def set_omega_all_file_path(self):
-        self.omega_all_file_path = self.get_omega_file_path("All")
-
-    def output_omegas(self, omegas, drifts, detuning):
-        print(f"\nMain detuning: {detuning}")
-        for omega, drift in zip(omegas, drifts):
-            print(f"Drift: {drift}, Omega: {omega}")
-        print("")
-
-    def omega_average(self, average_size):
-        self.set_omega_all_file_path()
-        omega_file_path = self.get_omega_file_path(average_size)
-        with open(omega_file_path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tOmega\n")
-            for detuning_obj in self.detuning_objects:
-                omegas, drifts = detuning_obj.get_omegas_averages(average_size)
-                file = self.save_detuning_omega(file, omegas, drifts, detuning_obj.detuning)
-
-    def save_detuning_omega(self, file, omegas, drifts, detuning):
-        for omega, drift in zip(omegas, drifts):
-            file.writelines(f"{detuning}\t{drift}\t{omega}\n")
-        return file
-
-    def get_omega_file_path(self, label):
-        data_set = self.power_obj.data_set.folder_name
-        omega_file_name = self.get_omega_file_name(data_set, label)
-        parent_path = self.power_obj.data_set.omega_path
-        omega_file_path = os.path.join(parent_path, omega_file_name)
-        return omega_file_path
-
-    def get_omega_file_name(self, data_set, label):
-        if label is None:
-            omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}.txt"
-        else:
-            omega_file_name = f"{data_set}_{self.power_obj.folder_name}_{self.trial_number}_{label}.txt"
-        return omega_file_name
-            
     def process_gamma(self, average_size):
         gamma_file_path = self.get_gamma_file_path(average_size)
         self.set_S21()

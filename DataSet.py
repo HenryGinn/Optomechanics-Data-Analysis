@@ -147,6 +147,10 @@ class DataSet():
             os.mkdir(self.gamma_path)
             print(f"Creating gamma folder at {self.gamma_path}")
 
+    def create_omega_objects(self):
+        for power_obj in self.power_objects:
+            power_obj.create_omega_objects()
+
     def average_omega(self, average_size = None):
         if self.omega_folder_exists():
             for power_obj in self.power_objects:

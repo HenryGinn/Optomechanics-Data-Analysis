@@ -1,6 +1,6 @@
-from Data import Data
-import os
 import numpy as np
+import os
+from Data import Data
 
 class Spectrum(Data):
 

@@ -318,7 +318,6 @@ class Data():
 
     def execute_manual_fit_choice(self, fitting_input_choice):
         if fitting_input_choice in self.fitting_choice_functions:
-            a = self.fitting_choice_functions[fitting_input_choice]
             fitting_choice_function, *args = self.fitting_choice_functions[fitting_input_choice]
             continue_looping, fit_rejected = fitting_choice_function(*args)
         else:
