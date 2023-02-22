@@ -1,6 +1,7 @@
 import numpy as np
 import os
 from Data import Data
+from DataFit import DataFit
 
 class Spectrum(Data):
 
@@ -80,9 +81,10 @@ class AverageData(Data):
         self.frequency -= self.frequency[self.min_centre_index]
     
     def set_gamma(self):
-        self.initial_fitting_parameters = self.get_initial_fitting_parameters()
-        self.fitting_parameters = self.get_automatic_fit(self.initial_fitting_parameters)
-        self.gamma = self.get_gamma_from_fit()
+        data_plot_obj = DataFit(self)
+        self.initial_fitting_parameters = data_plot_obj.get_initial_fitting_parameters()
+        self.fitting_parameters = data_plot_obj.get_automatic_fit(self.initial_fitting_parameters)
+        self.gamma = data_plot_obj.get_gamma_from_fit()
 
     def output_group(self):
         print("\nOutputting group data")
