@@ -36,7 +36,7 @@ class Transmission(Data):
             file.readline()
             self.frequency = np.array([self.detuning_obj.get_frequency_from_file_line(line)
                                        for line in file])
-class Average(Data):
+class AverageData(Data):
 
     """
     This class handles the average of data from several files

@@ -422,7 +422,7 @@ class Data():
         prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
         x_labels = [f'{value:.3f}' for value in plt.xticks()[0]/1000**prefix_power]
         plt.xticks(x_ticks, x_labels)
-        plt.xlabel('${\omega_c}$' + f'({prefix})')
+        plt.xlabel(f'Frequency ({prefix})')
         plt.ylabel('Amplitude')
 
     def __str__(self):

@@ -2,6 +2,8 @@ import numpy as np
 import os
 from Trial import Trial
 from OmegaTrial import OmegaTrial
+from GammaTrial import GammaTrial
+from TrialPlot import TrialPlot
 
 class Power():
 
@@ -88,18 +90,24 @@ class Power():
         for omega_obj in self.omega_objects:
             omega_obj.omega_average(average_size)
 
+    def create_gamma_objects(self):
+        self.gamma_objects = [GammaTrial(trial_obj)
+                              for trial_obj in self.trial_objects]
+
     def process_gamma(self, average_size):
-        for trial_obj in self.trial_objects:
-            trial_obj.process_gamma(average_size)
-            trial_obj.save_gamma(average_size)
+        for gamma_obj in self.gamma_objects:
+            gamma_obj.process_gamma(average_size)
+            gamma_obj.save_gamma(average_size)
 
     def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:
-            trial_obj.create_trial_plots(plot_name)
+            trial_plot_obj = TrialPlot(trial_obj)
+            trial_plot_obj.create_trial_plots(plot_name)
 
     def create_detuning_plots(self, plot_name):
         for trial_obj in self.trial_objects:
-            trial_obj.create_detuning_plots(plot_name)
+            trial_plot_obj = TrialPlot(trial_obj)
+            trial_plot_obj.create_detuning_plots(plot_name)
 
     def output_trial_paths(self):
         self.output_trial_transmission_paths()

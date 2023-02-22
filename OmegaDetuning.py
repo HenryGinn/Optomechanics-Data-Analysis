@@ -1,24 +1,26 @@
 import numpy as np
+from AverageDetuning import AverageDetuning
 
 class OmegaDetuning():
 
     def __init__(self, detuning_obj):
         self.detuning = detuning_obj
+        self.average_detuning = AverageDetuning(detuning_obj)
     
     def get_omegas_all(self):
         centre_frequencies = self.detuning.spectrum_centre_frequencies
         omegas_all = centre_frequencies - self.detuning.cavity_frequency - self.detuning.detuning
-        acceptable_indexes = self.detuning.get_acceptable_indexes(omegas_all)
+        acceptable_indexes = self.average_detuning.get_acceptable_indexes(omegas_all)
         self.detuning.spectrum_indexes = self.detuning.spectrum_indexes[acceptable_indexes]
         omegas_all = omegas_all[acceptable_indexes]
-        drifts = self.detuning.get_drifts(self.detuning.spectrum_indexes, len(self.detuning.spectrum_objects))
+        drifts = self.average_detuning.get_drifts(self.detuning.spectrum_indexes, len(self.detuning.spectrum_objects))
         return omegas_all, drifts
 
     def get_omegas_averages(self, average_size):
         drifts_all, omegas_all = self.get_omegas_all_from_file()
-        average_size = self.detuning.get_average_size(average_size, len(omegas_all))
-        omegas_averages = self.detuning.average_list(omegas_all, average_size)
-        drifts_averages = self.detuning.average_list(drifts_all, average_size)
+        average_size = self.average_detuning.get_average_size(average_size, len(omegas_all))
+        omegas_averages = self.average_detuning.average_list(omegas_all, average_size)
+        drifts_averages = self.average_detuning.average_list(drifts_all, average_size)
         return omegas_averages, drifts_averages
 
     def get_omegas_all_from_file(self):

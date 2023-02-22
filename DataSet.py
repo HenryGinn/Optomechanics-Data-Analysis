@@ -151,6 +151,10 @@ class DataSet():
         for power_obj in self.power_objects:
             power_obj.create_omega_objects()
 
+    def create_gamma_objects(self):
+        for power_obj in self.power_objects:
+            power_obj.create_gamma_objects()
+    
     def average_omega(self, average_size = None):
         if self.omega_folder_exists():
             for power_obj in self.power_objects:
