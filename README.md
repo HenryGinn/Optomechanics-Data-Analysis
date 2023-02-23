@@ -124,10 +124,10 @@ Fill in: explanation of how intial fitting parameters are found
 
 ################################## TO DO LIST ##################################
 
-Record all values of omega before averaging. Each row in the file will need to have the value of omega, the drift, and also it's time interpolation value as this will be needed later. The plotting code will need to be changed drastically, it was from the old version and has been crowbarred into the new class based structure so this is not unexpected.
-
-Save the S21 results to files
-
-Process gamma in a similar way to omega
+Add quadratic approximation to find the peak
 
 Make subplots of gamma and omega
+
+Clean code further
+
+Update documentation

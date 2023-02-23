@@ -59,31 +59,32 @@ class Data():
         self.S21_has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
 
     def set_S21_centre_index(self):
-        peak_index = np.argmax(self.S21)
-        candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
+        self.peak_index = np.argmax(self.S21)
+        candidate_indexes, region_points = self.get_candidate_and_region_indexes()
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         heuristic_intercept_x, heuristic_intercept_y = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
         self.S21_centre_index = round(heuristic_intercept_x)
-        self.set_S21_centre_frequency_fit()
+        self.set_S21_centre_frequency_polynomial_fit(degree=2)
+        #self.set_S21_centre_frequency_lorentzian_fit()
         self.review_centre()
 
-    def get_candidate_and_region_indexes(self, peak_index):
+    def get_candidate_and_region_indexes(self):
         spacing = 4
-        left_limit = self.get_left_limit(peak_index)
-        right_limit = self.get_right_limit(peak_index)
+        left_limit = self.get_left_limit()
+        right_limit = self.get_right_limit()
         region_points = np.array(range(left_limit, right_limit))
         candidate_indexes = region_points[[0, spacing, -spacing-1, -1]]
         return candidate_indexes, region_points
 
-    def get_left_limit(self, peak_index):
-        left_limit = peak_index - self.semi_width
+    def get_left_limit(self):
+        left_limit = self.peak_index - self.semi_width
         if left_limit < 0:
             self.warning_computation_of_centre("left")
             left_limit = 0
         return left_limit
 
-    def get_right_limit(self, peak_index):
-        right_limit = peak_index + self.semi_width
+    def get_right_limit(self):
+        right_limit = self.peak_index + self.semi_width
         if right_limit >= len(self.S21):
             self.warning_computation_of_centre("right")
             right_limit = len(self.S21)
@@ -123,22 +124,30 @@ class Data():
         c = a*x_1 + b*y_1
         return a, b, c
 
+    def set_S21_centre_frequency_peak(self):
+        self.S21_centre_frequency = self.frequency[self.peak_index]
+    
     def set_S21_centre_frequency_index(self):
         self.S21_centre_frequency = self.frequency[self.S21_centre_index]
 
-    def set_S21_centre_frequency_interpolate(self, heuristic_intercept):
-        lower_index = math.floor(heuristic_intercept)
-        upper_index = math.ceil(heuristic_intercept)
-        lower_frequency = self.frequency[lower_index]
-        upper_frequency = self.frequency[upper_index]
-        fractional_part = heuristic_intercept % 1
-        self.S21_centre_frequency = lower_frequency + (upper_frequency - lower_frequency)*fractional_part
-
-    def set_S21_centre_frequency_fit(self):
+    def set_S21_centre_frequency_lorentzian_fit(self, width=10):
+        self.remove_S21_discontinuities()
         data_fit_obj = DataFit(self)
+        self.fit_function = data_fit_obj.evaluate_lorentzian
         initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
-        fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
-        self.S21_centre_frequency = fitting_parameters[3]
+        self.fit_width = width
+        self.fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
+        self.S21_centre_frequency = self.fitting_parameters[3]
+
+    def set_S21_centre_frequency_polynomial_fit(self, degree=2, width=10):
+        self.remove_S21_discontinuities()
+        data_fit_obj = DataFit(self)
+        self.fit_function = data_fit_obj.evaluate_polynomial
+        initial_fitting_parameters = np.zeros(degree + 1)
+        self.fit_width = width
+        self.fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
+        points = np.linspace(self.fit_frequencies[0], self.fit_frequencies[-1], 100)
+        self.S21_centre_frequency = points[round(np.argmax(np.polyval(self.fitting_parameters, points)))]
 
     def review_centre(self):
         self.if_review_centre_heuristic()
@@ -149,20 +158,19 @@ class Data():
             self.review_centre_heuristic()
 
     def review_centre_heuristic(self):
-        peak_index = np.argmax(self.S21)
-        candidate_indexes, region_points = self.get_candidate_and_region_indexes(peak_index)
+        candidate_indexes, region_points = self.get_candidate_and_region_indexes()
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         _, heuristic_intercept = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
-        self.output_review_centre_heuristic(peak_index, candidate_indexes, region_points, heuristic_intercept)
+        self.output_review_centre_heuristic(candidate_indexes, region_points, heuristic_intercept)
 
-    def output_review_centre_heuristic(self, peak_index, candidate_indexes, region_points, heuristic_intercept):
-        self.output_centre_data(peak_index, candidate_indexes, region_points)
+    def output_review_centre_heuristic(self, candidate_indexes, region_points, heuristic_intercept):
+        self.output_centre_data(candidate_indexes, region_points)
         self.plot_review_centre_heuristic(region_points, candidate_indexes, heuristic_intercept)
         self.add_review_centre_heuristic_labels()
         plt.show()
 
-    def output_centre_data(self, peak_index, candidate_indexes, region_points):
-        print((f"Peak index: {peak_index}\n"
+    def output_centre_data(self, candidate_indexes, region_points):
+        print((f"Peak index: {self.peak_index}\n"
                f"Frequency min, max, and len: {min(self.frequency)}, {max(self.frequency)}, {len(self.frequency)}\n"
                f"S21 len: {len(self.S21)}\n"
                f"Candidate indices: {candidate_indexes}\n"
@@ -195,14 +203,18 @@ class Data():
             self.review_centre_results()
 
     def review_centre_results(self):
-        peak_index = np.argmax(self.S21)
-        _, region_points = self.get_candidate_and_region_indexes(peak_index)
-        self.output_review_centre_results(peak_index, region_points)
+        _, region_points = self.get_candidate_and_region_indexes()
+        self.add_plot_of_fit()
+        self.output_review_centre_results(region_points)
 
-    def output_review_centre_results(self, peak_index, region_points):
+    def add_plot_of_fit(self):
+        plot_obj = DataFit(self)
+        plot_obj.plot_fitting(fitting=True)
+
+    def output_review_centre_results(self, region_points):
         plt.plot(self.frequency, self.S21)
-        frequency_range = np.linspace(0, self.S21[peak_index], 100)
-        plt.plot(self.frequency[peak_index], self.S21[peak_index], '*k')
+        frequency_range = np.linspace(0, self.S21[self.peak_index], 100)
+        plt.plot(self.frequency[self.peak_index], self.S21[self.peak_index], '*k')
         plt.plot([self.S21_centre_frequency] * 100, frequency_range, 'r')
         self.add_review_centre_results_labels()
         plt.show()
@@ -226,6 +238,10 @@ class Data():
             return self.S21_centre_frequency
         else:
             return None
+
+    def plot_S21(self, fitting=False):
+        plot_obj = DataFit(self)
+        plot_obj.plot_S21(fitting)
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"

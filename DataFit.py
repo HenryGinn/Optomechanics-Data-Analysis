@@ -61,17 +61,36 @@ class DataFit():
         return approximate_peak, mid_line_height
 
     def get_automatic_fit(self, initial_fitting_parameters):
+        self.set_fit_data()
         fitting_parameters = sc.optimize.leastsq(self.get_residuals,
-                                                 initial_fitting_parameters)[0]
+                                                 initial_fitting_parameters,
+                                                 args=self.data.fit_function)[0]
         return fitting_parameters
 
-    def get_residuals(self, fitting_parameters):
-        residuals = self.evaluate_lorentzian(fitting_parameters) - self.data.S21
+    def set_fit_data(self):
+        if hasattr(self.data, 'fit_width'):
+            self.do_set_fit_data()
+        else:
+            self.data.fit_frequencies = self.data.frequency
+            self.data.fit_S21 = self.data.S21
+
+    def do_set_fit_data(self):
+        left = self.data.peak_index - self.data.fit_width
+        right = self.data.peak_index + self.data.fit_width
+        self.data.fit_frequencies = self.data.frequency[left:right]
+        self.data.fit_S21 = self.data.S21[left:right]
+
+    def get_residuals(self, fitting_parameters, fitting_function):
+        residuals = fitting_function(fitting_parameters) - self.data.fit_S21
         return residuals
 
     def evaluate_lorentzian(self, lorentzian_parameters):
         F, gamma, noise, w = lorentzian_parameters
-        function_values = (F/(gamma**2 + 4*(self.data.frequency - w)**2)) + noise
+        function_values = (F/(gamma**2 + 4*(self.data.fit_frequencies - w)**2)) + noise
+        return function_values
+
+    def evaluate_polynomial(self, fitting_parameters):
+        function_values = np.polyval(fitting_parameters, self.data.fit_frequencies)
         return function_values
 
     def get_gamma_from_fit(self):
@@ -215,19 +234,15 @@ class DataFit():
 
     def plot_fitting(self, fitting):
         if fitting is True and self.data.fitting_parameters is not None:
-            plt.plot(self.data.frequency,
-                     self.evaluate_lorentzian(self.data.fitting_parameters),
+            self.set_fit_data()
+            plt.plot(self.data.fit_frequencies,
+                     self.data.fit_function(self.data.fitting_parameters),
                      'k--', alpha=0.5, linewidth=2.0, label='fit')
 
     def add_plot_labels(self):
         self.add_title()
-        x_ticks = plt.xticks()[0]
-        max_x_tick = max(abs(x_ticks))
-        prefix_power = math.floor(math.log(max_x_tick, 1000))
-        prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
-        x_labels = [f'{value:.3f}' for value in plt.xticks()[0]/1000**prefix_power]
-        plt.xticks(x_ticks, x_labels)
-        plt.xlabel(f'Frequency ({prefix})')
+        self.set_x_ticks_and_labels()
+        plt.xlabel(f'Frequency ({self.prefix})')
         plt.ylabel('Amplitude')
 
     def add_title(self):
@@ -235,3 +250,11 @@ class DataFit():
         trial = self.data.detuning_obj.trial.trial_number
         detuning = self.data.detuning
         plt.title(f"S21 vs Frequency for {power} dBm,\nTrial {trial}, Detuning {detuning} Hz")
+
+    def set_x_ticks_and_labels(self):
+        x_ticks = plt.xticks()[0]
+        max_x_tick = max(abs(x_ticks))
+        prefix_power = math.floor(math.log(max_x_tick, 1000))
+        self.prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
+        x_labels = [f'{value:.3f}' for value in plt.xticks()[0]/1000**prefix_power]
+        plt.xticks(x_ticks, x_labels)
