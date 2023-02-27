@@ -1,8 +1,8 @@
+import matplotlib.pyplot as plt
 import os
 import sys
 from Power import Power
 import PutTrialsInFolders
-import PlotGammaAndOmega
 
 class DataSet():
 
@@ -122,6 +122,13 @@ class DataSet():
         self.create_S21_folder()
         self.create_omega_folder()
         self.create_gamma_folder()
+        self.create_omega_and_gamma_folder()
+
+    def create_data_set_results_folder(self):
+        self.create_results_folder()
+        self.data_set_results_path = os.path.join(self.results_path, self.folder_name)
+        if os.path.isdir(self.data_set_results_path) == False:
+            os.mkdir(self.data_set_results_path)
     
     def create_results_folder(self):
         self.results_path = os.path.join(self.parent_path, "Results")
@@ -146,6 +153,12 @@ class DataSet():
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
             print(f"Creating gamma folder at {self.gamma_path}")
+
+    def create_omega_and_gamma_folder(self):
+        self.omega_and_gamma_path = os.path.join(self.data_set_results_path, "Omega and Gamma Plots")
+        if os.path.isdir(self.omega_and_gamma_path) == False:
+            os.mkdir(self.omega_and_gamma_path)
+            print(f"Creating Omega and Gamma folder at {self.omega_and_gamma_path}")
 
     def create_omega_objects(self):
         for power_obj in self.power_objects:
@@ -186,13 +199,7 @@ class DataSet():
         for power_obj in self.power_objects:
             print(f"Finding gamma: {power_obj.folder_name}")
             power_obj.process_gamma(average_size)
-
-    def create_data_set_results_folder(self):
-        self.create_results_folder()
-        self.data_set_results_path = os.path.join(self.results_path, self.folder_name)
-        if os.path.isdir(self.data_set_results_path) == False:
-            os.mkdir(self.data_set_results_path)
-
+    
     def create_trial_plots(self, plot_name):
         for power_obj in self.power_objects:
             power_obj.create_trial_plots(plot_name)
@@ -202,15 +209,19 @@ class DataSet():
             power_obj.create_detuning_plots(plot_name)
 
     def plot_omega(self, format_type="pdf"):
-        PlotGammaAndOmega.generate_plot("Omega",
-                                        self.omega_path,
-                                        format_type)
+        omega_axes = self.plot_obj.generate_plot("Omega",
+                                                 self.omega_path,
+                                                 format_type)
 
     def plot_gamma(self, format_type="pdf"):
-        PlotGammaAndOmega.generate_plot("Gamma",
-                                        self.gamma_path,
-                                        format_type)
+        gamma_axes = self.plot_obj.generate_plot("Gamma",
+                                                 self.gamma_path,
+                                                 format_type)
 
+    def plot_omega_and_gamma(self, format_type="pdf"):
+        for power_obj in self.power_objects:
+            power_obj.plot_omega_and_gamma(format_type)
+    
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 
                   f"Folder structure type: {self.folder_structure_type}\n" +

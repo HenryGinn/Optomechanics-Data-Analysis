@@ -1,10 +1,55 @@
 import matplotlib.pyplot as plt
+import os
+from PlotGammaAndOmega import PlotGreek
 from DetuningPlot import DetuningPlot
 
 class TrialPlot():
 
     def __init__(self, trial_obj):
         self.trial = trial_obj
+
+    def plot_omega_and_gamma(self, format_type):
+        self.greek_fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2)
+        self.plot_omega()
+        self.plot_gamma()
+        self.add_omega_and_gamma_titles()
+        self.save_omega_and_gamma_plot(format_type)
+
+    def plot_omega(self):
+        omega_plot = PlotGreek(self, self.axis_omega)
+        omega_plot.plot_greek(self.trial.data_set.omega_path)
+        omega_plot.add_axis_labels("Omega")
+
+    def plot_gamma(self):
+        gamma_plot = PlotGreek(self, self.axis_gamma)
+        gamma_plot.plot_greek(self.trial.data_set.gamma_path)
+        gamma_plot.add_axis_labels("Gamma")
+
+    def add_omega_and_gamma_titles(self):
+        plot_title = self.get_omega_and_gamma_plot_title()
+        self.greek_fig.suptitle(plot_title)
+        #self.axis_omega.set_title("Omega")
+        #self.axis_gamma.set_title("Gamma")
+
+    def get_omega_and_gamma_plot_title(self):
+        data_set = self.trial.data_set.folder_name
+        power_string = self.trial.power_obj.power_string
+        trial_number = self.trial.trial_number
+        plot_title = f"{data_set}, {power_string} dBm, Trial {trial_number}"
+        return plot_title
+
+    def save_omega_and_gamma_plot(self, format_type):
+        plot_file_name = self.get_omega_and_gamma_file_name()
+        plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
+        plt.tight_layout()
+        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+
+    def get_omega_and_gamma_file_name(self):
+        data_set = self.trial.data_set.folder_name
+        power_string = self.trial.power_obj.power_string
+        trial_number = self.trial.trial_number
+        plot_file_name = f"Omega_and_Gamma_{data_set}_{power_string}_dBm_Trial_{trial_number}"
+        return plot_file_name
 
     def create_trial_plots(self, plot_name):
         {"Detuning vs time": self.plot_detuning_vs_time,

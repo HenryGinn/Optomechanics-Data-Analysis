@@ -124,8 +124,6 @@ Fill in: explanation of how intial fitting parameters are found
 
 ################################## TO DO LIST ##################################
 
-Add quadratic approximation to find the peak
-
 Make subplots of gamma and omega
 
 Clean code further
