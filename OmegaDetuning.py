@@ -21,7 +21,8 @@ class OmegaDetuning():
         average_size = self.average_detuning.get_average_size(average_size, len(omegas_all))
         omegas_averages = self.average_detuning.average_list(omegas_all, average_size)
         drifts_averages = self.average_detuning.average_list(drifts_all, average_size)
-        return omegas_averages, drifts_averages
+        deviations = self.average_detuning.get_standard_deviations(omegas_all, average_size)
+        return omegas_averages, drifts_averages, deviations
 
     def get_omegas_all_from_file(self):
         with open(self.detuning.trial.omega_all_file_path, "r") as file:

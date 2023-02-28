@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from DataTypes import *
+from DataTypes import Spectrum, Transmission
+from AverageDetuning import AverageDetuning
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5

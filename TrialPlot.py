@@ -8,48 +8,83 @@ class TrialPlot():
     def __init__(self, trial_obj):
         self.trial = trial_obj
 
+    def create_omega_plot(self, format_type):
+        self.fig, self.axis_omega = plt.subplots()
+        self.plot_omega()
+        self.omega_plot.add_plot_labels()
+        self.save_omega_plot(format_type)
+
+    def save_omega_plot(self, format_type):
+        plot_file_name = self.get_plot_file_name("Omega")
+        plot_path = os.path.join(self.trial.data_set.omega_path, plot_file_name)
+        self.update_figure_size(8, 4.8)
+        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+
+    def create_gamma_plot(self, format_type):
+        self.fig, self.axis_gamma = plt.subplots()
+        self.plot_gamma()
+        self.gamma_plot.add_plot_labels()
+        self.save_gamma_plot(format_type)
+
+    def save_gamma_plot(self, format_type):
+        plot_file_name = self.get_plot_file_name("Gamma")
+        plot_path = os.path.join(self.trial.data_set.gamma_path, plot_file_name)
+        self.update_figure_size(8, 4.8)
+        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+
     def plot_omega_and_gamma(self, format_type):
-        self.greek_fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2)
+        self.fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2, sharex=True)
         self.plot_omega()
         self.plot_gamma()
-        self.add_omega_and_gamma_titles()
+        self.add_omega_and_gamma_plot_labels()
         self.save_omega_and_gamma_plot(format_type)
 
     def plot_omega(self):
-        omega_plot = PlotGreek(self, self.axis_omega)
-        omega_plot.plot_greek(self.trial.data_set.omega_path)
-        omega_plot.add_axis_labels("Omega")
+        self.omega_plot = PlotGreek(self, self.axis_omega, r"$\Omega_m$",
+                                    offset_by_0_value=True)
+        self.omega_plot.plot_greek(self.trial.data_set.omega_path)
 
     def plot_gamma(self):
-        gamma_plot = PlotGreek(self, self.axis_gamma)
-        gamma_plot.plot_greek(self.trial.data_set.gamma_path)
-        gamma_plot.add_axis_labels("Gamma")
+        self.gamma_plot = PlotGreek(self, self.axis_gamma, r"$\Gamma_m$")
+        self.gamma_plot.plot_greek(self.trial.data_set.gamma_path)
+
+    def add_omega_and_gamma_plot_labels(self):
+        self.add_omega_and_gamma_titles()
+        self.omega_plot.add_y_axis_labels()
+        self.gamma_plot.add_y_axis_labels()
+        self.gamma_plot.add_x_axis_labels()
 
     def add_omega_and_gamma_titles(self):
         plot_title = self.get_omega_and_gamma_plot_title()
-        self.greek_fig.suptitle(plot_title)
-        #self.axis_omega.set_title("Omega")
-        #self.axis_gamma.set_title("Gamma")
+        self.fig.suptitle(plot_title)
 
     def get_omega_and_gamma_plot_title(self):
         data_set = self.trial.data_set.folder_name
         power_string = self.trial.power_obj.power_string
         trial_number = self.trial.trial_number
-        plot_title = f"{data_set}, {power_string} dBm, Trial {trial_number}"
+        plot_title = ("Dynamical Backaction\n"
+                      f"{data_set}, {power_string} dBm, Trial {trial_number}")
         return plot_title
 
     def save_omega_and_gamma_plot(self, format_type):
-        plot_file_name = self.get_omega_and_gamma_file_name()
+        plot_file_name = self.get_plot_file_name("Omega_and_Gamma")
         plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
         plt.tight_layout()
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
 
-    def get_omega_and_gamma_file_name(self):
+    def get_plot_file_name(self, plot_type):
         data_set = self.trial.data_set.folder_name
         power_string = self.trial.power_obj.power_string
         trial_number = self.trial.trial_number
-        plot_file_name = f"Omega_and_Gamma_{data_set}_{power_string}_dBm_Trial_{trial_number}"
+        omega_offset = self.omega_plot.greek_0_value
+        plot_file_name = (f"{plot_type}_{data_set}_{power_string}_dBm_"
+                          f"Trial_{trial_number}_Omega_offset_{omega_offset}")
         return plot_file_name
+
+    def update_figure_size(self, width=8, height=4.8):
+        plt.tight_layout()
+        self.fig.set_size_inches(width, height)
+        plt.gca().set_position([0, 0, 1, 1])
 
     def create_trial_plots(self, plot_name):
         {"Detuning vs time": self.plot_detuning_vs_time,

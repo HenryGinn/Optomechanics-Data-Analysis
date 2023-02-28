@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from DataTypes import AverageData
+from AverageData import AverageData
 
 class AverageDetuning():
 
@@ -88,3 +88,9 @@ class AverageDetuning():
         spectra_count = len(self.detuning.spectrum_objects)
         drifts = self.get_drifts(indexes, spectra_count)
         average_obj.drift = np.mean(drifts)
+
+    def get_standard_deviations(self, list_full, average_size):
+        group_indexes = self.get_group_indexes(len(list_full), average_size)
+        standard_deviations = [np.std(list_full[indexes])
+                                      for indexes in group_indexes]
+        return standard_deviations

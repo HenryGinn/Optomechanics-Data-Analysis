@@ -43,14 +43,14 @@ class OmegaTrial():
         self.set_omega_all_file_path()
         omega_file_path = self.get_omega_file_path(average_size)
         with open(omega_file_path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tOmega\n")
+            file.writelines(f"Detuning\tDrift\tOmega\tStandard Deviation\n")
             for omega_obj in self.omega_objects:
-                omegas, drifts = omega_obj.get_omegas_averages(average_size)
-                file = self.save_detuning_omega(file, omegas, drifts, omega_obj.detuning.detuning)
+                self.omegas, self.drifts, self.deviations = omega_obj.get_omegas_averages(average_size)
+                file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
 
-    def save_detuning_omega(self, file, omegas, drifts, detuning):
-        for omega, drift in zip(omegas, drifts):
-            file.writelines(f"{detuning}\t{drift}\t{omega}\n")
+    def save_detuning_omega(self, file, detuning):
+        for omega, drift, deviation in zip(self.omegas, self.drifts, self.deviations):
+            file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
         return file
 
     def get_omega_file_path(self, label):

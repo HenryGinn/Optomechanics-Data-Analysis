@@ -98,6 +98,16 @@ class Power():
         for gamma_obj in self.gamma_objects:
             gamma_obj.process_gamma(average_size)
             gamma_obj.save_gamma(average_size)
+    
+    def plot_omega(self, format_type):
+        for trial_obj in self.trial_objects:
+            trial_plot_obj = TrialPlot(trial_obj)
+            trial_plot_obj.create_omega_plot(format_type)
+    
+    def plot_gamma(self, format_type):
+        for trial_obj in self.trial_objects:
+            trial_plot_obj = TrialPlot(trial_obj)
+            trial_plot_obj.create_gamma_plot(format_type)
 
     def plot_omega_and_gamma(self, format_type):
         for trial_obj in self.trial_objects:

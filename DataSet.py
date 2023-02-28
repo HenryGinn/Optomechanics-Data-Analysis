@@ -209,15 +209,13 @@ class DataSet():
             power_obj.create_detuning_plots(plot_name)
 
     def plot_omega(self, format_type="pdf"):
-        omega_axes = self.plot_obj.generate_plot("Omega",
-                                                 self.omega_path,
-                                                 format_type)
+        for power_obj in self.power_objects:
+            power_obj.plot_omega(format_type)
 
     def plot_gamma(self, format_type="pdf"):
-        gamma_axes = self.plot_obj.generate_plot("Gamma",
-                                                 self.gamma_path,
-                                                 format_type)
-
+        for power_obj in self.power_objects:
+            power_obj.plot_gamma(format_type)
+    
     def plot_omega_and_gamma(self, format_type="pdf"):
         for power_obj in self.power_objects:
             power_obj.plot_omega_and_gamma(format_type)
