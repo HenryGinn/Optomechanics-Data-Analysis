@@ -19,18 +19,24 @@ class GammaTrial():
             gamma_obj.set_gamma_averages(average_size)
 
     def get_gamma_file_path(self, average_size):
-        data_set = self.trial.power_obj.data_set.folder_name
-        gamma_file_name = self.get_gamma_file_name(data_set, average_size)
+        gamma_file_name = self.get_gamma_file_name(average_size)
         parent_path = self.trial.power_obj.data_set.gamma_path
         gamma_file_path = os.path.join(parent_path, gamma_file_name)
         return gamma_file_path
 
-    def get_gamma_file_name(self, data_set, average_size):
-        if average_size is None:
-            gamma_file_name = f"{data_set}_{self.trial.power_obj.folder_name}_{self.trial.trial_number}.txt"
-        else:
-            gamma_file_name = f"{data_set}_{self.trial.power_obj.folder_name}_{self.trial.trial_number}_{average_size}.txt"
+    def get_gamma_file_name(self, average_size):
+        base_file_name = self.get_gamma_base_file_name()
+        if average_size is not None:
+            gamma_file_name = f"{base_file_name}_{average_size}"
+        gamma_file_name = f"{gamma_file_name}.txt"
         return gamma_file_name
+
+    def get_gamma_base_file_name(self):
+        data_set = self.trial.power_obj.data_set.folder_name
+        power = self.trial.power_obj.folder_name
+        trial = self.trial.trial_number
+        base_file_name = f"{data_set}_Power_{power}_Trial_{trial}"
+        return base_file_name
 
     def save_gamma(self, average_size):
         gamma_file_path = self.get_gamma_file_path(average_size)

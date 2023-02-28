@@ -26,8 +26,8 @@ class OmegaTrial():
     def write_omega_to_file(self, file):
         for omega_obj in self.omega_objects:
             if omega_obj.detuning.valid:
-                omegas, drifts = omega_obj.get_omegas_all()
-                file = self.save_detuning_omega(file, omegas, drifts, omega_obj.detuning.detuning)
+                self.omegas, self.drifts = omega_obj.get_omegas_all()
+                file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
         return file
 
     def set_omega_all_file_path(self):
@@ -49,20 +49,39 @@ class OmegaTrial():
                 file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
 
     def save_detuning_omega(self, file, detuning):
-        for omega, drift, deviation in zip(self.omegas, self.drifts, self.deviations):
-            file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
+        if hasattr(self, "deviations"):
+            self.save_detuning_omega_deviation(file, detuning)
+        else:
+            self.save_detuning_omega_no_deviation(file, detuning)
+        return file
+
+    def save_detuning_omega_deviation(self, file, detuning):
+        if self.omegas is not None:
+            for omega, drift, deviation in zip(self.omegas, self.drifts, self.deviations):
+                file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
+        return file
+
+    def save_detuning_omega_no_deviation(self, file, detuning):
+        for omega, drift in zip(self.omegas, self.drifts):
+            file.writelines(f"{detuning}\t{drift}\t{omega}\n")
         return file
 
     def get_omega_file_path(self, label):
-        data_set = self.trial.power_obj.data_set.folder_name
-        omega_file_name = self.get_omega_file_name(data_set, label)
+        omega_file_name = self.get_omega_file_name(label)
         parent_path = self.trial.power_obj.data_set.omega_path
         omega_file_path = os.path.join(parent_path, omega_file_name)
         return omega_file_path
 
-    def get_omega_file_name(self, data_set, label):
-        if label is None:
-            omega_file_name = f"{data_set}_{self.trial.power_obj.folder_name}_{self.trial.trial_number}.txt"
-        else:
-            omega_file_name = f"{data_set}_{self.trial.power_obj.folder_name}_{self.trial.trial_number}_{label}.txt"
+    def get_omega_file_name(self, label):
+        base_omega_file_name = self.get_base_omega_file_name()
+        if label is not None:
+            omega_file_name = f"{base_omega_file_name}_{label}"
+        omega_file_name = f"{omega_file_name}.txt"
         return omega_file_name
+
+    def get_base_omega_file_name(self):
+        data_set = self.trial.power_obj.data_set.folder_name
+        power = self.trial.power_obj.folder_name
+        trial = self.trial.trial_number
+        base_omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}"
+        return base_omega_file_name

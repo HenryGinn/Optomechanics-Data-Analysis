@@ -17,6 +17,9 @@ class Spectrum(Data):
     def is_spectrum_valid(self):
         return True
 
+    def set_S21_centre_frequency(self):
+        self.set_S21_centre_frequency_index()
+
 class Transmission(Data):
 
     """
@@ -35,6 +38,9 @@ class Transmission(Data):
             file.readline()
             self.frequency = np.array([self.detuning_obj.get_frequency_from_file_line(line)
                                        for line in file])
+
+    def set_S21_centre_frequency(self):
+        self.set_S21_centre_frequency_polynomial_fit(degree=2)
 
     def remove_S21_discontinuities(self):
         neighbour_averages = self.get_neighbour_averages()

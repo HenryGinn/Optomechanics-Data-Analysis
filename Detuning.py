@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import math
 from DataTypes import Spectrum, Transmission
 from AverageDetuning import AverageDetuning
+from Utils import *
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -48,7 +49,7 @@ class Detuning():
             frequency = float(line_components[1])
             return frequency
         except:
-            self.detuning. Exception((f"Could not read frequency from file line '{line}'"
+            raise Exception((f"Could not read frequency from file line '{line}'"
                              f"while attempting to process detuning:\n{self}"))
 
     def create_spectrum_objects(self):
@@ -80,7 +81,7 @@ class Detuning():
 
     def filter_bad_offsets(self):
         spectrum_centres = self.get_spectrum_centre_indexes()
-        acceptable_indexes = self.get_acceptable_indexes(spectrum_centres, 5)
+        acceptable_indexes = get_acceptable_indexes(spectrum_centres, 5)
         self.output_rejected_spectrum_data(acceptable_indexes)
         self.valid_spectrum_indexes = self.valid_spectrum_indexes[acceptable_indexes]
         self.update_valid_peaks(self.valid_spectrum_indexes)

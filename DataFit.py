@@ -75,10 +75,24 @@ class DataFit():
             self.data.fit_S21 = self.data.S21
 
     def do_set_fit_data(self):
-        left = self.data.peak_index - self.data.fit_width
-        right = self.data.peak_index + self.data.fit_width
+        left = self.get_left_index()
+        right = self.get_right_index()
         self.data.fit_frequencies = self.data.frequency[left:right]
         self.data.fit_S21 = self.data.S21[left:right]
+
+    def get_left_index(self):
+        left = self.data.peak_index - self.data.fit_width
+        if left < 0:
+            print(f"Warning: transmission had very off centre peak\n{self.data}")
+            left = 0
+        return left
+
+    def get_right_index(self):
+        right = self.data.peak_index + self.data.fit_width
+        if right >= len(self.data.frequency):
+            print(f"Warning: transmission had very off centre peak\n{self.data}")
+            right = len(self.data.frequency) - 1
+        return right
 
     def get_residuals(self, fitting_parameters, fitting_function):
         residuals = fitting_function(fitting_parameters) - self.data.fit_S21

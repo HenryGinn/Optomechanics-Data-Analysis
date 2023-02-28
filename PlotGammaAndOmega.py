@@ -10,20 +10,21 @@ plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 class PlotGreek():
 
-    def __init__(self, trial_obj, axis, name, offset_by_0_value=False):
+    def __init__(self, trial_obj, axis, file_names, path, name, offset_by_0_value=False):
         self.trial_obj = trial_obj
         self.axis = axis
+        self.file_names = file_names
+        self.path = path
         self.name = name
         self.offset_by_0_value = offset_by_0_value
     
-    def plot_greek(self, file_path):
-        for file_name in sorted(os.listdir(file_path)):
-            if file_name.endswith(".txt") and not file_name.endswith("All.txt"):
-                file_contents = self.get_file_contents(file_path, file_name)
-                self.plot_file_contents(file_contents, file_name)
+    def plot_greek(self):
+        for file_name in self.file_names:
+            file_contents = self.get_file_contents(file_name)
+            self.plot_file_contents(file_contents, file_name)
 
-    def get_file_contents(self, path, file_name):
-        file_path = os.path.join(path, file_name)
+    def get_file_contents(self, file_name):
+        file_path = os.path.join(self.path, file_name)
         with open(file_path, "r") as file:
             file.readline()
             file_contents = file.readlines()
@@ -65,9 +66,17 @@ class PlotGreek():
             self.offset_greek_by_0_value()
 
     def offset_greek_by_0_value(self):
-        detuning_0_index = self.detuning.index(0.0)
+        detuning_0_index = self.get_detuning_0_index()
         self.greek_0_value = self.greek[detuning_0_index]
         self.greek -= self.greek_0_value
+
+    def get_detuning_0_index(self):
+        if 0.0 in self.detuning:
+            detuning_0_index = self.detuning.index(0.0)
+        else:
+            print(f"Warning: trial does not have data for 0 detuning\n{self.trial_obj}")
+            detuning_0_index = 0
+        return detuning_0_index
 
     def get_acceptable_indices(self, data):
         if len(data) > 2:
@@ -89,7 +98,7 @@ class PlotGreek():
     def make_plot_of_greek(self):
         x_values = self.detuning - self.drift
         if hasattr(self, 'deviations') is False:
-            self.axis.plot(x_values, self.greek, fmt='.-', label=self.label)
+            self.axis.plot(x_values, self.greek, '.-', label=self.label)
         else:
             self.axis.errorbar(x_values, self.greek, fmt='.-', yerr=self.deviations, label=self.label)
 

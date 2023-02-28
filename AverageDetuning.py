@@ -1,6 +1,7 @@
 import numpy as np
 import math
 from AverageData import AverageData
+import Utils
 
 class AverageDetuning():
 
@@ -19,19 +20,6 @@ class AverageDetuning():
         S21_average_obj = AverageData(self.detuning, S21_group, spectrum_indexes)
         return S21_average_obj
     
-    def get_acceptable_indexes(self, data, tolerance=4):
-        if data.size < 3:
-            acceptable_indexes = np.arange(len(data))
-        else:
-            acceptable_indexes = self.get_acceptable_indexes_non_trivial(data, tolerance)
-        return acceptable_indexes
-
-    def get_acceptable_indexes_non_trivial(self, data, tolerance):
-        deviations = np.abs(data - np.median(data))
-        modified_deviation = np.average(deviations**(1/4))**4
-        accepted_indexes = np.abs(deviations) < tolerance * modified_deviation
-        return accepted_indexes
-
     def get_average_size(self, average_size, total_count):
         if average_size is None:
             average_size = total_count

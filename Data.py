@@ -64,8 +64,7 @@ class Data():
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         heuristic_intercept_x, heuristic_intercept_y = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
         self.S21_centre_index = round(heuristic_intercept_x)
-        self.set_S21_centre_frequency_polynomial_fit(degree=2)
-        #self.set_S21_centre_frequency_lorentzian_fit()
+        self.set_S21_centre_frequency()
         self.review_centre()
 
     def get_candidate_and_region_indexes(self):

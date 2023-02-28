@@ -47,10 +47,11 @@ class AverageData(Data):
         self.frequency -= self.frequency[self.min_centre_index]
     
     def set_gamma(self):
-        data_plot_obj = DataFit(self)
-        self.initial_fitting_parameters = data_plot_obj.get_initial_fitting_parameters()
-        self.fitting_parameters = data_plot_obj.get_automatic_fit(self.initial_fitting_parameters)
-        self.gamma = data_plot_obj.get_gamma_from_fit()
+        data_fit_obj = DataFit(self)
+        self.fit_function = data_fit_obj.evaluate_lorentzian
+        self.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
+        self.fitting_parameters = data_fit_obj.get_automatic_fit(self.initial_fitting_parameters)
+        self.gamma = data_fit_obj.get_gamma_from_fit()
 
     def output_group(self):
         print("\nOutputting group data")

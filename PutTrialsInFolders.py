@@ -12,7 +12,9 @@ def put_trials_in_folders(folder_name):
 def process_folder(data_set_path, data_type):
     data_type_path = os.path.join(data_set_path, data_type)
     if folder_broken(data_type_path):
-        input("Folder names are broken: press enter to fix them")
+        input(("Folder names are broken: press enter to fix them\n"
+               "The program will complain that a folder does not exist"
+               "This is because it's name has been changed. Rerun program\n"))
         fix_folders(data_type_path)
 
 def folder_broken(data_type_path):

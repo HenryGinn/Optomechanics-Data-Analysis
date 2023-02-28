@@ -144,7 +144,7 @@ class Trial():
                                  if file_name[index - len(number_name):index] == number_name][0] + 1
             return number_left_index
         except:
-            raise Exception(f"Could not find {number_name} in file name:\n{file_name}")
+            raise Exception(f"Could not find '{number_name}' in file name:\n{file_name}")
 
     def get_number_right_index(self, left_index, file_name):
         right_index = left_index
