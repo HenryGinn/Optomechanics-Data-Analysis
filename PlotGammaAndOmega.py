@@ -40,7 +40,7 @@ class PlotGreek():
         if len(file_contents) != 0:
             self.set_detuning_and_greek_from_file(file_contents)
         else:
-            print("Warning: no data could be extracted from file")
+            print("Warning: no data could be extracted from file in PlotGammaAndOmega")
             self.detuning, self.drift, self.greek = None, None, None
 
     def set_detuning_and_greek_from_file(self, file_contents):

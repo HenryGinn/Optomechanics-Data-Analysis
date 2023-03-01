@@ -119,7 +119,14 @@ class DataSet():
     
     def create_results_folders(self):
         self.create_data_set_results_folder()
-        self.create_S21_folder()
+        self.create_S21_folders()
+        self.create_greek_folders()
+
+    def create_S21_folders(self):
+        self.create_spectrum_folder()
+        self.create_transmission_folder()
+
+    def create_greek_folders(self):
         self.create_omega_folder()
         self.create_gamma_folder()
         self.create_omega_and_gamma_folder()
@@ -136,23 +143,29 @@ class DataSet():
             os.mkdir(self.results_path)
             print(f"Creating results folder at {self.results_path}")
 
-    def create_S21_folder(self):
-        self.S21_path = os.path.join(self.data_set_results_path, "S21 Peaks")
-        if os.path.isdir(self.S21_path) == False:
-            os.mkdir(self.S21_path)
-            print(f"Creating S21 folder at {self.S21_path}")
+    def create_spectrum_folder(self):
+        self.spectrum_path = os.path.join(self.data_set_results_path, "Spectrum Peaks")
+        if os.path.isdir(self.spectrum_path) == False:
+            os.mkdir(self.spectrum_path)
+            print(f"Creating spectrum peaks folder at {self.spectrum_path}")
+
+    def create_transmission_folder(self):
+        self.transmission_path = os.path.join(self.data_set_results_path, "Transmission Peaks")
+        if os.path.isdir(self.transmission_path) == False:
+            os.mkdir(self.transmission_path)
+            print(f"Creating transmission peaks folder at {self.transmission_path}")
 
     def create_omega_folder(self):
         self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
         if os.path.isdir(self.omega_path) == False:
-            print(f"Creating omega folder at {self.omega_path}")
+            print(f"Creating Omega folder at {self.omega_path}")
             os.mkdir(self.omega_path)
 
     def create_gamma_folder(self):
         self.gamma_path = os.path.join(self.data_set_results_path, "Gamma Results")
         if os.path.isdir(self.gamma_path) == False:
             os.mkdir(self.gamma_path)
-            print(f"Creating gamma folder at {self.gamma_path}")
+            print(f"Creating Gamma folder at {self.gamma_path}")
 
     def create_omega_and_gamma_folder(self):
         self.omega_and_gamma_path = os.path.join(self.data_set_results_path, "Omega and Gamma Plots")
@@ -185,10 +198,10 @@ class DataSet():
             print(f"Processing transmission: {power_obj.folder_name}")
             power_obj.process_transmission()
 
-    def process_S21(self):
+    def process_spectrum(self):
         for power_obj in self.power_objects:
-            print(f"Processing S21: {power_obj.folder_name}")
-            power_obj.process_S21()
+            print(f"Processing spectrum: {power_obj.folder_name}")
+            power_obj.process_spectrum()
 
     def process_omega(self):
         for power_obj in self.power_objects:

@@ -28,7 +28,7 @@ def update_path(trial_folder_path, trial_folder_name):
     new_trial_folder_path = os.path.join(trial_folder_path, new_trial_folder_name)
     os.rename(original_trial_folder_path, new_trial_folder_path)
 
-input(("Warning: you must have run 'Add underscores to folder names"
+input(("Warning: you must have run 'Add underscores to folder names "
        "for trials in 19112022' before running the program\n"
        "Press enter to continue running the program if you have done this\n"))
 

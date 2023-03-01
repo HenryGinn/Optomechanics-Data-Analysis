@@ -57,7 +57,7 @@ class AverageDetuning():
         return end_point_indexes
 
     def get_drifts(self, indexes, total):
-        if hasattr(self.detuning, 'actual_frequency'):
+        if hasattr(self.detuning.transmission, 'S21_centre_frequency'):
             return self.do_get_drifts(indexes, total)
         else:
             raise Exception(("Interpolation requires information about the transmission\n"
@@ -65,8 +65,8 @@ class AverageDetuning():
 
     def do_get_drifts(self, indexes, total):
         spacings = indexes / total
-        current_detuning = self.detuning.actual_frequency
-        next_detuning = self.detuning.next_detuning.actual_frequency
+        current_detuning = self.detuning.transmission.S21_centre_frequency
+        next_detuning = self.detuning.next_detuning.transmission.S21_centre_frequency
         difference = next_detuning - current_detuning
         drifts = difference*spacings
         return drifts

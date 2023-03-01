@@ -74,9 +74,9 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_transmission()
 
-    def process_S21(self):
+    def process_spectrum(self):
         for trial_obj in self.trial_objects:
-            trial_obj.process_S21()
+            trial_obj.process_spectrum()
 
     def create_omega_objects(self):
         self.omega_objects = [OmegaTrial(trial_obj)

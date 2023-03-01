@@ -20,8 +20,8 @@ class OmegaTrial():
 
     def setup_omega_all(self):
         self.set_omega_all_file_path()
-        self.trial.set_S21()
-        self.trial.process_transmission()
+        self.trial.set_spectrum()
+        self.trial.set_transmission()
 
     def write_omega_to_file(self, file):
         for omega_obj in self.omega_objects:

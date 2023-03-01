@@ -53,6 +53,7 @@ class TrialPlot():
         plot_path = os.path.join(self.trial.data_set.omega_path, plot_file_name)
         self.update_figure_size(8, 4.8)
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+        plt.close()
 
     def create_gamma_plot(self, format_type):
         gamma_file_names = self.get_data_files(self, self.trial.data_set.omega_path)
@@ -75,20 +76,37 @@ class TrialPlot():
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
 
     def plot_omega_and_gamma(self, format_type):
-        if self.omega_and_gamma_files_exist():
+        if self.omega_and_gamma_files_valid():
             self.fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2, sharex=True)
             self.plot_omega()
             self.plot_gamma()
             self.add_omega_and_gamma_plot_labels()
             self.save_omega_and_gamma_plot(format_type)
 
-    def omega_and_gamma_files_exist(self):
+    def omega_and_gamma_files_valid(self):
         self.set_omega_files()
         self.set_gamma_files()
-        if len(self.omega_files) != 0:
-            if len(self.gamma_files) != 0:
+        omega_path = self.trial.data_set.omega_path
+        gamma_path = self.trial.data_set.gamma_path
+        if self.file_list_has_data(omega_path, self.omega_files):
+            return False
+        if self.file_list_has_data(gamma_path, self.gamma_files):
+            return False
+        return True
+
+    def file_list_has_data(self, folder_path, file_list):
+        for file_name in file_list:
+            file_path = os.path.join(folder_path, file_name)
+            if self.file_has_data(file_path):
                 return True
         return False
+
+    def file_has_data(self, file_path):
+        with open(file_path, "r") as file:
+            file.readline()
+            first_data_line = file.readline()
+            is_no_data = (first_data_line == "")
+        return is_no_data
 
     def add_omega_and_gamma_plot_labels(self):
         self.add_omega_and_gamma_titles()

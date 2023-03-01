@@ -175,40 +175,71 @@ class Trial():
                              for line in file]
         return file_contents
 
-    def process_S21(self):
-        self.set_S21_file_path()
-        with open(self.S21_file_path, "w+") as file:
-            file.writelines(f"Detuning\tS21_peak_index\tS21_peak_frequency\tIndex\n")
+    def process_spectrum(self):
+        self.set_spectrum_file_path()
+        with open(self.spectrum_file_path, "w+") as file:
+            file.writelines(f"Detuning\tspectrum_peak_index\tspectrum_peak_frequency\tIndex\n")
             for detuning_obj in self.detuning_objects:
-                file = self.write_S21_peaks_to_file(file, detuning_obj)
+                file = self.write_spectrum_peaks_to_file(file, detuning_obj)
 
-    def set_S21_file_path(self):
-        S21_folder_path = self.data_set.S21_path
+    def set_spectrum_file_path(self):
+        spectrum_folder_path = self.data_set.spectrum_path
         file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
-        self.S21_file_path = os.path.join(S21_folder_path, file_name)
+        self.spectrum_file_path = os.path.join(spectrum_folder_path, file_name)
 
-    def write_S21_peaks_to_file(self, file, detuning_obj):
-        S21_peak_indexes, S21_peak_frequencies, file_indexes = detuning_obj.get_S21_peaks()
-        for (peak_index, frequency, file_index) in zip(S21_peak_indexes, S21_peak_frequencies, file_indexes):
+    def write_spectrum_peaks_to_file(self, file, detuning_obj):
+        spectrum_peak_indexes, spectrum_peak_frequencies, file_indexes = detuning_obj.get_spectrum_peaks()
+        for (peak_index, frequency, file_index) in zip(spectrum_peak_indexes, spectrum_peak_frequencies, file_indexes):
             file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{frequency}\t{file_index}\n")
         return file
 
-    def set_S21(self):
-        self.set_S21_file_path()
-        if os.path.exists(self.S21_file_path) == False:
-            raise Exception((f"S21 data could not be found for {self.trial_number}\n"
-                             f"Run process_S21 method first"))
+    def set_spectrum(self):
+        self.set_spectrum_file_path()
+        if os.path.exists(self.spectrum_file_path) == False:
+            raise Exception((f"Spectrum data could not be found for {self.trial_number}\n"
+                             f"Run process_spectrum method first"))
         else:
-            self.extract_S21_from_file()
+            self.extract_spectrum_from_file()
 
-    def extract_S21_from_file(self):
-        S21_file_contents = self.get_file_contents(self.S21_file_path)
+    def extract_spectrum_from_file(self):
+        spectrum_file_contents = self.get_file_contents(self.spectrum_file_path)
         for detuning_obj in self.detuning_objects:
-            detuning_obj.extract_S21_from_file_detuning(S21_file_contents)
+            detuning_obj.extract_spectrum_from_file_detuning(spectrum_file_contents)
 
     def process_transmission(self):
+        self.set_transmission_file_path()
+        with open(self.transmission_file_path, "w+") as file:
+            file.writelines(f"Detuning\tTransmission peak index\tTransmission peak frequency\n")
+            for detuning_obj in self.detuning_objects:
+                file = self.write_transmission_peaks_to_file(file, detuning_obj)
+
+    def set_transmission_file_path(self):
+        transmission_folder_path = self.data_set.transmission_path
+        file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        self.transmission_file_path = os.path.join(transmission_folder_path, file_name)
+
+    def write_transmission_peaks_to_file(self, file, detuning_obj):
+        peak_index, peak_frequency = detuning_obj.get_transmission_peak()
+        file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{peak_frequency}\n")
+        return file
+
+    def set_transmission(self):
+        self.set_transmission_file_path()
+        if os.path.exists(self.transmission_file_path) == False:
+            raise Exception((f"Transmission data could not be found for {self.trial_number}\n"
+                             f"Run process_transmission method first"))
+        else:
+            self.extract_transmission_from_file()
+
+    def extract_transmission_from_file(self):
+        transmission_file_contents = self.get_file_contents(self.transmission_file_path)
+        detunings, indexes, frequencies = zip(*transmission_file_contents)
         for detuning_obj in self.detuning_objects:
-            detuning_obj.process_transmission()
+            if detuning_obj.detuning in detunings:
+                detuning_index = detunings.index(detuning_obj.detuning)
+                index = indexes[detuning_index]
+                frequency = frequencies[detuning_index]
+                detuning_obj.extract_transmission_from_file_detuning(index, frequency)
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:

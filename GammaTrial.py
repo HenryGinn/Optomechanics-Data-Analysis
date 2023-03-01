@@ -12,11 +12,12 @@ class GammaTrial():
                               for detuning_obj in self.trial.detuning_objects]
 
     def process_gamma(self, average_size):
-        gamma_file_path = self.get_gamma_file_path(average_size)
-        self.trial.set_S21()
+        self.trial.set_spectrum()
+        self.trial.set_transmission()
         for gamma_obj in self.gamma_objects:
-            print(f"Detuning: {gamma_obj.detuning.detuning}")
-            gamma_obj.set_gamma_averages(average_size)
+            if gamma_obj.detuning.valid:
+                print(f"Detuning: {gamma_obj.detuning.detuning}")
+                gamma_obj.set_gamma_averages(average_size)
 
     def get_gamma_file_path(self, average_size):
         gamma_file_name = self.get_gamma_file_name(average_size)
@@ -43,4 +44,5 @@ class GammaTrial():
         with open(gamma_file_path, "w") as file:
             file.writelines(f"Detuning\tDrift\tGamma\n")
             for gamma_obj in self.gamma_objects:
-                file = gamma_obj.save_gamma(file)
+                if gamma_obj.detuning.valid:
+                    file = gamma_obj.save_gamma(file)

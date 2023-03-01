@@ -56,20 +56,29 @@ class Detuning():
         self.spectrum_objects = [Spectrum(self, spectrum_path)
                                  for spectrum_path in self.spectrum_paths]
 
+    def get_transmission_peak(self):
+        self.process_transmission()
+        return (self.transmission.S21_centre_index,
+                self.transmission.S21_centre_frequency)
+
     def process_transmission(self):
         self.transmission = Transmission(self, self.transmission_path)
         self.transmission.process_S21()
         self.transmission.set_S21_centre_index()
-        self.actual_frequency = self.transmission.S21_centre_frequency
 
-    def get_S21_peaks(self):
-        self.process_S21()
+    def extract_transmission_from_file_detuning(self, centre_index, centre_frequency):
+        self.transmission = Transmission(self, self.transmission_path)
+        self.transmission.S21_centre_index = centre_index
+        self.transmission.S21_centre_frequency = centre_frequency
+
+    def get_spectrum_peaks(self):
+        self.process_spectrum()
         self.set_valid_spectrum_indexes()
         self.filter_bad_offsets()
         spectrum_centre_indexes, spectrum_centre_frequencies = self.get_centre_information()
         return spectrum_centre_indexes, spectrum_centre_frequencies, self.valid_spectrum_indexes
 
-    def process_S21(self):
+    def process_spectrum(self):
         for spectrum_obj in self.spectrum_objects:
             spectrum_obj.process_S21()
 
@@ -99,9 +108,9 @@ class Detuning():
             if index not in acceptable_indexes:
                 self.spectrum_objects[index].S21_has_valid_peak = False
 
-    def extract_S21_from_file_detuning(self, S21_file_contents):
+    def extract_spectrum_from_file_detuning(self, spectrum_file_contents):
         properties = [(centre_indexes, centre_frequencies, indexes) for
-                      detuning, centre_indexes, centre_frequencies, indexes in S21_file_contents
+                      detuning, centre_indexes, centre_frequencies, indexes in spectrum_file_contents
                       if detuning == self.detuning]
         self.set_spectra_properties_from_file(properties)
 
