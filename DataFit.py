@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 class DataFit():
 
     reject_bad_fits = False
+    review_bad_fits = True
     bad_fit_threshold = 20
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
@@ -84,6 +85,7 @@ class DataFit():
         left = self.data.peak_index - self.data.fit_width
         if left < 0:
             print(f"Warning: transmission had very off centre peak\n{self.data}")
+            self.review_bad_fit()
             left = 0
         return left
 
@@ -91,8 +93,13 @@ class DataFit():
         right = self.data.peak_index + self.data.fit_width
         if right >= len(self.data.frequency):
             print(f"Warning: transmission had very off centre peak\n{self.data}")
+            self.review_bad_fit()
             right = len(self.data.frequency) - 1
         return right
+
+    def review_bad_fit(self):
+        if self.review_bad_fits:
+            self.plot_S21()
 
     def get_residuals(self, fitting_parameters, fitting_function):
         residuals = fitting_function(fitting_parameters) - self.data.fit_S21

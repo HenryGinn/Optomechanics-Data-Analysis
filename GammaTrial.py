@@ -26,9 +26,9 @@ class GammaTrial():
         return gamma_file_path
 
     def get_gamma_file_name(self, average_size):
-        base_file_name = self.get_gamma_base_file_name()
+        gamma_file_name = self.get_gamma_base_file_name()
         if average_size is not None:
-            gamma_file_name = f"{base_file_name}_{average_size}"
+            gamma_file_name = f"{gamma_file_name}_{average_size}"
         gamma_file_name = f"{gamma_file_name}.txt"
         return gamma_file_name
 

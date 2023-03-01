@@ -49,14 +49,14 @@ class TrialPlot():
         return data_files
 
     def save_omega_plot(self, format_type):
-        plot_file_name = f"{self.get_plot_file_name('Omega')}.{format_type}"
+        plot_file_name = self.get_omega_plot_file_name(format_type)
         plot_path = os.path.join(self.trial.data_set.omega_path, plot_file_name)
         self.update_figure_size(8, 4.8)
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
         plt.close()
 
     def create_gamma_plot(self, format_type):
-        gamma_file_names = self.get_data_files(self, self.trial.data_set.omega_path)
+        gamma_file_names = self.get_data_files(self.trial.data_set.omega_path)
         if gamma_file_names is not []:
             self.fig, self.axis_gamma = plt.subplots()
             self.plot_gamma()
@@ -70,7 +70,7 @@ class TrialPlot():
         self.gamma_plot.plot_greek()
 
     def save_gamma_plot(self, format_type):
-        plot_file_name = f"{self.get_plot_file_name('Gamma')}.{format_type}"
+        plot_file_name = self.get_gamma_plot_file_name(format_type)
         plot_path = os.path.join(self.trial.data_set.gamma_path, plot_file_name)
         self.update_figure_size(8, 4.8)
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
@@ -127,20 +127,18 @@ class TrialPlot():
         return plot_title
 
     def save_omega_and_gamma_plot(self, format_type):
-        plot_file_name = f"{self.get_plot_file_name('Omega_and_Gamma')}.{format_type}"
+        plot_file_name = self.get_omega_and_gamma_plot_file_name(self, format_type)
         plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
         plt.tight_layout()
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
 
-    def get_plot_file_name(self, plot_type):
-        data_set = self.trial.data_set.folder_name
-        power_string = self.trial.power_obj.power_string
-        trial_number = self.trial.trial_number
+    def get_omega_plot_file_name(self, format_type):
+        base_plot_file_name = self.get_base_plot_file_name()
         omega_offset = self.get_omega_offset()
-        plot_file_name = (f"{plot_type}_{data_set}_{power_string}_dBm_"
-                          f"Trial_{trial_number}_Omega_offset_{omega_offset}")
+        plot_file_name = (f"Omega_{base_plot_file_name}_"
+                          f"OmegaOffset_{omega_offset}.{format_type}")
         return plot_file_name
-
+    
     def get_omega_offset(self):
         try:
             omega_offset = self.omega_plot.greek_0_value
@@ -148,6 +146,26 @@ class TrialPlot():
             power, trial = self.trial.power_obj.power_string, self.trial.trial_number
             raise Exception(f"Could not get omega offset for {power}, {trial}")
         return omega_offset
+
+    def get_gamma_plot_file_name(self, format_type):
+        base_plot_file_name = self.get_base_plot_file_name()
+        plot_file_name = (f"Gamma_{base_plot_file_name}.{format_type}")
+        return plot_file_name
+
+    def get_omega_and_gamma_plot_file_name(self, format_type):
+        base_plot_file_name = self.get_base_plot_file_name()
+        omega_offset = self.get_omega_offset()
+        plot_file_name = (f"OmegaAndGamma_{base_plot_file_name}_"
+                          f"OmegaOffset_{omega_offset}.{format_type}")
+        return plot_file_name
+
+    def get_base_plot_file_name(self):
+        data_set = self.trial.data_set.folder_name
+        power_string = self.trial.power_obj.power_string
+        trial_number = self.trial.trial_number
+        plot_file_name = (f"{data_set}_{power_string}_dBm_"
+                          f"Trial_{trial_number}")
+        return plot_file_name
 
     def update_figure_size(self, width=8, height=4.8):
         plt.tight_layout()
