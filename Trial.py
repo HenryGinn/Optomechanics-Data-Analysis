@@ -209,18 +209,19 @@ class Trial():
     def process_transmission(self):
         self.set_transmission_file_path()
         with open(self.transmission_file_path, "w+") as file:
-            file.writelines(f"Detuning\tTransmission peak index\tTransmission peak frequency\n")
+            file.writelines(f"Detuning (Hz)\tTransmission peak index\tTransmission peak frequency (Hz)\tCavity frequency (Hz)\n")
             for detuning_obj in self.detuning_objects:
-                file = self.write_transmission_peaks_to_file(file, detuning_obj)
+                file = self.write_transmission_data_to_file(file, detuning_obj)
 
     def set_transmission_file_path(self):
         transmission_folder_path = self.data_set.transmission_path
         file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
         self.transmission_file_path = os.path.join(transmission_folder_path, file_name)
 
-    def write_transmission_peaks_to_file(self, file, detuning_obj):
+    def write_transmission_data_to_file(self, file, detuning_obj):
         peak_index, peak_frequency = detuning_obj.get_transmission_peak()
-        file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{peak_frequency}\n")
+        cavity_frequency = detuning_obj.cavity_frequency
+        file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{peak_frequency}\t{cavity_frequency}\n")
         return file
 
     def set_transmission(self):
@@ -233,13 +234,31 @@ class Trial():
 
     def extract_transmission_from_file(self):
         transmission_file_contents = self.get_file_contents(self.transmission_file_path)
-        detunings, indexes, frequencies = zip(*transmission_file_contents)
+        detunings, indexes, frequencies, cavity_frequencies = zip(*transmission_file_contents)
         for detuning_obj in self.detuning_objects:
             if detuning_obj.detuning in detunings:
-                detuning_index = detunings.index(detuning_obj.detuning)
-                index = indexes[detuning_index]
-                frequency = frequencies[detuning_index]
-                detuning_obj.extract_transmission_from_file_detuning(index, frequency)
+                self.extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)
+
+    def extract_transmission_from_file_detuning(self, detunings, detuning_obj, transmission_file_contents):
+        detuning_index = detunings.index(detuning_obj.detuning)
+        _, index, frequency, cavity_frequency = transmission_file_contents[detuning_index]
+        detuning_obj.extract_transmission_from_file_detuning(index, frequency, cavity_frequency)
+
+    def get_data_files(self, folder_path):
+        all_file_names = sorted(os.listdir(folder_path))
+        data_files = [file_name
+                      for file_name in all_file_names
+                      if self.is_valid_file_name(file_name)]
+        return data_files
+
+    def is_valid_file_name(self, file_name):
+        if file_name.endswith(".txt") and not file_name.endswith("All.txt"):
+            power = self.get_number_from_file_name(file_name, "Power")
+            trial = self.get_number_from_file_name(file_name, "Trial")
+            if power == float(self.power_obj.power_string):
+                if trial == float(self.trial_number):
+                    return True
+        return False
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:

@@ -83,10 +83,22 @@ class Power():
                               for trial_obj in self.trial_objects]
 
     def process_omega(self):
+        if hasattr(self, "omega_objects"):
+            self.do_process_omega()
+        else:
+            raise Exception("Call create_omega_objects method first")
+
+    def do_process_omega(self):
         for omega_obj in self.omega_objects:
             omega_obj.process_omega_all()
 
     def average_omega(self, average_size):
+        if hasattr(self, "omega_objects"):
+            self.do_average_omega(average_size)
+        else:
+            raise Exception("Call create_omega_objects method first")
+
+    def do_average_omega(self, average_size):
         for omega_obj in self.omega_objects:
             omega_obj.omega_average(average_size)
 
@@ -95,9 +107,25 @@ class Power():
                               for trial_obj in self.trial_objects]
 
     def process_gamma(self, average_size):
+        if hasattr(self, "gamma_objects"):
+            self.do_process_gamma(average_size)
+        else:
+            raise Exception("Call create_gamma_objects method first")
+
+    def do_process_gamma(self, average_size):
         for gamma_obj in self.gamma_objects:
             gamma_obj.process_gamma(average_size)
             gamma_obj.save_gamma(average_size)
+
+    def average_gamma(self):
+        if hasattr(self, "gamma_objects"):
+            self.do_average_gamma()
+        else:
+            raise Exception("Call create_gamma_objects method first")
+
+    def do_average_gamma(self):
+        for gamma_obj in self.gamma_objects:
+            gamma_obj.average_gamma()
     
     def plot_omega(self, format_type):
         for trial_obj in self.trial_objects:

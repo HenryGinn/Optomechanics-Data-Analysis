@@ -150,10 +150,10 @@ class DataSet():
             print(f"Creating spectrum peaks folder at {self.spectrum_path}")
 
     def create_transmission_folder(self):
-        self.transmission_path = os.path.join(self.data_set_results_path, "Transmission Peaks")
+        self.transmission_path = os.path.join(self.data_set_results_path, "Transmission Data")
         if os.path.isdir(self.transmission_path) == False:
             os.mkdir(self.transmission_path)
-            print(f"Creating transmission peaks folder at {self.transmission_path}")
+            print(f"Creating transmission data folder at {self.transmission_path}")
 
     def create_omega_folder(self):
         self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
@@ -180,18 +180,6 @@ class DataSet():
     def create_gamma_objects(self):
         for power_obj in self.power_objects:
             power_obj.create_gamma_objects()
-    
-    def average_omega(self, average_size = None):
-        if self.omega_folder_exists():
-            for power_obj in self.power_objects:
-                power_obj.average_omega(average_size)
-
-    def omega_folder_exists(self):
-        if hasattr(self, "omega_path"):
-            return True
-        else:
-            raise Exception(("Omega folder does not exist\n"
-                             "Run process_omega method first"))
 
     def process_transmission(self):
         for power_obj in self.power_objects:
@@ -207,11 +195,27 @@ class DataSet():
         for power_obj in self.power_objects:
             print(f"Finding omega: {power_obj.folder_name}")
             power_obj.process_omega()
+    
+    def average_omega(self, average_size = None):
+        if self.omega_folder_exists():
+            for power_obj in self.power_objects:
+                power_obj.average_omega(average_size)
+
+    def omega_folder_exists(self):
+        if hasattr(self, "omega_path"):
+            return True
+        else:
+            raise Exception(("Omega folder does not exist\n"
+                             "Run process_omega method first"))
         
     def process_gamma(self, average_size = None):
         for power_obj in self.power_objects:
             print(f"Finding gamma: {power_obj.folder_name}")
             power_obj.process_gamma(average_size)
+
+    def average_gamma(self):
+        for power_obj in self.power_objects:
+            power_obj.average_gamma()
     
     def create_trial_plots(self, plot_name):
         for power_obj in self.power_objects:

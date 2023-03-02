@@ -1,3 +1,4 @@
+from statistics import mean
 from AverageDetuning import AverageDetuning
 
 class GammaDetuning():
@@ -18,3 +19,10 @@ class GammaDetuning():
             gamma = S21_average_obj.gamma
             file.writelines(f"{self.detuning.detuning}\t{drift}\t{gamma}\n")
         return file
+
+    def set_average_gamma(self, file_contents):
+        drifts_and_gammas = [(drift, gamma) for detuning, drift, gamma in file_contents
+                             if detuning == self.detuning.detuning]
+        drifts, gammas = zip(*drifts_and_gammas)
+        self.average_drift = mean(drifts)
+        self.average_gamma = mean(gammas)

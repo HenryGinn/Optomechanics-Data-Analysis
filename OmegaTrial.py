@@ -85,3 +85,8 @@ class OmegaTrial():
         trial = self.trial.trial_number
         base_omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}"
         return base_omega_file_name
+
+    def set_omega_files(self):
+        if hasattr(self, "omega_files") is False:
+            self.omega_path = self.trial.data_set.omega_path
+            self.omega_files = self.trial.get_data_files(self.omega_path)

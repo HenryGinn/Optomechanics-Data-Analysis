@@ -45,8 +45,9 @@ class Transmission(Data):
     def remove_S21_discontinuities(self):
         neighbour_averages = self.get_neighbour_averages()
         tolerance = 0.01
-        S21_is_bad = np.abs(neighbour_averages - self.S21) > tolerance
-        self.S21 = np.where(S21_is_bad, neighbour_averages, self.S21)
+        S21_is_good = np.abs(neighbour_averages - self.S21) < tolerance
+        self.S21 = self.S21[S21_is_good]
+        self.frequency = self.frequency[S21_is_good]
 
     def get_neighbour_averages(self):
         left = self.S21[:-2]

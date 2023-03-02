@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 from PlotGammaAndOmega import PlotGreek
+from GammaTrial import GammaTrial
+from OmegaTrial import OmegaTrial
 from DetuningPlot import DetuningPlot
 
 class TrialPlot():
@@ -8,46 +10,23 @@ class TrialPlot():
     def __init__(self, trial_obj):
         self.trial = trial_obj
 
-    def is_valid_file_name(self, file_name):
-        if file_name.endswith(".txt") and not file_name.endswith("All.txt"):
-            power = self.trial.get_number_from_file_name(file_name, "Power")
-            trial = self.trial.get_number_from_file_name(file_name, "Trial")
-            if power == float(self.trial.power_obj.power_string):
-                if trial == float(self.trial.trial_number):
-                    return True
-        return False
-
     def create_omega_plot(self, format_type):
-        omega_file_names = self.get_data_files(self, self.trial.data_set.omega_path)
-        if omega_file_names is not []:
+        self.omega_obj = OmegaTrial(self.trial)
+        self.omega_obj.set_omega_files()
+        if self.omega_obj.omega_files is not []:
             self.fig, self.axis_omega = plt.subplots()
             self.plot_omega()
             self.omega_plot.add_plot_labels()
             self.save_omega_plot(format_type)
 
     def plot_omega(self):
-        self.set_omega_files()
-        self.omega_plot = PlotGreek(self.trial, self.axis_omega, self.omega_files,
-                                    self.omega_path, r"$\Omega_m$", offset_by_0_value=True)
+        files = self.omega_obj.omega_files
+        path = self.omega_obj.omega_path
+        name = r"$\Omega_m$"
+        self.omega_plot = PlotGreek(self.trial, self.axis_omega, files, path,
+                                    name, offset_by_0_value=True)
         self.omega_plot.plot_greek()
-
-    def set_omega_files(self):
-        if hasattr(self, "omega_files") is False:
-            self.omega_path = self.trial.data_set.omega_path
-            self.omega_files = self.get_data_files(self.omega_path)
-
-    def set_gamma_files(self):
-        if hasattr(self, "gamma_files") is False:
-            self.gamma_path = self.trial.data_set.gamma_path
-            self.gamma_files = self.get_data_files(self.gamma_path)
-
-    def get_data_files(self, folder_path):
-        all_file_names = sorted(os.listdir(folder_path))
-        data_files = [file_name
-                      for file_name in all_file_names
-                      if self.is_valid_file_name(file_name)]
-        return data_files
-
+    
     def save_omega_plot(self, format_type):
         plot_file_name = self.get_omega_plot_file_name(format_type)
         plot_path = os.path.join(self.trial.data_set.omega_path, plot_file_name)
@@ -56,17 +35,19 @@ class TrialPlot():
         plt.close()
 
     def create_gamma_plot(self, format_type):
-        gamma_file_names = self.get_data_files(self.trial.data_set.omega_path)
-        if gamma_file_names is not []:
+        self.gamma_obj = GammaTrial(self.trial)
+        self.gamma_obj.set_gamma_files()
+        if self.gamma_obj.gamma_files is not []:
             self.fig, self.axis_gamma = plt.subplots()
             self.plot_gamma()
             self.gamma_plot.add_plot_labels()
             self.save_gamma_plot(format_type)
 
     def plot_gamma(self):
-        self.set_gamma_files()
-        self.gamma_plot = PlotGreek(self.trial, self.axis_gamma, self.gamma_files,
-                                    self.gamma_path, r"$\Gamma_m$")
+        files = self.gamma_obj.gamma_files
+        path = self.gamma_obj.gamma_path
+        name = r"$\Gamma_m$"
+        self.gamma_plot = PlotGreek(self.trial, self.axis_gamma, files, path ,name)
         self.gamma_plot.plot_greek()
 
     def save_gamma_plot(self, format_type):

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 class DataFit():
 
     reject_bad_fits = False
-    review_bad_fits = True
+    review_bad_fits = False
     bad_fit_threshold = 20
     parameter_names = ["F", "Gamma", "Noise", "w"]
 

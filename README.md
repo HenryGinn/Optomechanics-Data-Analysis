@@ -1,53 +1,68 @@
 # Optomechanics-Data-Analysis
 
-################################### CONTENTS ###################################
+## Contents
 
-1: OVERVIEW
-2: CHECKS TO RUN BEFORE USING
-3: FOLDER STRUCTURE DESCRIPTION
-4: PROCESSING OF SPECTRUM DATA
-5: REVIEW OF ANALYSIS IN SIDE BAND FITTING
-6: COMPUTATION OF CENTRE OF DATA
-7: TREATEMENT OF GAMMA AND OMEGA
-8: TO DO LIST
+---
 
-################################### OVERVIEW ###################################
+1. [Overview](#overview)
+1. [Checks to Run Before Use](#checks-to-run-before-use)
+1. [Folder Structure Description](#folder-structure-description)
+1. [Processing of Spectrum Data](#processing-of-spectrum-data)
+1. [Review of Analysis in Sideband Fitting](#review-of-analysis-in-sideband-fitting)
+1. [Computation of Centre of Data](#computation-of-centre-of-data)
+1. [Treatment of Omega and Gamma](#treatment-of-omega-and-gamma)
+1. [To Do List](#to-do-list)
+
+---
+
+## Overview
 
 There are 3 main sets of programs 1: Side band fitting 2: Plot gamma and omega
 3: File name correctors
 
-Side Band Fitting
+### Side Band Fitting
+
 This has 5 main classes: DataSet, Power, Trial, Detuning, and Data, of which Spectrum and Transmission are subclasses. Side Band Fitting Interface handles these classes. This code centres the plots, extracts gamma from the data and saves it to files, and produces various plots about the data.
 
-Plot Gamma and Omega
+### Plot Gamma and Omega
+
 This reads the data from the files produced by the side band fitting code and produces a plot. Each of the trials from a data set is shown as a different line
 
-File Name Correctors
+### File Name Correctors
+
 These are preprocessing programs that help make the file and folder names consistent and easily processed by other programs. The main issues are with folder_structure_type=3 data sets, and these are fixed automatically by calling the fix_folder_structure method of DataSet.
 
-General Procedure for Processing Data
+### General Procedure for Processing Data
 
 Data is read from the relevant places, and automatic checks are done to see whether each bit of data needs to be reviewed. Flagged data can be automatically rejected or manually reviewed, or all data can be reviewed instead of just the parts the program suggested as problematic. This data is then saved to a file. Where potentially useful, intermediate steps are saved to files to avoid needing to rerun code.
 
-########################## CHECKS TO RUN BEFORE USING ##########################
+---
 
-Data Set Folder Structure:
+## Checks to Run Before Use
+
+### Data Set Folder Structure
+
 Different data sets have different folder structures.
     For data sets in the same format as 15112022, use folder_structure_type=1 For data sets in the same format as 16112022_overnight, use folder_structure_type=2
     For data sets in the same format as 19112022, use folder_structure_type=3
 There are 3 areas in which the folder structure can change, see the doc string in DataSet, Power, and Trial classes for more details.
 
-File Names:
+### File Names
+
 Find out what folder structure your data set has out of the options listed above. In the program you are using, check the notes that are made about that data set. The main causes of error are as follows
     1: Numberings such as 0, 1, ..., 10, 11. When sorting as a string this will get 0, 10, 1, 11, so numbers should be padded with leading 0s: 00, 01, ..., 10, 11.
     2: Missing underscores. Underscores are used to find positions in file names to extract information. Sometimes these are missing and need to be added
     3: Folders containing files of different sizes. If these are part of the same data set, they should have the same size. Incorrect sizes should be deleted from the folder (a copy of the data, not the original).
 
+### Manual Filtering of Structures
+
 It can be useful to only consider a single power, trial, detuning, or spectra. Currently this is done manually by adding [0:1] on the end of the list comprehension where the lists of objects are defined in set_power_objects (in DataSet), set_trial_objects (in Power), set_detuning_objects (in Trial), and set_spectrum_objects (in Detuning). These may have been left in for debugging purposes.
 
-######################### FOLDER STRUCTURE DESCRIPTION #########################
+---
 
-Main Folder Structure
+## Folder Structure Description
+
+### Main Folder Structure
 
 Parent folder: everything is contained inside this one
     Repo: when saving the repository, this is the folder you want to clone to.
@@ -65,7 +80,7 @@ Parent folder: everything is contained inside this one
                 Text files: these contain the results for each trial
                 Gamma Plot: this is a plot of gamma
 
-Data Set Folder Structures
+### Data Set Folder Structures
 
 The program knows about 3 types of folder structure and examples of each are given below. These are referred to as folder_structure_type = 1, 2, and 3. The program does not currently attempt to deduce what the folder structure is so this part has to be done manually.
 
@@ -75,7 +90,9 @@ The program knows about 3 types of folder structure and examples of each are giv
 
 19112022 has two folders inside, "Spectrum" and "Transmission". Inside each of those are folders for the powers, one folder per power. For "Spectrum", inside of each power folder is a list of folders, one for each detuning. Inside each of these for both "Spectrum" and "Transmission" is a list of folders, one for each trial. These are named "{power}_{trial_number}". Inside each of these is the same structure as in 16112022_overnight.
 
-######################### PROCESSING OF SPECTRUM DATA #########################
+---
+
+## Processing of Spectrum Data
 
 There are two things we want from each spectrum: the frequency of the peak and the value of Gamma when we fit it. The main issue we have is when the data is bad. Below we quantify some of the ways in which data can be bad or awkward
 	1: No clear peak is present - the data just looks like noise
@@ -84,7 +101,9 @@ There are two things we want from each spectrum: the frequency of the peak and t
 
 The first thing we want to do with the spectra is filter out the bad files (those affected by issues (1) and (2)). As we need to use the peaks to test whether they are valid, we remove those spectra at the same time as we are finding the peaks. After this stage the results will be saved to text files for each trial where each row contains the detuning, index of the peak, frequency of the peak, and the file number it came from. All these spectra should have well defined peaks in the expected positions and will be ready to be averaged together for fitting. This is implemented in two parts: the value of the noise and the actual peak are found and their ratio is computed. If it is beyond a certain threshold it is rejected - due to the very large number of spectra, this should not be done manually ever. Once a spectrum has been certified as having a high enough peak, the index of the peak is compared to the rest of the spectra that passed, and a modified standard deviation based on the median is used to determine which spectra are outliers.
 
-################### REVIEW OF ANALYSIS IN SIDE BAND FITTING ###################
+## Review of Analysis in Sideband Fitting
+
+---
 
 1: How to review the realignment of the plots so that the peak is at the centre before the average. In the Data class there is a class attribute called "review_centre_results". Change this to true to review how well the computed centre matches with the shape of the plot for all plots. When the data is offsetted and realigned, it is necessary to chop off a bit from each end of the range so that only the overlap region is considered. When this region is smaller than expected, the plot will be reviewed.
 
@@ -92,9 +111,11 @@ The first thing we want to do with the spectra is filter out the bad files (thos
 
 3: How to review the plots after the average has been taken. Awaiting implementation
 
-4: Manual fitting instructions Deciding if a plot needs to be fitted manually: the initial fitting parameters are assumed to be somewhat reasonable, and a fitting heuristic is computed by how different the computed fitting parameters are from the initial. If this is above a certain threshold, it will be flagged and sent to be handled manually. The figure will be plotted with the automatic fit. Close this figure and then a menu will appear asking what changes you want to make to the fitting parameters, or if you want to accept or reject the fit. If the data is wrong, or cannot be fitted sufficiently well, it should be rejected. You need to close the figures manually to move on to the next figure
+4: Manual fitting instructions. Deciding if a plot needs to be fitted manually: the initial fitting parameters are assumed to be somewhat reasonable, and a fitting heuristic is computed by how different the computed fitting parameters are from the initial. If this is above a certain threshold, it will be flagged and sent to be handled manually. The figure will be plotted with the automatic fit. Close this figure and then a menu will appear asking what changes you want to make to the fitting parameters, or if you want to accept or reject the fit. If the data is wrong, or cannot be fitted sufficiently well, it should be rejected. You need to close the figures manually to move on to the next figure
 
-######################## COMPUTATION OF CENTRE OF DATA ########################
+---
+
+## Computation of Centre of Data
 
 We compute the centre of the spectrum so we can shift all spectra within a detuning trial and find the average. We expect this to be around the resonsant frequency, but the value we compute is usually slightly to the left. Note that the purpose of this step is not to find the resonant frequency perfectly, but to assign a number to the centre reliably that leads to all spectra being realigned accurately.
 
@@ -106,7 +127,9 @@ A naive choice of centre would be the minimum value of the heuristic described a
 
 This has a sound mathematical basis as if this process is done with a perfect Lorentzian then you get a curve y = A*x*sin(arctan(x/B)) + C (C has some x dependence but this is negligible and unimportant). If we approximate arctan(x) as pi/2 for x away from 1 (this approximation is pretty good for x > 3) then we see that our curve looks like |x| + c in the region we are interested in.
 
-######################## TREATEMENT OF OMEGA AND GAMMA ########################
+---
+
+## Treatment of Omega and Gamma
 
 Each spectrum has a value of omega and each omega has an associated drift. We can take smaller groups of omega and average them, as this helps us account for the drift. We take the transmission before each spectrum to recalibrate the system to ensure it is being driven at the resonant frequency. When the spectrum data is taken, energy is put into the system which changes the resonant frequency so it needs to be recalibrated. As the spectra are taken, the system is becoming uncalibrated as the resonant frequency drifts. We find this drift by linear interpolation.
 
@@ -122,7 +145,9 @@ Each spectrum is approximately in the shape of a Lorentzian curve. This has the 
 
 Fill in: explanation of how intial fitting parameters are found
 
-################################## TO DO LIST ##################################
+---
+
+## To Do List
 
 Make subplots of gamma and omega
 
