@@ -220,8 +220,9 @@ class Trial():
 
     def write_transmission_data_to_file(self, file, detuning_obj):
         peak_index, peak_frequency = detuning_obj.get_transmission_peak()
-        cavity_frequency = detuning_obj.cavity_frequency
-        file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{peak_frequency}\t{cavity_frequency}\n")
+        if peak_index is not None:
+            cavity_frequency = detuning_obj.cavity_frequency
+            file.writelines(f"{detuning_obj.detuning}\t{peak_index}\t{peak_frequency}\t{cavity_frequency}\n")
         return file
 
     def set_transmission(self):
@@ -240,6 +241,12 @@ class Trial():
                 self.extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)
 
     def extract_transmission_from_file_detuning(self, detunings, detuning_obj, transmission_file_contents):
+        if detuning_obj.detuning in detunings:
+            self.do_extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)
+        else:
+            detuning_obj.valid = False
+
+    def do_extract_transmission_from_file_detuning(self, detunings, detuning_obj, transmission_file_contents):
         detuning_index = detunings.index(detuning_obj.detuning)
         _, index, frequency, cavity_frequency = transmission_file_contents[detuning_index]
         detuning_obj.extract_transmission_from_file_detuning(index, frequency, cavity_frequency)

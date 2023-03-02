@@ -14,8 +14,11 @@ class Spectrum(Data):
         self.file_path = spectrum_path
         self.frequency = self.detuning_obj.frequency
 
-    def is_spectrum_valid(self):
-        return True
+    def set_S21_has_valid_peak(self):
+        peak = np.max(self.S21)
+        noise = np.median(self.S21)
+        peak_ratio = peak / noise
+        self.S21_has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
 
     def set_S21_centre_frequency(self):
         self.set_S21_centre_frequency_index()
@@ -38,6 +41,9 @@ class Transmission(Data):
             file.readline()
             self.frequency = np.array([self.detuning_obj.get_frequency_from_file_line(line)
                                        for line in file])
+
+    def set_S21_has_valid_peak(self):
+        self.S21_has_valid_peak = True
 
     def set_S21_centre_frequency(self):
         self.set_S21_centre_frequency_polynomial_fit(degree=2)

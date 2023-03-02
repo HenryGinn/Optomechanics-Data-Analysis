@@ -52,12 +52,6 @@ class Data():
             raise Exception((f"Could not read voltage from file line '{line}'"
                              f"while attempting to process spectrum:\n{self}"))
 
-    def set_S21_has_valid_peak(self):
-        peak = np.max(self.S21)
-        noise = np.median(self.S21)
-        peak_ratio = peak / noise
-        self.S21_has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
-
     def set_S21_centre_index(self):
         self.peak_index = np.argmax(self.S21)
         candidate_indexes, region_points = self.get_candidate_and_region_indexes()

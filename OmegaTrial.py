@@ -73,9 +73,9 @@ class OmegaTrial():
         return omega_file_path
 
     def get_omega_file_name(self, label):
-        base_omega_file_name = self.get_base_omega_file_name()
+        omega_file_name = self.get_base_omega_file_name()
         if label is not None:
-            omega_file_name = f"{base_omega_file_name}_{label}"
+            omega_file_name = f"{omega_file_name}_{label}"
         omega_file_name = f"{omega_file_name}.txt"
         return omega_file_name
 

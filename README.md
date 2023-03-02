@@ -149,8 +149,6 @@ Fill in: explanation of how intial fitting parameters are found
 
 ## To Do List
 
-Make subplots of gamma and omega
-
-Clean code further
-
-Update documentation
+- Make computation of S21 centre index a method of the data type, not data
+- Clean code
+- Update documentation
