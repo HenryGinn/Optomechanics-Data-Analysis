@@ -22,7 +22,7 @@ class Detuning():
     def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
         self.initialise_attributes(trial, detuning, timestamp,
                                    transmission_path, spectrum_paths)
-        self.valid = False
+        self.valid = True
         self.set_frequency()
         self.create_spectrum_objects()
 
@@ -70,7 +70,6 @@ class Detuning():
         self.transmission.process_S21()
 
     def extract_transmission_from_file_detuning(self, centre_index, centre_frequency, cavity_frequency):
-        self.detuning_obj.valid = True
         self.transmission = Transmission(self, self.transmission_path)
         self.transmission.S21_centre_index = centre_index
         self.transmission.S21_centre_frequency = centre_frequency
@@ -121,7 +120,6 @@ class Detuning():
 
     def set_spectra_properties_from_file(self, variables):
         if variables != []:
-            self.valid = True
             self.set_spectra_properties_from_file_valid(variables)
         else:
             self.valid = False

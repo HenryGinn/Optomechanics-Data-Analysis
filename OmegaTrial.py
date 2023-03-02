@@ -46,9 +46,14 @@ class OmegaTrial():
             file.writelines(f"Detuning\tDrift\tOmega\tStandard Deviation\n")
             for omega_obj in self.omega_objects:
                 self.omegas, self.drifts, self.deviations = omega_obj.get_omegas_averages(average_size)
-                file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
+                self.save_detuning_omega(file, omega_obj.detuning.detuning)
 
     def save_detuning_omega(self, file, detuning):
+        if self.omegas is not None:
+            self.do_save_detuning_omega(file, detuning)
+        return file
+
+    def do_save_detuning_omega(self, file, detuning):
         if hasattr(self, "deviations"):
             self.save_detuning_omega_deviation(file, detuning)
         else:
@@ -59,7 +64,6 @@ class OmegaTrial():
         if self.omegas is not None:
             for omega, drift, deviation in zip(self.omegas, self.drifts, self.deviations):
                 file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
-        return file
 
     def save_detuning_omega_no_deviation(self, file, detuning):
         for omega, drift in zip(self.omegas, self.drifts):

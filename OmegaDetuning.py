@@ -9,6 +9,13 @@ class OmegaDetuning():
         self.average_detuning = AverageDetuning(detuning_obj)
     
     def get_omegas_all(self):
+        if self.detuning.valid:
+            omegas_all, drifts = self.do_get_omegas_all()
+        else:
+            omegas_all, drifts = None, None
+        return omegas_all, drifts
+
+    def do_get_omegas_all(self):
         centre_frequencies = self.detuning.spectrum_centre_frequencies
         omegas_all = centre_frequencies - self.detuning.cavity_frequency - self.detuning.detuning
         acceptable_indexes = get_acceptable_indexes(omegas_all)

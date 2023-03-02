@@ -66,6 +66,8 @@ class AverageDetuning():
     def do_get_drifts(self, indexes, total):
         spacings = indexes / total
         current_detuning = self.detuning.transmission.S21_centre_frequency
+        #print(self.detuning)
+        #print(self.detuning.next_detuning)
         next_detuning = self.detuning.next_detuning.transmission.S21_centre_frequency
         difference = next_detuning - current_detuning
         drifts = difference*spacings

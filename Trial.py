@@ -92,12 +92,6 @@ class Trial():
     def process_detuning_objects(self):
         self.detuning_objects = sorted(self.detuning_objects,
                                        key = lambda detuning_obj: detuning_obj.detuning)
-        self.set_next_detuning_objects()
-
-    def set_next_detuning_objects(self):
-        for index in range(len(self.detuning_objects) - 1):
-            self.detuning_objects[index].next_detuning = self.detuning_objects[index + 1]
-        self.detuning_objects[-1].next_detuning = self.detuning_objects[-1]
 
     def get_detuning_and_timestamp_from_folder(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
@@ -231,14 +225,17 @@ class Trial():
             raise Exception((f"Transmission data could not be found for {self.trial_number}\n"
                              f"Run process_transmission method first"))
         else:
-            self.extract_transmission_from_file()
+            self.do_set_transmission()
+
+    def do_set_transmission(self):
+        self.extract_transmission_from_file()
+        self.set_next_detuning_objects()
 
     def extract_transmission_from_file(self):
         transmission_file_contents = self.get_file_contents(self.transmission_file_path)
         detunings, indexes, frequencies, cavity_frequencies = zip(*transmission_file_contents)
         for detuning_obj in self.detuning_objects:
-            if detuning_obj.detuning in detunings:
-                self.extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)
+            self.extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)
 
     def extract_transmission_from_file_detuning(self, detunings, detuning_obj, transmission_file_contents):
         if detuning_obj.detuning in detunings:
@@ -266,6 +263,18 @@ class Trial():
                 if trial == float(self.trial_number):
                     return True
         return False
+    
+    def set_next_detuning_objects(self):
+        for index in range(len(self.detuning_objects) - 1):
+            if self.detuning_objects[index].valid:
+                self.set_next_detuning_object_valid(index)
+        self.detuning_objects[-1].next_detuning = self.detuning_objects[-1]
+
+    def set_next_detuning_object_valid(self, index):
+        if self.detuning_objects[index + 1].valid:
+            self.detuning_objects[index].next_detuning = self.detuning_objects[index + 1]
+        else:
+            self.detuning_objects[index].next_detuning = self.detuning_objects[index]
 
     def output_detunings(self):
         for detuning_obj in self.detuning_objects:
