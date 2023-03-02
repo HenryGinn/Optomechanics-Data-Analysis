@@ -1,4 +1,4 @@
-from statistics import mean
+import numpy as np
 from AverageDetuning import AverageDetuning
 
 class GammaDetuning():
@@ -21,8 +21,13 @@ class GammaDetuning():
         return file
 
     def set_average_gamma(self, file_contents):
+        drifts, gammas = self.get_drifts_and_gammas(file_contents)
+        self.average_drift = np.mean(drifts)
+        self.average_gamma = np.mean(gammas)
+        self.deviation = np.std(gammas)
+
+    def get_drifts_and_gammas(self, file_contents):
         drifts_and_gammas = [(drift, gamma) for detuning, drift, gamma in file_contents
                              if detuning == self.detuning.detuning]
         drifts, gammas = zip(*drifts_and_gammas)
-        self.average_drift = mean(drifts)
-        self.average_gamma = mean(gammas)
+        return drifts, gammas

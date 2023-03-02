@@ -59,15 +59,15 @@ class GammaTrial():
                 self.do_average_gamma(file_name)
 
     def file_has_gamma_averages(self, file_name):
-        last_number_in_file_name = self.get_last_number_in_file_name(file_name)
-        file_is_average = (last_number_in_file_name != "0")
+        last_string_in_file_name = self.get_last_number_in_file_name(file_name)
+        file_is_average = (last_string_in_file_name not in ["0", "Average"])
         return file_is_average
 
     def get_last_number_in_file_name(self, file_name):
         underscore_locations = self.trial.get_underscore_locations(file_name)
         left = underscore_locations[-1] + 1
         right = len(file_name) - 4
-        last_number_in_file_name = file_name, file_name[left:right]
+        last_number_in_file_name = file_name[left:right]
         return last_number_in_file_name
 
     def do_average_gamma(self, file_name):
@@ -83,7 +83,7 @@ class GammaTrial():
     def save_average_gamma(self):
         self.set_average_gamma_file_path()
         with open(self.average_gamma_file_path, "w+") as file:
-            file.writelines(f"Detuning (Hz)\tDrift(Hz)\tGamma (Hz)\t\n")
+            file.writelines(f"Detuning (Hz)\tDrift (Hz)\tGamma (Hz)\tStandard deviation (Hz)\n")
             for detuning_obj in self.gamma_objects:
                 file = self.write_average_gamma_to_file(file, detuning_obj)
 
@@ -96,8 +96,9 @@ class GammaTrial():
         self.average_gamma_file_path = os.path.join(gamma_folder_path, file_name)
 
     def write_average_gamma_to_file(self, file, detuning_obj):
+        detuning = detuning_obj.detuning.detuning
         drift = detuning_obj.average_drift
         gamma = detuning_obj.average_gamma
-        detuning = detuning_obj.detuning.detuning
-        file.writelines(f"{detuning}\t{drift}\t{gamma}\n")
+        deviation = detuning_obj.deviation
+        file.writelines(f"{detuning}\t{drift}\t{gamma}\t{deviation}\n")
         return file
