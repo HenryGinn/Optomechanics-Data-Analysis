@@ -96,6 +96,11 @@ class GammaTrial():
         self.average_gamma_file_path = os.path.join(gamma_folder_path, file_name)
 
     def write_average_gamma_to_file(self, file, detuning_obj):
+        if detuning_obj.average_gamma is not None:
+            file = self.do_write_average_gamma_to_file(file, detuning_obj)
+        return file
+
+    def do_write_average_gamma_to_file(self, file, detuning_obj):
         detuning = detuning_obj.detuning.detuning
         drift = detuning_obj.average_drift
         gamma = detuning_obj.average_gamma
