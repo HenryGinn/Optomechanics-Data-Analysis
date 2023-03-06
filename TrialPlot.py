@@ -11,13 +11,14 @@ class TrialPlot():
         self.trial = trial_obj
 
     def create_omega_plot(self, format_type):
-        self.omega_obj = OmegaTrial(self.trial)
-        self.omega_obj.set_omega_files()
-        if self.omega_obj.omega_files != []:
-            self.fig, self.axis_omega = plt.subplots()
-            self.plot_omega()
-            self.omega_plot.add_plot_labels()
-            self.save_omega_plot(format_type)
+        if self.omega_has_data():
+            self.do_create_omega_plot(format_type)
+
+    def do_create_omega_plot(self, format_type):
+        self.fig, self.axis_omega = plt.subplots()
+        self.plot_omega()
+        self.omega_plot.add_plot_labels()
+        self.save_omega_plot(format_type)
 
     def plot_omega(self):
         files = self.omega_obj.omega_files
@@ -35,13 +36,14 @@ class TrialPlot():
         plt.close()
 
     def create_gamma_plot(self, format_type):
-        self.gamma_obj = GammaTrial(self.trial)
-        self.gamma_obj.set_gamma_files()
-        if self.gamma_obj.gamma_files is not []:
-            self.fig, self.axis_gamma = plt.subplots()
-            self.plot_gamma()
-            self.gamma_plot.add_plot_labels()
-            self.save_gamma_plot(format_type)
+        if self.gamma_has_data():
+            self.do_create_gamma_plot(format_type)
+
+    def do_create_gamma_plot(self, format_type):
+        self.fig, self.axis_gamma = plt.subplots()
+        self.plot_gamma()
+        self.gamma_plot.add_plot_labels()
+        self.save_gamma_plot(format_type)
 
     def plot_gamma(self):
         files = self.gamma_obj.gamma_files
@@ -55,27 +57,38 @@ class TrialPlot():
         plot_path = os.path.join(self.trial.data_set.gamma_path, plot_file_name)
         self.update_figure_size(8, 4.8)
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+        plt.close()
 
     def plot_omega_and_gamma(self, format_type):
         if self.omega_and_gamma_files_valid():
-            self.fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2, sharex=True)
-            self.plot_omega()
-            self.plot_gamma()
-            self.add_omega_and_gamma_plot_labels()
-            self.save_omega_and_gamma_plot(format_type)
+            self.do_plot_omega_and_gamma(format_type)
+
+    def do_plot_omega_and_gamma(self, format_type):
+        self.fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2, sharex=True)
+        self.plot_omega()
+        self.plot_gamma()
+        self.add_omega_and_gamma_plot_labels()
+        self.save_omega_and_gamma_plot(format_type)
 
     def omega_and_gamma_files_valid(self):
+        if self.omega_has_data():
+            if self.gamma_has_data():
+                return True
+        return False
+
+    def omega_has_data(self):
         self.omega_obj = OmegaTrial(self.trial)
-        self.gamma_obj = GammaTrial(self.trial)
         self.omega_obj.set_omega_files()
-        self.gamma_obj.set_gamma_files()
         omega_path = self.trial.data_set.omega_path
+        omega_non_empty = self.file_list_has_data(omega_path, self.omega_obj.omega_files)
+        return omega_non_empty
+
+    def gamma_has_data(self):
+        self.gamma_obj = GammaTrial(self.trial)
+        self.gamma_obj.set_gamma_files()
         gamma_path = self.trial.data_set.gamma_path
-        if self.file_list_has_data(omega_path, self.omega_obj.omega_files):
-            return False
-        if self.file_list_has_data(gamma_path, self.gamma_obj.gamma_files):
-            return False
-        return True
+        gamma_non_empty = self.file_list_has_data(gamma_path, self.gamma_obj.gamma_files)
+        return gamma_non_empty
 
     def file_list_has_data(self, folder_path, file_list):
         for file_name in file_list:
@@ -114,6 +127,7 @@ class TrialPlot():
         plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
         plt.tight_layout()
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)
+        plt.close()
 
     def get_omega_plot_file_name(self, format_type):
         base_plot_file_name = self.get_base_plot_file_name()
@@ -126,9 +140,12 @@ class TrialPlot():
         try:
             omega_offset = self.omega_plot.greek_0_value
         except:
-            power, trial = self.trial.power_obj.power_string, self.trial.trial_number
-            raise Exception(f"Could not get omega offset for {power}, {trial}")
+            self.omega_offset_exception()
         return omega_offset
+
+    def omega_offset_exception(self):
+        power, trial = self.trial.power_obj.power_string, self.trial.trial_number
+        raise Exception(f"Could not get omega offset for {power}, {trial}")
 
     def get_gamma_plot_file_name(self, format_type):
         base_plot_file_name = self.get_base_plot_file_name()
