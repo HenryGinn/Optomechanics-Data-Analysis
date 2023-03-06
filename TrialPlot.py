@@ -13,7 +13,7 @@ class TrialPlot():
     def create_omega_plot(self, format_type):
         self.omega_obj = OmegaTrial(self.trial)
         self.omega_obj.set_omega_files()
-        if self.omega_obj.omega_files is not []:
+        if self.omega_obj.omega_files != []:
             self.fig, self.axis_omega = plt.subplots()
             self.plot_omega()
             self.omega_plot.add_plot_labels()
@@ -65,13 +65,15 @@ class TrialPlot():
             self.save_omega_and_gamma_plot(format_type)
 
     def omega_and_gamma_files_valid(self):
-        self.set_omega_files()
-        self.set_gamma_files()
+        self.omega_obj = OmegaTrial(self.trial)
+        self.gamma_obj = GammaTrial(self.trial)
+        self.omega_obj.set_omega_files()
+        self.gamma_obj.set_gamma_files()
         omega_path = self.trial.data_set.omega_path
         gamma_path = self.trial.data_set.gamma_path
-        if self.file_list_has_data(omega_path, self.omega_files):
+        if self.file_list_has_data(omega_path, self.omega_obj.omega_files):
             return False
-        if self.file_list_has_data(gamma_path, self.gamma_files):
+        if self.file_list_has_data(gamma_path, self.gamma_obj.gamma_files):
             return False
         return True
 
@@ -108,7 +110,7 @@ class TrialPlot():
         return plot_title
 
     def save_omega_and_gamma_plot(self, format_type):
-        plot_file_name = self.get_omega_and_gamma_plot_file_name(self, format_type)
+        plot_file_name = self.get_omega_and_gamma_plot_file_name(format_type)
         plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
         plt.tight_layout()
         plt.savefig(plot_path, bbox_inches='tight', format=format_type)

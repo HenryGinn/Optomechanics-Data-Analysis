@@ -1,5 +1,5 @@
 import numpy as np
-import scipy as sc
+import scipy.optimize as sc
 import math
 import matplotlib.pyplot as plt
 
@@ -68,9 +68,9 @@ class DataFit():
 
     def get_automatic_fit(self, initial_fitting_parameters):
         self.set_fit_data()
-        fitting_parameters = sc.optimize.leastsq(self.get_residuals,
-                                                 initial_fitting_parameters,
-                                                 args=self.data.fit_function)[0]
+        fitting_parameters = sc.leastsq(self.get_residuals,
+                                        initial_fitting_parameters,
+                                        args=self.data.fit_function)[0]
         return fitting_parameters
 
     def set_fit_data(self):

@@ -48,6 +48,7 @@ class PlotGreek():
                                  for line in file_contents]
         if len(file_lines_decomposed[0]) == 3:
             self.detuning, self.drift, self.greek = zip(*file_lines_decomposed)
+            self.deviations = None
         else:
             self.detuning, self.drift, self.greek, self.deviations = zip(*file_lines_decomposed)
         self.process_file_output()
@@ -92,7 +93,7 @@ class PlotGreek():
         return acceptable_indices
 
     def filter_deviations(self, acceptable_indices):
-        if hasattr(self, "deviations"):
+        if self.deviations is not None:
             self.deviations = np.array(self.deviations)[acceptable_indices]
 
     def make_plot_of_greek(self):

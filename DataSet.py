@@ -24,8 +24,7 @@ class DataSet():
         
     def set_data_set_path_names(self):
         script_path = sys.path[0]
-        self.repository_path = os.path.dirname(script_path)
-        self.parent_path = os.path.dirname(self.repository_path)
+        self.parent_path = os.path.dirname(script_path)
         self.data_set_path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
 
     def process_power_structures(self):
