@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-from DataTypes import Spectrum, Transmission
+from Spectrum import Spectrum
+from Transmission import Transmission
 from AverageDetuning import AverageDetuning
 from Utils import *
 

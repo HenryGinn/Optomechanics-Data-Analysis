@@ -5,6 +5,12 @@
 ---
 
 1. [Overview](#overview)
+1. [Program Files](#program-files)
+    1. [Main Level](#main-level)
+    1. [Power](#power)
+    1. [Trial](#trial)
+    1. [Detuning](#detuning)
+    1. [Data](#data)
 1. [Checks to Run Before Use](#checks-to-run-before-use)
 1. [Folder Structure Description](#folder-structure-description)
 1. [Processing of Spectrum Data](#processing-of-spectrum-data)
@@ -17,25 +23,141 @@
 
 ## Overview
 
-There are 3 main sets of programs 1: Side band fitting 2: Plot gamma and omega
-3: File name correctors
+### Structure of Data
 
-### Side Band Fitting
-
-This has 5 main classes: DataSet, Power, Trial, Detuning, and Data, of which Spectrum and Transmission are subclasses. Side Band Fitting Interface handles these classes. This code centres the plots, extracts gamma from the data and saves it to files, and produces various plots about the data.
-
-### Plot Gamma and Omega
-
-This reads the data from the files produced by the side band fitting code and produces a plot. Each of the trials from a data set is shown as a different line
-
-### File Name Correctors
-
-These are preprocessing programs that help make the file and folder names consistent and easily processed by other programs. The main issues are with folder_structure_type=3 data sets, and these are fixed automatically by calling the fix_folder_structure method of DataSet.
+The program has a hierarchy that corresponds to the hierarchy of the data
+- Interface: this is where you control what the program does. In the finished program the user should only ever need to interact with this script
+- Data set: this corresponds to the data collected in one session. The data sets are stored in folders with names like 15112022
+- Power: the power that an experiment runs at can vary and these are stored in more folders. The powers used usually range from 24 dBm to 29 dBm
+- Trial: for each power there can be multiple runs of the same experiment, and we call each of these runs a trial
+- Detuning: for each trial the experiment looks at a specific value for the detuning. The detunings usually range from -20 MHz to 20 MHz.
+- Data: the output power is measured at a range of frequencies, and this is used to calculate something called the S21 - we convert it immediately and only ever work in terms of S21. There are two types of data taken: the transmission is taken over a wide frequency range and locates the resonant frequency of the cavity, and each spectrum measures a narrow region around the peak when the cavity is pumped at some detuning from the resonant frequency.
 
 ### General Procedure for Processing Data
 
 Data is read from the relevant places, and automatic checks are done to see whether each bit of data needs to be reviewed. Flagged data can be automatically rejected or manually reviewed, or all data can be reviewed instead of just the parts the program suggested as problematic. This data is then saved to a file. Where potentially useful, intermediate steps are saved to files to avoid needing to rerun code.
 
+---
+
+## Program Files
+
+These are the programs at each of the levels described in the overview.
+
+[Main Level](#main-level)
+- Side Band Fitting Interface
+- Utils
+
+[Data Set](#data-set)
+- DataSet
+- PlotGammaAndOmega
+- PutTrialsInFolders
+
+[Power](#power)
+- Power
+
+[Trial](#trial)
+- Trial
+- TrialPlot
+- OmegaTrial
+- GammaTrial
+
+[Detuning](#detuning)
+- Detuning
+- DetuningPlot
+- AverageDetuning
+- OmegaDetuning
+- GammaDetuning
+
+[Data](#data)
+- Data
+- DataFit
+- Transmission
+- Spectrum
+- AverageData
+
+### Main Level
+
+#### Interface
+
+The process of analysing the data is split into parts. The first step is to analyse the folder structure, and this will create the necessary hierarchy of objects that the rest of the program can use. It also creates any folders that might be used to store results.
+
+Processing the transmission and the spectra happens next, and the peaks of the S21 are saved to text files. If the peak of the S21 curve is problematic on an inital inspection, the data will not be saved. Whenever some data is needed at a later stage, it loads the data from these files, and it will already have a guarantee the data is not too bad. These only need to be run once per data set.
+
+The handling of omega happens next. Whenever omega is processed, the omega objects need to be created so this method should be run. The process_omega method will find a value of omega for each spectrum and save it to a text file, along with it's drift - these files have the label "All" at the end. The average_omega method will read these omega from a file and average them in group sizes specified by the argument of the method. If no average size is given then all the omega will be averaged. The results are saved to text files along with the standard deviation associated with the averaging procedure. The plot_omega method will take all the averaged omega files for each trial and plot them on a graph. Omega objects do not need to be created for plotting.
+
+Gamma is handled in a similar way to omega. The main difference is that getting gamma requires a fit of the spectra to be found, but the data is often quite messy so fitting each spectrum will often give bad fits. Also they cannot be averaged in the same way as omega as the fitting process is non-linear, and cannot be interchanged with the averaging process. Several spectra are aligned and averaged together, and a fit of this gives a value of gamma. For each new average size the process_gamma method will need to be called, and as with omega, if no average size is given then all spectra will be used. The average_gamma method takes the results from the previous step and averages them together for each detuning. We also get a standard deviation associated with this average. Plotting works similarly to omega.
+
+The final set of methods are to create plots. The plot_omega_and_gamma method creates a plot with both omega and gamma on two axes within one figure, and these individual plots are the same that you would get from plot_omega and plot_gamma. You can also plot things where there is one plot per trial with the create_trial_plots method, or plot things at the detuning level with the create_detuning_plots method. Both of these take in a string that gives the type of plot desired.
+
+#### Utils
+
+This has any functions that are useful in general and can be used across the program. Currently it does not have much in there but there are several things that should probably be in there when cleaning up.
+
+---
+
+### Data Set
+
+#### DataSet
+
+The main task of the DataSet class is to take in the requests from the interface and manage them. It keeps track of the power objects, the paths of the main folders associated with the data set, and mainly calls methods of the power objects. Power and PutTrialsInFolders are the managed here.
+
+#### PutTrialsInFolders
+
+Some of the later side band data sets have badly managed folders. For the folder structure where the experiment has been split into trials, the program expects to find one folder per power, and inside each of those, one folder per trial labelled {power}_{trial_number}. When this program is called it will detect whether the issue is present, and if it is fix them after asking the user if they want it to go ahead.
+
+#### Fix numbering on 29 dBm trials in 19112022
+
+This is a separate script that is not managed by DataSet. After the program has claimed to fix the folder names, this will need to be run to handle this edge case. I deemed it not worth it to automatically detect this situation. The issue it fixes is that there are 11 trials where the first one failed and so needs to be deleted, but then the numbering for the others is offset by 1.
+
+---
+
+### Power
+
+#### Power
+
+The Power class does not do much, and most of the things you might think are associated with the power level are actually handled at the trial level. It has two main jobs, one being the creation of the trial objects, and the other being calling the methods of the trial objects when it receives calls from the DataSet class.
+
+---
+
+### Trial
+
+#### Trial
+
+This is where most of the reading and writing of information about the transmission and the spectrum happens here. One of it's main jobs is to create the detuning objects. It is at this stage where the transmission files need to be paired up with the spectrum files, and this is done by reading the timestamp. For each detuning there is one transmission and there can be many spectrum files.
+
+The other main purpose of this class is to manage the collection of data about the transmission and spectra files (through the process_transmission and process_spectrum methods of DataSet) and save them to files. When this information needs to be accessed, the reading of those files will also be processed by this class. Whenever anything else needs to be processed at the trial level, they will refer to the attributes of the objects of this class as that is where the data is stored.
+
+#### OmegaTrial
+
+#### GammaTrial
+
+#### TrialPlot
+
+#### PlotGammaAndOmega
+
+---
+
+### Detuning
+
+#### Detuning
+
+#### DetuningPlot
+
+#### AverageDetuning
+
+#### OmegaDetuning
+
+#### GammaDetuning
+
+---
+
+### Data
+
+#### Data
+#### DataFit
+#### Transmission
+#### Spectrum
+#### AverageData
 ---
 
 ## Checks to Run Before Use
@@ -150,5 +272,6 @@ Fill in: explanation of how intial fitting parameters are found
 ## To Do List
 
 - Make computation of S21 centre index a method of the data type, not data
+- Move get_number_from_file_name from Trial to Utils
 - Clean code
 - Update documentation
