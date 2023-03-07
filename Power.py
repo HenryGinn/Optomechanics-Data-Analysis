@@ -131,17 +131,17 @@ class Power():
     def plot_omega(self, format_type):
         for trial_obj in self.trial_objects:
             greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.create_omega_plot(format_type)
+            greek_figure_obj.create_omega_figure(format_type)
     
     def plot_gamma(self, format_type):
         for trial_obj in self.trial_objects:
             greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.create_gamma_plot(format_type)
+            greek_figure_obj.create_gamma_figure(format_type)
 
     def plot_omega_and_gamma(self, format_type):
         for trial_obj in self.trial_objects:
             greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.plot_omega_and_gamma(format_type)
+            greek_figure_obj.create_omega_and_gamma_figure(format_type)
 
     def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:

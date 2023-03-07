@@ -14,8 +14,8 @@ of peak", "Transmission peak", and "Colour plots". Options for creating
 plots by detuning are "Frequency of peak"
 """
 
-my_data_set = DataSet("15112022", folder_structure_type=1)
-#my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
+#my_data_set = DataSet("15112022", folder_structure_type=1)
+my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
 #my_data_set = DataSet("19112022", folder_structure_type=3)
 #my_data_set = DataSet("21112022", folder_structure_type=3)
 #my_data_set = DataSet("22112022", folder_structure_type=3)
@@ -33,9 +33,9 @@ my_data_set.process_folders()
 #my_data_set.process_gamma(6)
 #my_data_set.average_gamma()
 
-my_data_set.plot_omega("pdf")
-#my_data_set.plot_gamma("pdf")
-#my_data_set.plot_omega_and_gamma()
+#my_data_set.plot_omega()
+#my_data_set.plot_gamma()
+my_data_set.plot_omega_and_gamma()
 
 #my_data_set.create_trial_plot_objects()
 #my_data_set.create_trial_plots("Transmission peak")

@@ -101,9 +101,3 @@ class OmegaTrial(GreekTrial):
         omega_child = Greek(self.trial, self, label)
         omega_child.extract_from_file(file_name)
         return omega_child
-
-    def get_label(self, file_name):
-        label = file_name[file_name.index("l") + 3:-4]
-        if label == "":
-            label = None
-        return label
