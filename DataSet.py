@@ -215,14 +215,6 @@ class DataSet():
     def average_gamma(self):
         for power_obj in self.power_objects:
             power_obj.average_gamma()
-    
-    def create_trial_plots(self, plot_name):
-        for power_obj in self.power_objects:
-            power_obj.create_trial_plots(plot_name)
-
-    def create_detuning_plots(self, plot_name):
-        for power_obj in self.power_objects:
-            power_obj.create_detuning_plots(plot_name)
 
     def plot_omega(self, format_type="pdf"):
         for power_obj in self.power_objects:
@@ -235,6 +227,18 @@ class DataSet():
     def plot_omega_and_gamma(self, format_type="pdf"):
         for power_obj in self.power_objects:
             power_obj.plot_omega_and_gamma(format_type)
+
+    def create_trial_plot_objects(self):
+        for power_obj in self.power_objects:
+            power_obj.create_trial_plot_objects()
+                
+    def create_trial_plots(self, plot_name):
+        for power_obj in self.power_objects:
+            power_obj.create_trial_plots(plot_name)
+
+    def create_detuning_plots(self, plot_name):
+        for power_obj in self.power_objects:
+            power_obj.create_detuning_plots(plot_name)
     
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 

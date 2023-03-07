@@ -12,3 +12,10 @@ def get_acceptable_indexes_non_trivial(data, tolerance):
     modified_deviation = np.average(deviations**(1/4))**4
     accepted_indexes = np.abs(deviations) < tolerance * modified_deviation
     return accepted_indexes
+
+def get_file_contents(path):
+    with open(path, "r") as file:
+        file.readline()
+        file_contents = [[float(value) for value in line.strip().split("\t")]
+                         for line in file]
+    return file_contents

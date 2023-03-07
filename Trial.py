@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 from Detuning import Detuning
+from Utils import get_file_contents
 
 class Trial():
 
@@ -161,13 +162,6 @@ class Trial():
                              f"File name: {file_name}\n"
                              f"left_index: {left_index}, right index: {right_index}"
                              f"{file_name[left_index:right_index]}\n"))
-
-    def get_file_contents(self, path):
-        with open(path, "r") as file:
-            file.readline()
-            file_contents = [[float(value) for value in line.strip().split("\t")]
-                             for line in file]
-        return file_contents
 
     def process_spectrum(self):
         self.set_spectrum_file_path()

@@ -1,10 +1,13 @@
 import os
 from GammaDetuning import GammaDetuning
+from GreekTrial import GreekTrial
 
-class GammaTrial():
+class GammaTrial(GreekTrial):
 
     def __init__(self, trial_obj):
-        self.trial = trial_obj
+        GreekTrial.__init__(self, trial_obj)
+        self.name = r"$\Gamma_m$"
+        self.offset_by_0_value = False
         self.create_gamma_objects()
 
     def create_gamma_objects(self):

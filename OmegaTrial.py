@@ -1,11 +1,16 @@
 from copy import deepcopy
 import os
+from GreekTrial import GreekTrial
 from OmegaDetuning import OmegaDetuning
+from Greek import Greek
 
-class OmegaTrial():
+class OmegaTrial(GreekTrial):
 
     def __init__(self, trial_obj):
-        self.trial = trial_obj
+        GreekTrial.__init__(self, trial_obj)
+        self.name = "Omega"
+        self.name_latex = r"$\Omega_m$"
+        self.offset_by_0_value = True
         self.create_omega_objects()
 
     def create_omega_objects(self):
@@ -32,12 +37,6 @@ class OmegaTrial():
 
     def set_omega_all_file_path(self):
         self.trial.omega_all_file_path = self.get_omega_file_path("All")
-
-    def output_omegas(self, omegas, drifts, detuning):
-        print(f"\nMain detuning: {detuning}")
-        for omega, drift in zip(omegas, drifts):
-            print(f"Drift: {drift}, Omega: {omega}")
-        print("")
 
     def omega_average(self, average_size):
         self.set_omega_all_file_path()
@@ -72,8 +71,7 @@ class OmegaTrial():
 
     def get_omega_file_path(self, label):
         omega_file_name = self.get_omega_file_name(label)
-        parent_path = self.trial.power_obj.data_set.omega_path
-        omega_file_path = os.path.join(parent_path, omega_file_name)
+        omega_file_path = os.path.join(self.path, omega_file_name)
         return omega_file_path
 
     def get_omega_file_name(self, label):
@@ -91,6 +89,21 @@ class OmegaTrial():
         return base_omega_file_name
 
     def set_omega_files(self):
-        if hasattr(self, "omega_files") is False:
-            self.omega_path = self.trial.data_set.omega_path
-            self.omega_files = self.trial.get_data_files(self.omega_path)
+        self.path = self.trial.data_set.omega_path
+        self.omega_files = self.trial.get_data_files(self.path)
+
+    def set_omega_children(self):
+        self.omega_children = [self.get_omega_child(file_name)
+                               for file_name in self.omega_files]
+
+    def get_omega_child(self, file_name):
+        label = self.get_label(file_name)
+        omega_child = Greek(self.trial, self, label)
+        omega_child.extract_from_file(file_name)
+        return omega_child
+
+    def get_label(self, file_name):
+        label = file_name[file_name.index("l") + 3:-4]
+        if label == "":
+            label = None
+        return label

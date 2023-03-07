@@ -275,3 +275,9 @@ Fill in: explanation of how intial fitting parameters are found
 - Move get_number_from_file_name from Trial to Utils
 - Clean code
 - Update documentation
+
+## Gamma class structure
+
+OmegaTrial handles all the stuff to do with omega, and GammaTrial handles all the stuff to do with Gamma. There are things in common to both of these so they should be subclasses of a GreekTrial class. A greek can have several different files associated with it at the trial level, and these should all be able to be plotted on the same graph.
+
+The TrialPlot class handles figures, and the PlotGreek class handles axes. This means that instances of the PlotGreek class should be handled by TrialPlot. PlotGreek should take in a GreekLine object and plot that line as multiple lines can be plotted on the same axis. The PlotGreek class should handle all labels as this is something associated with an axis, but it will be told to add labels by the TrialPlot class.

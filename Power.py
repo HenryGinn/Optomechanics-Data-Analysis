@@ -3,6 +3,7 @@ import os
 from Trial import Trial
 from OmegaTrial import OmegaTrial
 from GammaTrial import GammaTrial
+from GreekFigure import GreekFigure
 from TrialPlot import TrialPlot
 
 class Power():
@@ -129,18 +130,18 @@ class Power():
     
     def plot_omega(self, format_type):
         for trial_obj in self.trial_objects:
-            trial_plot_obj = TrialPlot(trial_obj)
-            trial_plot_obj.create_omega_plot(format_type)
+            greek_figure_obj = GreekFigure(trial_obj)
+            greek_figure_obj.create_omega_plot(format_type)
     
     def plot_gamma(self, format_type):
         for trial_obj in self.trial_objects:
-            trial_plot_obj = TrialPlot(trial_obj)
-            trial_plot_obj.create_gamma_plot(format_type)
+            greek_figure_obj = GreekFigure(trial_obj)
+            greek_figure_obj.create_gamma_plot(format_type)
 
     def plot_omega_and_gamma(self, format_type):
         for trial_obj in self.trial_objects:
-            trial_plot_obj = TrialPlot(trial_obj)
-            trial_plot_obj.plot_omega_and_gamma(format_type)
+            greek_figure_obj = GreekFigure(trial_obj)
+            greek_figure_obj.plot_omega_and_gamma(format_type)
 
     def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:

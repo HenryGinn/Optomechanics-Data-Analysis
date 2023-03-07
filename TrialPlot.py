@@ -1,176 +1,9 @@
-import matplotlib.pyplot as plt
-import os
-from PlotGammaAndOmega import PlotGreek
-from GammaTrial import GammaTrial
-from OmegaTrial import OmegaTrial
 from DetuningPlot import DetuningPlot
 
 class TrialPlot():
 
     def __init__(self, trial_obj):
         self.trial = trial_obj
-
-    def create_omega_plot(self, format_type):
-        if self.omega_has_data():
-            self.do_create_omega_plot(format_type)
-
-    def do_create_omega_plot(self, format_type):
-        self.fig, self.axis_omega = plt.subplots()
-        self.plot_omega()
-        self.omega_plot.add_plot_labels()
-        self.save_omega_plot(format_type)
-
-    def plot_omega(self):
-        files = self.omega_obj.omega_files
-        path = self.omega_obj.omega_path
-        name = r"$\Omega_m$"
-        self.omega_plot = PlotGreek(self.trial, self.axis_omega, files, path,
-                                    name, offset_by_0_value=True)
-        self.omega_plot.plot_greek()
-    
-    def save_omega_plot(self, format_type):
-        plot_file_name = self.get_omega_plot_file_name(format_type)
-        plot_path = os.path.join(self.trial.data_set.omega_path, plot_file_name)
-        self.update_figure_size(8, 4.8)
-        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
-        plt.close()
-
-    def create_gamma_plot(self, format_type):
-        if self.gamma_has_data():
-            self.do_create_gamma_plot(format_type)
-
-    def do_create_gamma_plot(self, format_type):
-        self.fig, self.axis_gamma = plt.subplots()
-        self.plot_gamma()
-        self.gamma_plot.add_plot_labels()
-        self.save_gamma_plot(format_type)
-
-    def plot_gamma(self):
-        files = self.gamma_obj.gamma_files
-        path = self.gamma_obj.gamma_path
-        name = r"$\Gamma_m$"
-        self.gamma_plot = PlotGreek(self.trial, self.axis_gamma, files, path ,name)
-        self.gamma_plot.plot_greek()
-
-    def save_gamma_plot(self, format_type):
-        plot_file_name = self.get_gamma_plot_file_name(format_type)
-        plot_path = os.path.join(self.trial.data_set.gamma_path, plot_file_name)
-        self.update_figure_size(8, 4.8)
-        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
-        plt.close()
-
-    def plot_omega_and_gamma(self, format_type):
-        if self.omega_and_gamma_files_valid():
-            self.do_plot_omega_and_gamma(format_type)
-
-    def do_plot_omega_and_gamma(self, format_type):
-        self.fig, (self.axis_omega, self.axis_gamma) = plt.subplots(2, sharex=True)
-        self.plot_omega()
-        self.plot_gamma()
-        self.add_omega_and_gamma_plot_labels()
-        self.save_omega_and_gamma_plot(format_type)
-
-    def omega_and_gamma_files_valid(self):
-        if self.omega_has_data():
-            if self.gamma_has_data():
-                return True
-        return False
-
-    def omega_has_data(self):
-        self.omega_obj = OmegaTrial(self.trial)
-        self.omega_obj.set_omega_files()
-        omega_path = self.trial.data_set.omega_path
-        omega_non_empty = self.file_list_has_data(omega_path, self.omega_obj.omega_files)
-        return omega_non_empty
-
-    def gamma_has_data(self):
-        self.gamma_obj = GammaTrial(self.trial)
-        self.gamma_obj.set_gamma_files()
-        gamma_path = self.trial.data_set.gamma_path
-        gamma_non_empty = self.file_list_has_data(gamma_path, self.gamma_obj.gamma_files)
-        return gamma_non_empty
-
-    def file_list_has_data(self, folder_path, file_list):
-        for file_name in file_list:
-            file_path = os.path.join(folder_path, file_name)
-            if self.file_has_data(file_path):
-                return True
-        return False
-
-    def file_has_data(self, file_path):
-        with open(file_path, "r") as file:
-            file.readline()
-            first_data_line = file.readline()
-            is_no_data = (first_data_line == "")
-        return is_no_data
-
-    def add_omega_and_gamma_plot_labels(self):
-        self.add_omega_and_gamma_titles()
-        self.omega_plot.add_y_axis_labels()
-        self.gamma_plot.add_y_axis_labels()
-        self.gamma_plot.add_x_axis_labels()
-
-    def add_omega_and_gamma_titles(self):
-        plot_title = self.get_omega_and_gamma_plot_title()
-        self.fig.suptitle(plot_title)
-
-    def get_omega_and_gamma_plot_title(self):
-        data_set = self.trial.data_set.folder_name
-        power_string = self.trial.power_obj.power_string
-        trial_number = self.trial.trial_number
-        plot_title = ("Dynamical Backaction\n"
-                      f"{data_set}, {power_string} dBm, Trial {trial_number}")
-        return plot_title
-
-    def save_omega_and_gamma_plot(self, format_type):
-        plot_file_name = self.get_omega_and_gamma_plot_file_name(format_type)
-        plot_path = os.path.join(self.trial.data_set.omega_and_gamma_path, plot_file_name)
-        plt.tight_layout()
-        plt.savefig(plot_path, bbox_inches='tight', format=format_type)
-        plt.close()
-
-    def get_omega_plot_file_name(self, format_type):
-        base_plot_file_name = self.get_base_plot_file_name()
-        omega_offset = self.get_omega_offset()
-        plot_file_name = (f"Omega_{base_plot_file_name}_"
-                          f"OmegaOffset_{omega_offset}.{format_type}")
-        return plot_file_name
-    
-    def get_omega_offset(self):
-        try:
-            omega_offset = self.omega_plot.greek_0_value
-        except:
-            self.omega_offset_exception()
-        return omega_offset
-
-    def omega_offset_exception(self):
-        power, trial = self.trial.power_obj.power_string, self.trial.trial_number
-        raise Exception(f"Could not get omega offset for {power}, {trial}")
-
-    def get_gamma_plot_file_name(self, format_type):
-        base_plot_file_name = self.get_base_plot_file_name()
-        plot_file_name = (f"Gamma_{base_plot_file_name}.{format_type}")
-        return plot_file_name
-
-    def get_omega_and_gamma_plot_file_name(self, format_type):
-        base_plot_file_name = self.get_base_plot_file_name()
-        omega_offset = self.get_omega_offset()
-        plot_file_name = (f"OmegaAndGamma_{base_plot_file_name}_"
-                          f"OmegaOffset_{omega_offset}.{format_type}")
-        return plot_file_name
-
-    def get_base_plot_file_name(self):
-        data_set = self.trial.data_set.folder_name
-        power_string = self.trial.power_obj.power_string
-        trial_number = self.trial.trial_number
-        plot_file_name = (f"{data_set}_{power_string}_dBm_"
-                          f"Trial_{trial_number}")
-        return plot_file_name
-
-    def update_figure_size(self, width=8, height=4.8):
-        plt.tight_layout()
-        self.fig.set_size_inches(width, height)
-        plt.gca().set_position([0, 0, 1, 1])
 
     def create_trial_plots(self, plot_name):
         {"Detuning vs time": self.plot_detuning_vs_time,
@@ -196,12 +29,16 @@ class TrialPlot():
         plt.title(f"Detuning vs Time for {self.power_obj.folder_name}")
 
     def plot_frequency_of_peak(self):
-        peak_frequencies = [spectrum_obj.S21_centre_frequency
-                            for detuning_obj in self.trial.detuning_objects
-                            for spectrum_obj in detuning_obj.spectrum_objects]
+        peak_frequencies = self.get_peak_frequencies()
         plt.plot(peak_frequencies)
         self.add_frequency_of_peak_labels()
         plt.show()
+
+    def get_peak_frequencies(self):
+        peak_frequencies = [spectrum_obj.S21_centre_frequency
+                            for detuning_obj in self.trial.detuning_objects
+                            for spectrum_obj in detuning_obj.spectrum_objects]
+        return peak_frequencies
 
     def add_frequency_of_peak_labels(self):
         plt.xlabel("Spectrum number")
