@@ -8,37 +8,32 @@ class OmegaDetuning():
         self.detuning = detuning_obj
         self.average_detuning = AverageDetuning(detuning_obj)
     
-    def get_omegas_all(self):
+    def set_omegas_all(self):
         if self.detuning.valid:
-            omegas_all, drifts = self.do_get_omegas_all()
+            self.do_set_omegas_all()
         else:
-            omegas_all, drifts = None, None
-        return omegas_all, drifts
+            self.omegas, self.drifts = None, None
 
-    def do_get_omegas_all(self):
+    def do_set_omegas_all(self):
         centre_frequencies = self.detuning.spectrum_centre_frequencies
         omegas_all = centre_frequencies - self.detuning.cavity_frequency - self.detuning.detuning
         acceptable_indexes = get_acceptable_indexes(omegas_all)
         self.detuning.spectrum_indexes = self.detuning.spectrum_indexes[acceptable_indexes]
-        omegas_all = omegas_all[acceptable_indexes]
-        drifts = self.average_detuning.get_drifts(self.detuning.spectrum_indexes, len(self.detuning.spectrum_objects))
-        return omegas_all, drifts
+        self.omegas = omegas_all[acceptable_indexes]
+        self.drifts = self.average_detuning.get_drifts(self.detuning.spectrum_indexes, len(self.detuning.spectrum_objects))
 
-    def get_omegas_averages(self, average_size):
+    def set_omegas_averages(self, average_size):
         drifts_all, omegas_all = self.get_omegas_all_from_file()
         if drifts_all is None:
-            omegas_averages, drifts_averages, deviations = None, None, None
+            self.omegas, self.drifts, self.deviations = None, None, None
         else:
-            omegas_averages, drifts_averages, deviations = (
-                self.do_get_omegas_averages(drifts_all, omegas_all, average_size))
-        return omegas_averages, drifts_averages, deviations
+            self.do_set_omegas_averages(drifts_all, omegas_all, average_size)
 
-    def do_get_omegas_averages(self, drifts_all, omegas_all, average_size):
+    def do_set_omegas_averages(self, drifts_all, omegas_all, average_size):
         average_size = self.average_detuning.get_average_size(average_size, len(omegas_all))
-        omegas_averages = self.average_detuning.average_list(omegas_all, average_size)
-        drifts_averages = self.average_detuning.average_list(drifts_all, average_size)
-        deviations = self.average_detuning.get_standard_deviations(omegas_all, average_size)
-        return omegas_averages, drifts_averages, deviations
+        self.omegas = self.average_detuning.average_list(omegas_all, average_size)
+        self.drifts = self.average_detuning.average_list(drifts_all, average_size)
+        self.deviations = self.average_detuning.get_standard_deviations(omegas_all, average_size)
 
     def get_omegas_all_from_file(self):
         with open(self.detuning.trial.omega_all.path, "r") as file:

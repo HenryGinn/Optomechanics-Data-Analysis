@@ -38,8 +38,8 @@ class OmegaTrial(GreekTrial):
     def write_omega_to_file(self, file):
         for omega_obj in self.omega_objects:
             if omega_obj.detuning.valid:
-                self.omegas, self.drifts = omega_obj.get_omegas_all()
-                file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
+                omega_obj.set_omegas_all()
+                file = self.save_detuning_omega(file, omega_obj)
         return file
 
     def omega_average(self, average_size):
@@ -56,7 +56,7 @@ class OmegaTrial(GreekTrial):
         try:
             self.trial.omega_all.extract_from_path(path)
         except:
-            raise Exception("Cannot find omega all file. Run process_omega method")
+            raise Exception("Cannot find omega all file.\nRun process_omega method")
 
     def initialise_omega_average(self, average_size):
         label = self.get_label_from_average_size(average_size)
@@ -74,34 +74,38 @@ class OmegaTrial(GreekTrial):
         with open(self.omega_average.path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\tStandard Deviation\n")
             for omega_obj in self.omega_objects:
-                self.omegas, self.drifts, self.deviations = omega_obj.get_omegas_averages(average_size)
-                self.save_detuning_omega(file, omega_obj.detuning.detuning)
+                omega_obj.set_omegas_averages(average_size)
+                self.save_detuning_omega(file, omega_obj)
 
-    def save_detuning_omega(self, file, detuning):
-        if self.omegas is not None:
-            self.do_save_detuning_omega(file, detuning)
+    def save_detuning_omega(self, file, omega_obj):
+        if omega_obj.omegas is not None:
+            file = self.do_save_detuning_omega(file, omega_obj)
         return file
 
-    def do_save_detuning_omega(self, file, detuning):
-        if hasattr(self, "deviations"):
-            self.save_detuning_omega_deviation(file, detuning)
+    def do_save_detuning_omega(self, file, omega_obj):
+        if hasattr(omega_obj, "deviations"):
+            self.save_detuning_omega_deviation(file, omega_obj)
         else:
-            self.save_detuning_omega_no_deviation(file, detuning)
+            self.save_detuning_omega_no_deviation(file, omega_obj)
         return file
 
-    def save_detuning_omega_deviation(self, file, detuning):
-        if self.omegas is not None:
-            for omega, drift, deviation in zip(self.omegas, self.drifts, self.deviations):
-                file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
+    def save_detuning_omega_deviation(self, file, omega_obj):
+        detuning = omega_obj.detuning.detuning
+        for omega, drift, deviation in zip(omega_obj.omegas,
+                                           omega_obj.drifts,
+                                           omega_obj.deviations):
+            file.writelines(f"{detuning}\t{drift}\t{omega}\t{deviation}\n")
 
-    def save_detuning_omega_no_deviation(self, file, detuning):
-        for omega, drift in zip(self.omegas, self.drifts):
+    def save_detuning_omega_no_deviation(self, file, omega_obj):
+        detuning = omega_obj.detuning.detuning
+        for omega, drift in zip(omega_obj.omegas, omega_obj.drifts):
             file.writelines(f"{detuning}\t{drift}\t{omega}\n")
         return file
 
     def get_omega_file_path(self, label):
         omega_file_name = self.get_omega_file_name(label)
-        omega_file_path = os.path.join(self.trial.data_set.omega_path, omega_file_name)
+        omega_folder_path = self.trial.data_set.omega_path
+        omega_file_path = os.path.join(omega_folder_path, omega_file_name)
         return omega_file_path
 
     def get_omega_file_name(self, label):

@@ -25,12 +25,12 @@ my_data_set.process_folders()
 #my_data_set.process_transmission()
 #my_data_set.process_spectrum()
 
-my_data_set.create_omega_objects()
+#my_data_set.create_omega_objects()
 #my_data_set.process_omega()
-my_data_set.average_omega()
+#my_data_set.average_omega()
 
-#my_data_set.create_gamma_objects()
-#my_data_set.process_gamma(6)
+my_data_set.create_gamma_objects()
+my_data_set.process_gamma()
 #my_data_set.average_gamma()
 
 #my_data_set.plot_omega()
