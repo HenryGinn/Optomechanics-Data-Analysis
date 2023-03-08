@@ -18,6 +18,10 @@ class OmegaTrial(GreekTrial):
                               for detuning_obj in self.trial.detuning_objects]
 
     def process_omega_all(self):
+        #self.omega_all = Greek(self.trial, self, "All")
+        #self.omega_all.path = self.get_get_omega_file_path("All")
+        #self.trial.set_transmission()
+        #self.trial.set_spectrum()
         self.setup_omega_all()
         with open(self.trial.omega_all_file_path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\n")
@@ -88,16 +92,7 @@ class OmegaTrial(GreekTrial):
         base_omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}"
         return base_omega_file_name
 
-    def set_omega_files(self):
-        self.path = self.trial.data_set.omega_path
-        self.omega_files = self.trial.get_data_files(self.path)
-
     def set_omega_children(self):
-        self.omega_children = [self.get_omega_child(file_name)
-                               for file_name in self.omega_files]
-
-    def get_omega_child(self, file_name):
-        label = self.get_label(file_name)
-        omega_child = Greek(self.trial, self, label)
-        omega_child.extract_from_file(file_name)
-        return omega_child
+        self.path = self.trial.data_set.omega_path
+        self.set_files()
+        self.set_children()

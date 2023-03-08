@@ -112,23 +112,9 @@ class GammaTrial(GreekTrial):
         deviation = detuning_obj.deviation
         file.writelines(f"{detuning}\t{drift}\t{gamma}\t{deviation}\n")
         return file
-
-    def set_gamma_files(self):
-        self.path = self.trial.data_set.gamma_path
-        self.gamma_files = self.trial.get_data_files(self.path)
-
+    
     def set_gamma_children(self):
-        self.gamma_children = [self.get_gamma_child(file_name)
-                               for file_name in self.gamma_files]
+        self.path = self.trial.data_set.gamma_path
+        self.set_files()
+        self.set_children()
 
-    def get_gamma_child(self, file_name):
-        label = self.get_label(file_name)
-        gamma_child = Greek(self.trial, self, label)
-        gamma_child.extract_from_file(file_name)
-        return gamma_child
-
-    def get_label(self, file_name):
-        label = file_name[file_name.index("l") + 4:-4]
-        if label == "":
-            label = "All used\nin average"
-        return label
