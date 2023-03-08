@@ -26,10 +26,6 @@ class OmegaTrial(GreekTrial):
         self.trial.omega_all = Greek(self.trial, self, "All")
         self.trial.omega_all.path = self.get_omega_file_path("All")
 
-    def set_trial_from_file(self):
-        self.trial.set_transmission()
-        self.trial.set_spectrum()
-
     def create_omega_all_file(self):
         with open(self.trial.omega_all.path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\n")
@@ -62,13 +58,6 @@ class OmegaTrial(GreekTrial):
         label = self.get_label_from_average_size(average_size)
         self.omega_average = Greek(self.trial, self, label)
         self.omega_average.path = self.get_omega_file_path(label)
-
-    def get_label_from_average_size(self, average_size):
-        if average_size is None:
-            label = "AllSpectraAveraged"
-        else:
-            label = str(average_size)
-        return label
 
     def create_omega_average_file(self, average_size):
         with open(self.omega_average.path, "w") as file:

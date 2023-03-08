@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import os
 from Detuning import Detuning
 from Utils import get_file_contents
+from Utils import get_number_from_file_name
 
 class Trial():
 
@@ -45,13 +46,13 @@ class Trial():
         return spectrum_files
 
     def initialise_spectrum_files(self):
-        spectrum_files = {self.get_number_from_file_name(file_name, "detuning"): []
+        spectrum_files = {get_number_from_file_name(file_name, "detuning"): []
                           for file_name in os.listdir(self.spectrum_path)}
         return spectrum_files
 
     def populate_spectrum_files(self, spectrum_files):
         for file_name in os.listdir(self.spectrum_path):
-            detuning = self.get_number_from_file_name(file_name, "detuning")
+            detuning = get_number_from_file_name(file_name, "detuning")
             spectrum_files[detuning].append(file_name)
         return spectrum_files
 
@@ -62,7 +63,7 @@ class Trial():
         return spectrum_files
 
     def get_detuning_object_a(self, detuning, spectrum_files):
-        timestamp = self.get_number_from_file_name(spectrum_files[0], "timestamp")
+        timestamp = get_number_from_file_name(spectrum_files[0], "timestamp")
         spectrum_file_paths = [os.path.join(self.spectrum_path, file_name)
                                for file_name in spectrum_files]
         transmission_file_path = self.get_transmission_file_path(timestamp)
@@ -71,7 +72,7 @@ class Trial():
 
     def get_transmission_file_path(self, timestamp):
         for file_name in os.listdir(self.transmission_path):
-            candidate_timestamp = self.get_number_from_file_name(file_name, "timestamp")
+            candidate_timestamp = get_number_from_file_name(file_name, "timestamp")
             if timestamp == candidate_timestamp:
                 transmission_file_path = os.path.join(self.transmission_path, file_name)
                 return transmission_file_path
@@ -97,8 +98,8 @@ class Trial():
     def get_detuning_and_timestamp_from_folder(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
         file_name = os.listdir(folder_path)[0]
-        detuning = self.get_number_from_file_name(file_name, "detuning")
-        timestamp = self.get_number_from_file_name(file_name, "timestamp")
+        detuning = get_number_from_file_name(file_name, "detuning")
+        timestamp = get_number_from_file_name(file_name, "timestamp")
         return detuning, timestamp
 
     def get_spectrum_file_paths(self, folder_name):
@@ -118,51 +119,9 @@ class Trial():
             return False
 
     def get_counter(self, file_name):
-        counter = self.get_number_from_file_name(file_name, "counter")
+        counter = get_number_from_file_name(file_name, "counter")
         return counter
-            
-    def get_underscore_locations(self, file_name, limit=0):
-        underscore_locations = [index for index, character in enumerate(file_name)
-                                if character == "_" and index >= limit]
-        return underscore_locations
-
-    def get_number_from_file_name(self, file_name, number_name):
-        underscore_locations = self.get_underscore_locations(file_name, len(number_name))
-        left_index = self.get_number_left_index(underscore_locations, file_name, number_name)
-        right_index = self.get_number_right_index(left_index, file_name)
-        number = self.get_number(file_name, left_index, right_index)
-        return number
-
-    def get_number_left_index(self, underscore_locations, file_name, number_name):
-        try:
-            number_left_index = [index for index in underscore_locations
-                                 if file_name[index - len(number_name):index] == number_name][0] + 1
-            return number_left_index
-        except:
-            raise Exception(f"Could not find '{number_name}' in file name:\n{file_name}")
-
-    def get_number_right_index(self, left_index, file_name):
-        right_index = left_index
-        while self.is_index_valid(right_index, file_name):
-            right_index += 1
-        return right_index
-
-    def is_index_valid(self, index, file_name):
-        is_number = (file_name[index] in "0123456789.-")
-        is_not_at_end_of_file = (index < len(file_name) - 4)
-        is_valid = is_number and is_not_at_end_of_file
-        return is_valid
-
-    def get_number(self, file_name, left_index, right_index):
-        try:
-            number = float(file_name[left_index:right_index])
-            return number
-        except:
-            raise Exception((f"Could not convert number to float\n"
-                             f"File name: {file_name}\n"
-                             f"left_index: {left_index}, right index: {right_index}"
-                             f"{file_name[left_index:right_index]}\n"))
-
+    
     def process_spectrum(self):
         self.set_spectrum_file_path()
         with open(self.spectrum_file_path, "w+") as file:
@@ -250,9 +209,9 @@ class Trial():
         return data_files
 
     def is_valid_file_name(self, file_name):
-        if file_name.endswith(".txt") and not file_name.endswith("All.txt"):
-            power = self.get_number_from_file_name(file_name, "Power")
-            trial = self.get_number_from_file_name(file_name, "Trial")
+        if file_name.endswith(".txt") and not file_name.endswith("AllSpectraAveraged.txt"):
+            power = get_number_from_file_name(file_name, "Power")
+            trial = get_number_from_file_name(file_name, "Trial")
             if power == float(self.power_obj.power_string):
                 if trial == float(self.trial_number):
                     return True

@@ -10,9 +10,9 @@ class Greek():
     managed by OmegaTrial, GammaTrial, and GreekFigure
     """
 
-    def __init__(self, trial_obj, omega_obj, label):
+    def __init__(self, trial_obj, greek_obj, label):
         self.trial_obj = trial_obj
-        self.omega_obj = omega_obj
+        self.greek_obj = greek_obj
         self.label = label
 
     def extract_from_path(self, path):
@@ -22,7 +22,7 @@ class Greek():
 
     def set_file_attributes(self, file_name):
         self.file_name = file_name
-        self.file_path = os.path.join(self.omega_obj.path, self.file_name)
+        self.file_path = os.path.join(self.greek_obj.path, self.file_name)
         
     def set_detuning_and_greek(self, file_contents):
         if len(file_contents) != 0:

@@ -116,7 +116,6 @@ class Power():
     def do_process_gamma(self, average_size):
         for gamma_obj in self.gamma_objects:
             gamma_obj.process_gamma(average_size)
-            gamma_obj.save_gamma(average_size)
 
     def average_gamma(self):
         if hasattr(self, "gamma_objects"):

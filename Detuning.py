@@ -4,7 +4,7 @@ import math
 from Spectrum import Spectrum
 from Transmission import Transmission
 from AverageDetuning import AverageDetuning
-from Utils import *
+from Utils import get_number_from_file_name
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -37,7 +37,7 @@ class Detuning():
 
     def set_frequency(self):
         self.set_spectrum_frequency()
-        self.cavity_frequency = self.trial.get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
+        self.cavity_frequency = get_number_from_file_name(self.spectrum_paths[0], "cavity_freq")
 
     def set_spectrum_frequency(self):
         with open(self.spectrum_paths[0], "r") as file:
