@@ -41,7 +41,7 @@ class OmegaDetuning():
         return omegas_averages, drifts_averages, deviations
 
     def get_omegas_all_from_file(self):
-        with open(self.detuning.trial.omega_all_file_path, "r") as file:
+        with open(self.detuning.trial.omega_all.path, "r") as file:
             file.readline()
             file_contents = [[float(value) for value in line.strip().split("\t")]
                               for line in file]

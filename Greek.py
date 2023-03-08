@@ -15,20 +15,14 @@ class Greek():
         self.omega_obj = omega_obj
         self.label = label
 
-    def extract_from_file(self, file_name):
-        self.set_file_attributes(file_name)
-        file_contents = self.get_file_contents()
+    def extract_from_path(self, path):
+        self.path = path
+        file_contents = get_file_contents(path)
         self.set_detuning_and_greek(file_contents)
 
     def set_file_attributes(self, file_name):
         self.file_name = file_name
         self.file_path = os.path.join(self.omega_obj.path, self.file_name)
-    
-    def get_file_contents(self):
-        with open(self.file_path, "r") as file:
-            file.readline()
-            file_contents = file.readlines()
-        return file_contents
         
     def set_detuning_and_greek(self, file_contents):
         if len(file_contents) != 0:
@@ -38,13 +32,11 @@ class Greek():
             self.detuning, self.drift, self.greek = None, None, None
 
     def set_detuning_and_greek_from_file(self, file_contents):
-        file_lines_decomposed = [[float(number) for number in line.strip().split('\t')]
-                                 for line in file_contents]
-        if len(file_lines_decomposed[0]) == 3:
-            self.detuning, self.drift, self.greek = zip(*file_lines_decomposed)
+        if len(file_contents[0]) == 3:
+            self.detuning, self.drift, self.greek = zip(*file_contents)
             self.deviations = None
         else:
-            self.detuning, self.drift, self.greek, self.deviations = zip(*file_lines_decomposed)
+            self.detuning, self.drift, self.greek, self.deviations = zip(*file_contents)
         self.process_file_output()
 
     def process_file_output(self):

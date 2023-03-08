@@ -190,7 +190,7 @@ class Trial():
             self.extract_spectrum_from_file()
 
     def extract_spectrum_from_file(self):
-        spectrum_file_contents = self.get_file_contents(self.spectrum_file_path)
+        spectrum_file_contents = get_file_contents(self.spectrum_file_path)
         for detuning_obj in self.detuning_objects:
             detuning_obj.extract_spectrum_from_file_detuning(spectrum_file_contents)
 
@@ -226,7 +226,7 @@ class Trial():
         self.set_next_detuning_objects()
 
     def extract_transmission_from_file(self):
-        transmission_file_contents = self.get_file_contents(self.transmission_file_path)
+        transmission_file_contents = get_file_contents(self.transmission_file_path)
         detunings, indexes, frequencies, cavity_frequencies = zip(*transmission_file_contents)
         for detuning_obj in self.detuning_objects:
             self.extract_transmission_from_file_detuning(detunings, detuning_obj, transmission_file_contents)

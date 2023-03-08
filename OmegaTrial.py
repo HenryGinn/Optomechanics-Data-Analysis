@@ -18,19 +18,22 @@ class OmegaTrial(GreekTrial):
                               for detuning_obj in self.trial.detuning_objects]
 
     def process_omega_all(self):
-        #self.omega_all = Greek(self.trial, self, "All")
-        #self.omega_all.path = self.get_get_omega_file_path("All")
-        #self.trial.set_transmission()
-        #self.trial.set_spectrum()
-        self.setup_omega_all()
-        with open(self.trial.omega_all_file_path, "w") as file:
+        self.initialise_omega_all()
+        self.set_trial_from_file()
+        self.create_omega_all_file()
+
+    def initialise_omega_all(self):
+        self.trial.omega_all = Greek(self.trial, self, "All")
+        self.trial.omega_all.path = self.get_omega_file_path("All")
+
+    def set_trial_from_file(self):
+        self.trial.set_transmission()
+        self.trial.set_spectrum()
+
+    def create_omega_all_file(self):
+        with open(self.trial.omega_all.path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\n")
             file = self.write_omega_to_file(file)
-
-    def setup_omega_all(self):
-        self.set_omega_all_file_path()
-        self.trial.set_spectrum()
-        self.trial.set_transmission()
 
     def write_omega_to_file(self, file):
         for omega_obj in self.omega_objects:
@@ -39,13 +42,36 @@ class OmegaTrial(GreekTrial):
                 file = self.save_detuning_omega(file, omega_obj.detuning.detuning)
         return file
 
-    def set_omega_all_file_path(self):
-        self.trial.omega_all_file_path = self.get_omega_file_path("All")
-
     def omega_average(self, average_size):
-        self.set_omega_all_file_path()
-        omega_file_path = self.get_omega_file_path(average_size)
-        with open(omega_file_path, "w") as file:
+        self.read_from_omega_all()
+        self.initialise_omega_average(average_size)
+        self.create_omega_average_file(average_size)
+
+    def read_from_omega_all(self):
+        self.initialise_omega_all()
+        path = self.trial.omega_all.path
+        self.try_read_from_omega_all(path)
+
+    def try_read_from_omega_all(self, path):
+        try:
+            self.trial.omega_all.extract_from_path(path)
+        except:
+            raise Exception("Cannot find omega all file. Run process_omega method")
+
+    def initialise_omega_average(self, average_size):
+        label = self.get_label_from_average_size(average_size)
+        self.omega_average = Greek(self.trial, self, label)
+        self.omega_average.path = self.get_omega_file_path(label)
+
+    def get_label_from_average_size(self, average_size):
+        if average_size is None:
+            label = "AllSpectraAveraged"
+        else:
+            label = str(average_size)
+        return label
+
+    def create_omega_average_file(self, average_size):
+        with open(self.omega_average.path, "w") as file:
             file.writelines(f"Detuning\tDrift\tOmega\tStandard Deviation\n")
             for omega_obj in self.omega_objects:
                 self.omegas, self.drifts, self.deviations = omega_obj.get_omegas_averages(average_size)
@@ -75,22 +101,15 @@ class OmegaTrial(GreekTrial):
 
     def get_omega_file_path(self, label):
         omega_file_name = self.get_omega_file_name(label)
-        omega_file_path = os.path.join(self.path, omega_file_name)
+        omega_file_path = os.path.join(self.trial.data_set.omega_path, omega_file_name)
         return omega_file_path
 
     def get_omega_file_name(self, label):
-        omega_file_name = self.get_base_omega_file_name()
-        if label is not None:
-            omega_file_name = f"{omega_file_name}_{label}"
-        omega_file_name = f"{omega_file_name}.txt"
-        return omega_file_name
-
-    def get_base_omega_file_name(self):
         data_set = self.trial.power_obj.data_set.folder_name
         power = self.trial.power_obj.folder_name
         trial = self.trial.trial_number
-        base_omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}"
-        return base_omega_file_name
+        omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}_{label}.txt"
+        return omega_file_name
 
     def set_omega_children(self):
         self.path = self.trial.data_set.omega_path
