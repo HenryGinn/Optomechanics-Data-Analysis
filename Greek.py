@@ -49,7 +49,7 @@ class Greek():
 
     def process_greek(self):
         self.greek = np.abs(self.greek)
-        if self.omega_obj.offset_by_0_value:
+        if self.greek_obj.offset_by_0_value:
             self.offset_greek_by_0_value()
 
     def offset_greek_by_0_value(self):

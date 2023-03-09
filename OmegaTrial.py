@@ -94,6 +94,7 @@ class OmegaTrial(GreekTrial):
     def get_omega_file_path(self, label):
         omega_file_name = self.get_omega_file_name(label)
         omega_folder_path = self.trial.data_set.omega_path
+        #omega_folder_path = self.get_omega_folder_label_path(label)
         omega_file_path = os.path.join(omega_folder_path, omega_file_name)
         return omega_file_path
 
@@ -103,6 +104,9 @@ class OmegaTrial(GreekTrial):
         trial = self.trial.trial_number
         omega_file_name = f"{data_set}_Power_{power}_Trial_{trial}_{label}.txt"
         return omega_file_name
+
+    #def get_omega_folder_label_path(self, label):
+    #    omega_folder_name = f"{}"
 
     def set_omega_children(self):
         self.path = self.trial.data_set.omega_path

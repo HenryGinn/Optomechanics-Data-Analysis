@@ -25,11 +25,11 @@ class GammaTrial(GreekTrial):
 
     def create_gamma_average_obj(self, average_size):
         label = self.get_label_from_average_size(average_size)
-        self.trial.gamma_average = Greek(self.trial, self, label)
-        self.trial.gamma_average.path = self.get_gamma_file_path(average_size)
+        self.trial.gamma = Greek(self.trial, self, label)
+        self.trial.gamma.path = self.get_gamma_file_path(average_size)
 
     def create_gamma_average_file(self, average_size):
-        with open(self.trial.gamma_average.path, "w") as file:
+        with open(self.trial.gamma.path, "w") as file:
             file.writelines(f"Detuning\tDrift\tGamma\n")
             file = self.write_gamma_to_file(file, average_size)
 
@@ -41,7 +41,7 @@ class GammaTrial(GreekTrial):
         return file
 
     def get_gamma_file_path(self, average_size):
-        gamma_file_name = self.get_gamma_file_name(self.trial.gamma_average.label)
+        gamma_file_name = self.get_gamma_file_name(self.trial.gamma.label)
         parent_path = self.trial.power_obj.data_set.gamma_path
         gamma_file_path = os.path.join(parent_path, gamma_file_name)
         return gamma_file_path

@@ -18,6 +18,12 @@ class GreekTrial():
             label = str(average_size)
         return label
     
+    def get_label_from_file_name(self, file_name):
+        label = file_name[file_name.index("l") + 4:-4]
+        if label == "":
+            label = "NoLabel"
+        return label
+    
     def set_files(self):
         self.files = self.trial.get_data_files(self.path)
 
@@ -26,13 +32,8 @@ class GreekTrial():
                          for file_name in self.files]
 
     def get_child(self, file_name):
-        label = self.get_label(file_name)
+        label = self.get_label_from_file_name(file_name)
         child = Greek(self.trial, self, label)
-        child.extract_from_file(file_name)
+        path = os.path.join(self.path, file_name)
+        child.extract_from_path(path)
         return child
-    
-    def get_label_from_file_name(self, file_name):
-        label = file_name[file_name.index("l") + 4:-4]
-        if label == "":
-            label = "NoLabel"
-        return label
