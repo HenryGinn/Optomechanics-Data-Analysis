@@ -229,9 +229,9 @@ class DataSet():
         for power_obj in self.power_objects:
             power_obj.plot_omega_and_gamma(format_type)
 
-    def omega_power_drift(self):
+    def omega_power_drift(self, average=True):
         omega_power_drift_obj = OmegaPowerDrift(self)
-        omega_power_drift_obj.plot_drift()
+        omega_power_drift_obj.plot_drift(average)
 
     def create_trial_plot_objects(self):
         for power_obj in self.power_objects:

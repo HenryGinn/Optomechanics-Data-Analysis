@@ -10,7 +10,13 @@ class OmegaPowerDrift():
     def __init__(self, data_set):
         self.data_set = data_set
 
-    def plot_drift(self):
+    def plot_drift(self, average):
+        if average:
+            self.plot_drift_average()
+        else:
+            self.plot_drift_no_average()
+
+    def plot_drift_average(self):
         self.average_spectra()
         self.average_trials()
         self.create_plot()
@@ -56,7 +62,7 @@ class OmegaPowerDrift():
             for power_obj in self.data_set.power_objects:
                 if hasattr(power_obj, "average_trial"):
                     plot_obj = DataFit(power_obj.average_trial)
-                    plt.plot(plot_obj.data.frequency, plot_obj.data.S21, '.', alpha = 1, label=power_obj.power_string)
+                    plt.plot(plot_obj.data.frequency, plot_obj.data.S21, '.', alpha=1, label=power_obj.power_string)
             plot_obj.set_x_ticks_and_labels()
             plt.xlabel(f'Frequency ({plot_obj.prefix})')
             plt.ylabel('Amplitude')
@@ -66,3 +72,20 @@ class OmegaPowerDrift():
         else:
             print("0 detuning was not included in this data set")
         
+    def plot_drift_no_average(self):
+        for power_obj in self.data_set.power_objects:
+            detuning_0_obj = self.get_detuning_0_spectra(power_obj)
+            if detuning_0_obj is not None:
+                plt.figure()
+                for index, spectrum in enumerate(detuning_0_obj.spectrum_objects):
+                    if index % 5 == 0:
+                        spectrum.set_S21()
+                        plt.plot(spectrum.frequency, spectrum.S21, '.', alpha=1, label=power_obj.power_string)
+                plt.ylabel('Amplitude')
+                plt.title(f"0 Detuning Spectra For {self.data_set.folder_name}, {power_obj.power_string} dBm")
+                plt.show()
+
+    def get_detuning_0_spectra(self, power_obj):
+        for detuning_obj in power_obj.trial_objects[0].detuning_objects:
+            if float(detuning_obj.detuning) == float(0):
+                return detuning_obj
