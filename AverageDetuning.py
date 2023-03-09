@@ -8,8 +8,8 @@ class AverageDetuning():
     def __init__(self, detuning_obj):
         self.detuning = detuning_obj
     
-    def set_S21_average_objects(self, average_size):
-        average_size = self.get_average_size(average_size, len(self.detuning.spectrum_objects_valid))
+    def set_S21_average_objects(self, average_size=None):
+        average_size = self.get_average_size(average_size,  len(self.detuning.spectrum_objects_valid))
         group_indexes_all = self.get_group_indexes(len(self.detuning.spectrum_indexes), average_size)
         self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
                                     for group_indexes in group_indexes_all]

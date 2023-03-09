@@ -3,6 +3,7 @@ import os
 import sys
 from Power import Power
 import PutTrialsInFolders
+from OmegaPowerDrift import OmegaPowerDrift
 
 class DataSet():
 
@@ -227,6 +228,10 @@ class DataSet():
     def plot_omega_and_gamma(self, format_type="pdf"):
         for power_obj in self.power_objects:
             power_obj.plot_omega_and_gamma(format_type)
+
+    def omega_power_drift(self):
+        omega_power_drift_obj = OmegaPowerDrift(self)
+        omega_power_drift_obj.plot_drift()
 
     def create_trial_plot_objects(self):
         for power_obj in self.power_objects:

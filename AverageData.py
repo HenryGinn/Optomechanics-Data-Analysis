@@ -53,11 +53,8 @@ class AverageData(Data):
         self.fitting_parameters = data_fit_obj.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = data_fit_obj.get_gamma_from_fit()
 
-    def output_group(self):
-        print("\nOutputting group data")
-        print(self)
-        for data in self.data_group:
-            print(data)
+    def set_S21_centre_frequency(self):
+        self.set_S21_centre_frequency_index()
 
     def __str__(self):
         string = (f"Group size: {self.group_size}\n"

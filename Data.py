@@ -14,6 +14,8 @@ class Data():
     Spectrum and Transmission are subclasses of this.
     """
 
+    semi_width = 150
+    large_peak_threshold = 10**-8
     peak_ratio_threshold = 11.5
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
@@ -53,6 +55,22 @@ class Data():
                              f"while attempting to process spectrum:\n{self}"))
 
     def set_S21_centre_index(self):
+        if self.if_large_peak():
+            self.set_S21_centre_index_large()
+        else:
+            self.set_S21_centre_index_small()
+
+    def if_large_peak(self):
+        peak_is_large = (np.max(self.S21) > self.large_peak_threshold)
+        data_not_transmission = (type(self) != "<class 'Transmission.Transmission'>")
+        return (peak_is_large and data_not_transmission)
+
+    def set_S21_centre_index_large(self):
+        self.peak_index = np.argmax(self.S21)
+        self.S21_centre_index = self.peak_index
+        self.set_S21_centre_frequency()
+
+    def set_S21_centre_index_small(self):
         self.peak_index = np.argmax(self.S21)
         candidate_indexes, region_points = self.get_candidate_and_region_indexes()
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)

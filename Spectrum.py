@@ -6,8 +6,6 @@ class Spectrum(Data):
     """
     This class handles all the data for one spectrum of one detuning for one trial.
     """
-
-    semi_width = 150
     
     def __init__(self, detuning_obj, spectrum_path):
         Data.__init__(self, detuning_obj)
