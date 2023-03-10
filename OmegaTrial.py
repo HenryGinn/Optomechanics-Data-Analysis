@@ -1,3 +1,6 @@
+import scipy.optimize as sc
+import numpy as np
+import matplotlib.pyplot as plt
 from copy import deepcopy
 import os
 from GreekTrial import GreekTrial
@@ -112,3 +115,25 @@ class OmegaTrial(GreekTrial):
         self.path = self.trial.data_set.omega_path
         self.set_files()
         self.set_children()
+
+    def fit_curve(self, greek_child):
+        if hasattr(greek_child, "greek_0_value"):
+            initial_fitting_parameters = [1, 1]
+            fitting_parameters = sc.leastsq(self.get_residuals,
+                                            initial_fitting_parameters,
+                                            args=greek_child)[0]
+            plt.plot(greek_child.x_values, self.fitting_function(fitting_parameters, greek_child))
+
+    def get_residuals(self, fitting_parameters, greek_child):
+        residuals = self.fitting_function(fitting_parameters, greek_child) - greek_child.greek - greek_child.greek_0_value
+        return residuals
+
+    def fitting_function(self, fitting_parameters, greek_child):
+        g, kappa = fitting_parameters
+        leading_constants = g**2 * np.sign(greek_child.detuning)
+        plus = greek_child.detuning + greek_child.greek + greek_child.greek_0_value
+        minus = greek_child.detuning - greek_child.greek - greek_child.greek_0_value
+        term_plus = plus/(plus**2 + kappa**2/4)
+        term_minus = minus/(minus**2 + kappa**2/4)
+        function_values = leading_constants * (term_plus + term_minus)
+        return function_values

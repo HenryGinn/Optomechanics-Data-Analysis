@@ -34,11 +34,11 @@ my_data_set.process_folders()
 #my_data_set.process_gamma(6)
 #my_data_set.average_gamma()
 
-#my_data_set.plot_omega()
+my_data_set.plot_omega()
 #my_data_set.plot_gamma()
 #my_data_set.plot_omega_and_gamma()
 
-my_data_set.omega_power_drift(False)
+#my_data_set.omega_power_drift(False)
 
 #my_data_set.create_trial_plot_objects()
 #my_data_set.create_trial_plots("Transmission peak")

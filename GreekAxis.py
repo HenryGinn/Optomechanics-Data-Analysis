@@ -27,11 +27,10 @@ class GreekAxis():
         self.make_plot_of_greek(greek_child)
 
     def make_plot_of_greek(self, greek_child):
-        x_values = greek_child.detuning - greek_child.drift
         if hasattr(greek_child, 'deviations') is False:
-            self.axis.plot(x_values, greek_child.greek, '.-', label=greek_child.label)
+            self.axis.plot(greek_child.x_values, greek_child.greek, '.-', label=greek_child.label)
         else:
-            self.axis.errorbar(x_values, greek_child.greek, fmt='.-', yerr=greek_child.deviations, label=greek_child.label)
+            self.axis.errorbar(greek_child.x_values, greek_child.greek, fmt='.-', yerr=greek_child.deviations, label=greek_child.label)
 
     def add_plot_labels(self):
         self.add_axis_labels()

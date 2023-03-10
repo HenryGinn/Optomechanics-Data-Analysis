@@ -134,8 +134,8 @@ class DataFit():
         function_values = (F/(gamma**2 + 4*(self.data.fit_frequencies - w)**2)) + noise
         return function_values
 
-    def evaluate_polynomial(self, fitting_parameters):
-        function_values = np.polyval(fitting_parameters, self.data.fit_frequencies)
+    def evaluate_polynomial(self, polynomial_parameters):
+        function_values = np.polyval(polynomial_parameters, self.data.fit_frequencies)
         return function_values
 
     def get_gamma_from_fit(self):

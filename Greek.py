@@ -38,6 +38,7 @@ class Greek():
         else:
             self.detuning, self.drift, self.greek, self.deviations = zip(*file_contents)
         self.process_file_output()
+        self.x_values = self.detuning - self.drift
 
     def process_file_output(self):
         self.process_greek()
@@ -81,4 +82,3 @@ class Greek():
     def filter_deviations(self, acceptable_indices):
         if self.deviations is not None:
             self.deviations = np.array(self.deviations)[acceptable_indices]
-

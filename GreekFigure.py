@@ -125,6 +125,7 @@ class GreekFigure():
     def plot_greeks(self, greek_obj, axis):
         for greek_child in greek_obj.children:
             axis.plot_greek_child(greek_child)
+            #greek_obj.fit_curve(greek_child)
 
     def file_list_has_data(self, folder_path, file_list):
         for file_name in file_list:
