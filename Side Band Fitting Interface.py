@@ -17,9 +17,9 @@ plots by detuning are "Frequency of peak"
 #my_data_set = DataSet("15112022", folder_structure_type=1)
 #my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
 #my_data_set = DataSet("17112022", folder_structure_type=2)
-my_data_set = DataSet("19112022", folder_structure_type=3)
+#my_data_set = DataSet("19112022", folder_structure_type=3)
 #my_data_set = DataSet("21112022", folder_structure_type=3)
-#my_data_set = DataSet("22112022", folder_structure_type=3)
+my_data_set = DataSet("22112022", folder_structure_type=3)
 
 my_data_set.process_folders()
 
