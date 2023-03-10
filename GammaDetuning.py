@@ -17,7 +17,8 @@ class GammaDetuning():
         for S21_average_obj in self.average_detuning.S21_average_objects:
             drift = S21_average_obj.drift
             gamma = S21_average_obj.gamma
-            file.writelines(f"{self.detuning.detuning}\t{drift}\t{gamma}\n")
+            amplitude = S21_average_obj.amplitude
+            file.writelines(f"{self.detuning.detuning}\t{drift}\t{gamma}\t{amplitude}\n")
         return file
 
     def set_average_gamma(self, file_contents):

@@ -30,7 +30,7 @@ class GammaTrial(GreekTrial):
 
     def create_gamma_average_file(self, average_size):
         with open(self.trial.gamma.path, "w") as file:
-            file.writelines(f"Detuning\tDrift\tGamma\n")
+            file.writelines(f"Detuning\tDrift\tGamma\tAmplitude\n")
             file = self.write_gamma_to_file(file, average_size)
 
     def write_gamma_to_file(self, file, average_size):

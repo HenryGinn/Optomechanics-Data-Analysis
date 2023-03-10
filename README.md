@@ -271,8 +271,6 @@ Fill in: explanation of how intial fitting parameters are found
 
 ## To Do List
 
-- Make computation of S21 centre index a method of the data type, not data
-- Move get_number_from_file_name from Trial to Utils
 - Clean code
 - Update documentation
 

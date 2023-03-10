@@ -52,6 +52,7 @@ class AverageData(Data):
         self.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
         self.fitting_parameters = data_fit_obj.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = data_fit_obj.get_gamma_from_fit()
+        self.set_amplitude_from_fit()
 
     def set_S21_centre_frequency(self):
         self.set_S21_centre_frequency_index()

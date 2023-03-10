@@ -250,6 +250,10 @@ class Data():
         else:
             return None
 
+    def set_amplitude_from_fit(self):
+        function_values = self.fit_function(self.fitting_parameters)
+        self.amplitude = max(function_values)
+
     def plot_S21(self, fitting=False):
         plot_obj = DataFit(self)
         plot_obj.plot_S21(fitting)
