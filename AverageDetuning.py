@@ -56,28 +56,25 @@ class AverageDetuning():
         end_point_indexes = np.ceil(real_group_end_points)
         return end_point_indexes
 
-    def get_drifts(self, indexes, total):
+    def set_drifts(self, indexes, total):
         if hasattr(self.detuning.transmission, 'S21_centre_frequency'):
-            return self.do_get_drifts(indexes, total)
+            return self.do_set_drifts(indexes, total)
         else:
             raise Exception(("Interpolation requires information about the transmission\n"
                              "Run the process_transmission method first"))
 
-    def do_get_drifts(self, indexes, total):
+    def do_set_drifts(self, indexes, total):
         spacings = indexes / total
         current_detuning = self.detuning.transmission.S21_centre_frequency
-        #print(self.detuning)
-        #print(self.detuning.next_detuning)
         next_detuning = self.detuning.next_detuning.transmission.S21_centre_frequency
         difference = next_detuning - current_detuning
-        drifts = difference*spacings
-        return drifts
+        self.drifts = difference * spacings
 
     def set_drifts_average(self, average_obj):
         indexes = average_obj.group_indexes
         spectra_count = len(self.detuning.spectrum_objects)
-        drifts = self.get_drifts(indexes, spectra_count)
-        average_obj.drift = np.mean(drifts)
+        self.set_drifts(indexes, spectra_count)
+        average_obj.drift = np.mean(self.drifts)
 
     def get_standard_deviations(self, list_full, average_size):
         group_indexes = self.get_group_indexes(len(list_full), average_size)

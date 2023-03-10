@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 from GreekAxis import GreekAxis
-from GammaTrial import GammaTrial
-from OmegaTrial import OmegaTrial
+from GreekTrial import GreekTrial
 
 class GreekFigure():
 

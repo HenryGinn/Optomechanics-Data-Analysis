@@ -1,8 +1,7 @@
 import numpy as np
 import os
 from Trial import Trial
-from OmegaTrial import OmegaTrial
-from GammaTrial import GammaTrial
+from GreekTrial import GreekTrial
 from GreekFigure import GreekFigure
 from TrialPlot import TrialPlot
 
@@ -79,68 +78,34 @@ class Power():
         for trial_obj in self.trial_objects:
             trial_obj.process_spectrum()
 
-    def create_omega_objects(self):
-        self.omega_objects = [OmegaTrial(trial_obj)
+    def create_greek_objects(self):
+        self.greek_objects = [GreekTrial(trial_obj)
                               for trial_obj in self.trial_objects]
 
-    def process_omega(self):
-        if hasattr(self, "omega_objects"):
-            self.do_process_omega()
+    def process_greek(self, average_size):
+        if hasattr(self, "greek_objects"):
+            self.do_process_greek(average_size)
         else:
-            raise Exception("Call create_omega_objects method first")
+            raise Exception("Call create_greek_objects method first")
 
-    def do_process_omega(self):
-        for omega_obj in self.omega_objects:
-            omega_obj.process_omega_all()
+    def do_process_greek(self, average_size):
+        for greek_obj in self.greek_objects:
+            greek_obj.process_greek(average_size)
 
-    def average_omega(self, average_size):
-        if hasattr(self, "omega_objects"):
-            self.do_average_omega(average_size)
+    def average_greek(self):
+        if hasattr(self, "greek_objects"):
+            self.do_average_greek()
         else:
-            raise Exception("Call create_omega_objects method first")
+            raise Exception("Call create_greek_objects method first")
 
-    def do_average_omega(self, average_size):
-        for omega_obj in self.omega_objects:
-            omega_obj.omega_average(average_size)
-
-    def create_gamma_objects(self):
-        self.gamma_objects = [GammaTrial(trial_obj)
-                              for trial_obj in self.trial_objects]
-
-    def process_gamma(self, average_size):
-        if hasattr(self, "gamma_objects"):
-            self.do_process_gamma(average_size)
-        else:
-            raise Exception("Call create_gamma_objects method first")
-
-    def do_process_gamma(self, average_size):
-        for gamma_obj in self.gamma_objects:
-            gamma_obj.process_gamma(average_size)
-
-    def average_gamma(self):
-        if hasattr(self, "gamma_objects"):
-            self.do_average_gamma()
-        else:
-            raise Exception("Call create_gamma_objects method first")
-
-    def do_average_gamma(self):
-        for gamma_obj in self.gamma_objects:
-            gamma_obj.average_gamma()
+    def do_average_greek(self):
+        for greek_obj in self.greek_objects:
+            greek_obj.average_greek()
     
-    def plot_omega(self, format_type):
+    def plot_greek(self, format_type):
         for trial_obj in self.trial_objects:
             greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.create_omega_figure(format_type)
-    
-    def plot_gamma(self, format_type):
-        for trial_obj in self.trial_objects:
-            greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.create_gamma_figure(format_type)
-
-    def plot_omega_and_gamma(self, format_type):
-        for trial_obj in self.trial_objects:
-            greek_figure_obj = GreekFigure(trial_obj)
-            greek_figure_obj.create_omega_and_gamma_figure(format_type)
+            greek_figure_obj.create_greek_figure(format_type)
 
     def create_trial_plots(self, plot_name):
         for trial_obj in self.trial_objects:
