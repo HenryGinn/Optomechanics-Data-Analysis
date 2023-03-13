@@ -120,16 +120,11 @@ class DataSet():
     def create_results_folders(self):
         self.create_data_set_results_folder()
         self.create_S21_folders()
-        self.create_greek_folders()
+        self.create_greek_folder()
 
     def create_S21_folders(self):
         self.create_spectrum_folder()
         self.create_transmission_folder()
-
-    def create_greek_folders(self):
-        self.create_omega_folder()
-        self.create_gamma_folder()
-        self.create_omega_and_gamma_folder()
 
     def create_data_set_results_folder(self):
         self.create_results_folder()
@@ -155,31 +150,15 @@ class DataSet():
             os.mkdir(self.transmission_path)
             print(f"Creating transmission data folder at {self.transmission_path}")
 
-    def create_omega_folder(self):
-        self.omega_path = os.path.join(self.data_set_results_path, "Omega Results")
-        if os.path.isdir(self.omega_path) == False:
-            print(f"Creating Omega folder at {self.omega_path}")
-            os.mkdir(self.omega_path)
+    def create_greek_folder(self):
+        self.greek_path = os.path.join(self.data_set_results_path, "Omega and Gamma")
+        if os.path.isdir(self.greek_path) == False:
+            os.mkdir(self.greek_path)
+            print(f"Creating Omega and Gamma folder at {self.greek_path}")
 
-    def create_gamma_folder(self):
-        self.gamma_path = os.path.join(self.data_set_results_path, "Gamma Results")
-        if os.path.isdir(self.gamma_path) == False:
-            os.mkdir(self.gamma_path)
-            print(f"Creating Gamma folder at {self.gamma_path}")
-
-    def create_omega_and_gamma_folder(self):
-        self.omega_and_gamma_path = os.path.join(self.data_set_results_path, "Omega and Gamma Plots")
-        if os.path.isdir(self.omega_and_gamma_path) == False:
-            os.mkdir(self.omega_and_gamma_path)
-            print(f"Creating Omega and Gamma folder at {self.omega_and_gamma_path}")
-
-    def create_omega_objects(self):
+    def create_greek_objects(self):
         for power_obj in self.power_objects:
-            power_obj.create_omega_objects()
-
-    def create_gamma_objects(self):
-        for power_obj in self.power_objects:
-            power_obj.create_gamma_objects()
+            power_obj.create_greek_objects()
 
     def process_transmission(self):
         for power_obj in self.power_objects:
@@ -191,47 +170,19 @@ class DataSet():
             print(f"Processing spectrum: {power_obj.folder_name}")
             power_obj.process_spectrum()
 
-    def process_omega(self):
+    def process_greek(self, average_size=None):
         for power_obj in self.power_objects:
-            print(f"Finding omega: {power_obj.folder_name}")
-            power_obj.process_omega()
-    
-    def average_omega(self, average_size = None):
-        if self.omega_folder_exists():
-            for power_obj in self.power_objects:
-                power_obj.average_omega(average_size)
+            print(f"Finding omega and gamma: {power_obj.folder_name}")
+            power_obj.process_greek(average_size)
 
-    def omega_folder_exists(self):
-        if hasattr(self, "omega_path"):
-            return True
-        else:
-            raise Exception(("Omega folder does not exist\n"
-                             "Run process_omega method first"))
-        
-    def process_gamma(self, average_size = None):
+    def average_greek(self):
         for power_obj in self.power_objects:
-            print(f"Finding gamma: {power_obj.folder_name}")
-            power_obj.process_gamma(average_size)
+            print(f"Averaging omega and gamma: {power_obj.folder_name}")
+            power_obj.average_greek()
 
-    def average_gamma(self):
-        for power_obj in self.power_objects:
-            power_obj.average_gamma()
-
-    def plot_omega(self, format_type="pdf"):
-        for power_obj in self.power_objects:
-            power_obj.plot_omega(format_type)
-
-    def plot_gamma(self, format_type="pdf"):
-        for power_obj in self.power_objects:
-            power_obj.plot_gamma(format_type)
-    
-    def plot_omega_and_gamma(self, format_type="pdf"):
+    def plot_greek(self, format_type="pdf"):
         for power_obj in self.power_objects:
             power_obj.plot_omega_and_gamma(format_type)
-
-    def omega_power_drift(self, average=True):
-        omega_power_drift_obj = OmegaPowerDrift(self)
-        omega_power_drift_obj.plot_drift(average)
 
     def create_trial_plot_objects(self):
         for power_obj in self.power_objects:

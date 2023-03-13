@@ -44,15 +44,17 @@ class AverageData(Data):
         cutoff_size = self.max_centre_index - self.min_centre_index
         frequency_offset_length = len(self.detuning_obj.frequency) - cutoff_size
         self.frequency = np.copy(self.detuning_obj.frequency[:frequency_offset_length])
-        self.frequency -= self.frequency[self.min_centre_index]
+        self.frequency_shift = self.frequency[self.min_centre_index]
+        self.frequency -= self.frequency_shift
     
-    def set_gamma(self):
+    def set_greeks(self):
         data_fit_obj = DataFit(self)
         self.fit_function = data_fit_obj.evaluate_lorentzian
         self.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
         self.fitting_parameters = data_fit_obj.get_automatic_fit(self.initial_fitting_parameters)
         self.gamma = data_fit_obj.get_gamma_from_fit()
         self.set_amplitude_from_fit()
+        self.set_omega_from_fit()
 
     def set_S21_centre_frequency(self):
         self.set_S21_centre_frequency_index()

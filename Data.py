@@ -254,6 +254,10 @@ class Data():
         function_values = self.fit_function(self.fitting_parameters)
         self.amplitude = max(function_values)
 
+    def set_omega_from_fit(self):
+        centre_frequency = self.fitting_parameters[3] + self.frequency_shift
+        self.omega = centre_frequency - self.detuning_obj.cavity_frequency - self.detuning_obj.detuning
+
     def plot_S21(self, fitting=False):
         plot_obj = DataFit(self)
         plot_obj.plot_S21(fitting)
