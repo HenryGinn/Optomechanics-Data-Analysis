@@ -175,7 +175,7 @@ class Trial():
     def set_transmission(self):
         self.set_transmission_file_path()
         if os.path.exists(self.transmission_file_path) == False:
-            raise Exception((f"Transmission data could not be found for {self.trial_number}\n"
+            raise Exception((f"Transmission data could not be found for trial {self.trial_number}\n"
                              f"Run process_transmission method first"))
         else:
             self.do_set_transmission()

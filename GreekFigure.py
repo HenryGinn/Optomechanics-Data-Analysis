@@ -14,8 +14,8 @@ class GreekFigure():
     def __init__(self, trial_obj):
         self.trial = trial_obj
 
-    def create_omega_figure(self, format_type):
-        self.set_omega_obj()
+    def create_greek_figure(self, format_type):
+        self.set_greek_obj()
         if self.omega_files_valid():
             self.do_create_omega_figure(format_type)
 

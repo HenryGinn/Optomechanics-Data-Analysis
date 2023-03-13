@@ -278,7 +278,7 @@ class DataFit():
         plt.show()
 
     def plot_fitting(self, fitting):
-        if fitting is True and self.data.fitting_parameters is not None:
+        if fitting is True and hasattr(self.data, "fitting_parameters"):
             self.set_fit_data()
             plt.plot(self.data.fit_frequencies,
                      self.data.fit_function(self.data.fitting_parameters),

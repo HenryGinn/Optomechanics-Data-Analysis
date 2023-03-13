@@ -127,13 +127,13 @@ This is where most of the reading and writing of information about the transmiss
 
 The other main purpose of this class is to manage the collection of data about the transmission and spectra files (through the process_transmission and process_spectrum methods of DataSet) and save them to files. When this information needs to be accessed, the reading of those files will also be processed by this class. Whenever anything else needs to be processed at the trial level, they will refer to the attributes of the objects of this class as that is where the data is stored.
 
-#### OmegaTrial
-
-#### GammaTrial
+#### GreekTrial
 
 #### TrialPlot
 
-#### PlotGammaAndOmega
+#### GreekFigure
+
+#### GreekAxis
 
 ---
 

@@ -91,7 +91,7 @@ class GreekTrial():
         self.average_greek_file_path = os.path.join(greek_folder_path, file_name)
 
     def write_average_greek_to_file(self, file, detuning_obj):
-        if detuning_obj.omega_average is not None:
+        if hasattr(detuning_obj, "omega_average"):
             file = self.do_write_average_greek_to_file(file, detuning_obj)
         return file
 

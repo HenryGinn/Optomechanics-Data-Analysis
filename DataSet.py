@@ -182,7 +182,7 @@ class DataSet():
 
     def plot_greek(self, format_type="pdf"):
         for power_obj in self.power_objects:
-            power_obj.plot_omega_and_gamma(format_type)
+            power_obj.plot_greek(format_type)
 
     def create_trial_plot_objects(self):
         for power_obj in self.power_objects:

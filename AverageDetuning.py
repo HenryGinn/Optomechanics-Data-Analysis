@@ -13,17 +13,22 @@ class AverageDetuning():
         group_indexes_all = self.get_group_indexes(len(self.detuning.spectrum_indexes), average_size)
         self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
                                     for group_indexes in group_indexes_all]
+        self.remove_first_group()
 
     def get_S21_average_obj(self, group_indexes):
         spectrum_indexes = self.detuning.spectrum_indexes[group_indexes]
         S21_group = [self.detuning.spectrum_objects_valid[index] for index in group_indexes]
         S21_average_obj = AverageData(self.detuning, S21_group, spectrum_indexes)
         return S21_average_obj
-    
+
     def get_average_size(self, average_size, total_count):
         if average_size is None:
             average_size = total_count
         return average_size
+
+    def remove_first_group(self):
+        if len(self.S21_average_objects) > 1:
+            self.S21_average_objects = self.S21_average_objects[1:]
 
     def average_list(self, list_full, average_size):
         group_indexes = self.get_group_indexes(len(list_full), average_size)

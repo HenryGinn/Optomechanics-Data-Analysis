@@ -223,12 +223,19 @@ class Data():
         plot_obj.plot_fitting(fitting=True)
 
     def output_review_centre_results(self, region_points):
+        if self.detuning_obj.review_all_S21_simultaneously:
+            plt.subplot()
+        self.output_review_centre_results_single(region_points)
+        if self.detuning_obj.review_all_S21_simultaneously is False:
+            plt.show()
+
+    def output_review_centre_results_single(self, region_points):
         plt.plot(self.frequency, self.S21)
         frequency_range = np.linspace(0, self.S21[self.peak_index], 100)
         plt.plot(self.frequency[self.peak_index], self.S21[self.peak_index], '*k')
         plt.plot([self.S21_centre_frequency] * 100, frequency_range, 'r')
         self.add_review_centre_results_labels()
-        plt.show()
+        #plt.show()
     
     def add_review_centre_results_labels(self):
         power_folder = self.detuning_obj.trial.power_obj.folder_name

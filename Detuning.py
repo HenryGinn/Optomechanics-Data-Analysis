@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 import math
 from Spectrum import Spectrum
 from Transmission import Transmission
@@ -13,6 +14,7 @@ class Detuning():
     Processing of spectra happens here.
     """
 
+    review_all_S21_simultaneously = False
     output_rejected_spectra = False
     flag_bad_offsets = False
     
@@ -80,8 +82,10 @@ class Detuning():
         return spectrum_centre_indexes, spectrum_centre_frequencies, self.valid_spectrum_indexes
 
     def process_spectrum(self):
-        for spectrum_obj in self.spectrum_objects:
+        for index, spectrum_obj in enumerate(self.spectrum_objects):
             spectrum_obj.process_S21()
+            if ((index % 10 == 0) or (index == len(self.spectrum_objects) - 1)) and self.review_all_S21_simultaneously:
+                plt.show()
 
     def set_valid_spectrum_indexes(self):
         self.valid_spectrum_indexes = [spectrum_obj.S21_has_valid_peak

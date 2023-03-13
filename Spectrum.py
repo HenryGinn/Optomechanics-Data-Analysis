@@ -19,4 +19,4 @@ class Spectrum(Data):
         self.S21_has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
 
     def set_S21_centre_frequency(self):
-        self.set_S21_centre_frequency_index()
+        self.set_S21_centre_frequency_peak()
