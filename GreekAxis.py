@@ -31,14 +31,6 @@ class GreekAxis():
         else:
             self.axis.errorbar(greek_line.x_values, greek_line.greek, fmt='.-', yerr=greek_line.deviations, label=greek_line.label)
 
-    def add_plot_labels(self):
-        self.add_axis_labels()
-        self.axis.legend(bbox_to_anchor=(1.05, 1), loc = 2)
-
-    def add_axis_labels(self):
-        self.add_x_axis_labels()
-        self.add_y_axis_labels()
-
     def add_x_axis_labels(self):
         self.remove_edge_x_ticks()
         prefix, prefix_power = self.get_prefix_data()

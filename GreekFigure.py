@@ -41,7 +41,7 @@ class GreekFigure():
 
     def plot_greeks(self, axis_omega, axis_gamma, axis_amplitude):
         self.create_greek_axes(axis_omega, axis_gamma, axis_amplitude)
-        #self.fit_greek_axes()
+        self.fit_greek_axes()
         self.plot_greek_axes()
 
     def create_greek_axes(self, axis_omega, axis_gamma, axis_amplitude):
@@ -52,25 +52,34 @@ class GreekFigure():
 
     def create_omega_axis(self, axis):
         self.omega_axis = GreekAxis(self.trial, axis)
+        self.set_omega_axis_names()
+        self.omega_axis.lines = [self.get_omega_line(child)
+                                 for child in self.greek_obj.children]
+
+    def set_omega_axis_names(self):
         self.omega_axis.name = "Omega"
         self.omega_axis.name_latex = "$\Omega_m$"
         self.omega_axis.units = "Hz"
-        self.omega_axis.lines = [self.get_omega_line(child) for child in self.greek_obj.children]
 
     def get_omega_line(self, child):
         line = GreekLine(child)
-        line.greek = np.abs(child.omega)
-        line.offset_greek_by_0_value()
+        child.omega = np.abs(child.omega)
+        child.offset_omega_by_0_value()
+        line.greek = child.omega
         if hasattr(child, "omega_deviations"):
             line.deviations = child.omega_deviations
         return line
 
     def create_gamma_axis(self, axis):
         self.gamma_axis = GreekAxis(self.trial, axis)
+        self.set_gamma_axis_names()
+        self.gamma_axis.lines = [self.get_gamma_line(child)
+                                 for child in self.greek_obj.children]
+
+    def set_gamma_axis_names(self):
         self.gamma_axis.name = "Gamma"
         self.gamma_axis.name_latex = "$\Gamma_m$"
         self.gamma_axis.units = "Hz"
-        self.gamma_axis.lines = [self.get_gamma_line(child) for child in self.greek_obj.children]
 
     def get_gamma_line(self, child):
         line = GreekLine(child)
@@ -81,10 +90,14 @@ class GreekFigure():
 
     def create_amplitude_axis(self, axis):
         self.amplitude_axis = GreekAxis(self.trial, axis)
+        self.set_amplitude_axis_names()
+        self.amplitude_axis.lines = [self.get_amplitude_line(child)
+                                     for child in self.greek_obj.children]
+
+    def set_amplitude_axis_names(self):
         self.amplitude_axis.name = "Amplitude"
         self.amplitude_axis.name_latex = "Amplitude"
         self.amplitude_axis.units = "dBm"
-        self.amplitude_axis.lines = [self.get_amplitude_line(child) for child in self.greek_obj.children]
 
     def get_amplitude_line(self, child):
         line = GreekLine(child)
@@ -94,13 +107,30 @@ class GreekFigure():
         return line
 
     def fit_greek_axes(self):
-        for greek_axis in self.greek_axes:
-            for greek_child in greek_axis.greek_children:
-                greek_child.fit_curve()
+        for greek_child in self.greek_obj.children:
+            self.fit_omega(greek_child)
+            self.fit_gamma(greek_child)
+
+    def fit_omega(self, greek_child):
+        omega_fitting_parameters = greek_child.get_omega_fitting_parameters()
+        print(omega_fitting_parameters)
+        line = GreekLine(greek_child)
+        line.label = f"{line.label} Fit"
+        line.greek = greek_child.evaluate_omega_curve(omega_fitting_parameters)
+        self.omega_axis.lines.append(line)
+
+    def fit_gamma(self, greek_child):
+        gamma_fitting_parameters = greek_child.get_gamma_fitting_parameters()
+        print(gamma_fitting_parameters)
+        line = GreekLine(greek_child)
+        line.label = f"{line.label} Fit"
+        line.greek = greek_child.evaluate_gamma_curve(gamma_fitting_parameters)
+        self.gamma_axis.lines.append(line)
 
     def plot_greek_axes(self):
         for greek_axis in self.greek_axes:
             greek_axis.plot_lines()
+            greek_axis.axis.legend(bbox_to_anchor=(1.05, 1), loc = 2)
 
     def add_greek_figure_labels(self):
         self.add_figure_title()

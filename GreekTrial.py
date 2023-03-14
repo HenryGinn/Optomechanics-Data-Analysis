@@ -159,12 +159,8 @@ class GreekTrial():
         self.children = [self.get_child(file_name) for file_name in self.files]
 
     def get_child(self, file_name):
-        child = self.get_base_child(file_name)
-        return child
-
-    def get_base_child(self, file_name):
         label = self.get_label_from_file_name(file_name)
         path = os.path.join(self.path, file_name)
-        base_child = Greek(self.trial, self, label)
-        base_child.extract_from_path(path)
-        return base_child
+        child = Greek(self.trial, self, label)
+        child.extract_from_path(path)
+        return child
