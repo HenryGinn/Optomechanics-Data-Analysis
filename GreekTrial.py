@@ -5,6 +5,9 @@ import numpy as np
 
 from GreekDetuning import GreekDetuning
 from Greek import Greek
+from Omega import Omega
+from Gamma import Gamma
+from Amplitude import Amplitude
 from Utils import get_file_contents
 from Utils import get_last_number_in_file_name
 
@@ -160,33 +163,14 @@ class GreekTrial():
         self.omega_children, self.gamma_children, self.amplitude_children = zip(*children)
 
     def get_children(self, file_name):
-        label = self.get_label_from_file_name(file_name)
-        path = os.path.join(self.path, file_name)
-        child = Greek(self.trial, self, label)
-        child.extract_from_path(path)
-        omega_child = self.get_omega_child(child)
-        gamma_child = self.get_gamma_child(child)
-        amplitude_child = self.get_amplitude_child(child)
+        self.set_base_child(file_name)
+        omega_child = Omega(self.base_child)
+        gamma_child = Gamma(self.base_child)
+        amplitude_child = Amplitude(self.base_child)
         return omega_child, gamma_child, amplitude_child
 
-    def get_omega_child(self, child):
-        omega_child = deepcopy(child)
-        omega_child.greek = np.abs(omega_child.omega)
-        omega_child.offset_greek_by_0_value()
-        if hasattr(omega_child, "omega_deviations"):
-            omega_child.deviations = omega_child.omega_deviations
-        return omega_child
-
-    def get_gamma_child(self, child):
-        gamma_child = deepcopy(child)
-        gamma_child.greek = gamma_child.gamma
-        if hasattr(gamma_child, "gamma_deviations"):
-            gamma_child.deviations = gamma_child.gamma_deviations
-        return gamma_child
-
-    def get_amplitude_child(self, child):
-        amplitude_child = deepcopy(child)
-        amplitude_child.greek = amplitude_child.amplitude
-        if hasattr(amplitude_child, "amplitude_deviations"):
-            amplitude_child.deviations = amplitude_child.amplitude_deviations
-        return amplitude_child
+    def set_base_child(self, file_name):
+        label = self.get_label_from_file_name(file_name)
+        path = os.path.join(self.path, file_name)
+        self.base_child = Greek(self.trial, self, label)
+        self.base_child.extract_from_path(path)

@@ -15,6 +15,13 @@ class Greek():
         self.greek_obj = greek_obj
         self.label = label
 
+    def initialise_from_base_greek(self, base_greek):
+        self.trial_obj = base_greek.trial_obj
+        self.greek_obj = base_greek.greek_obj
+        self.label = base_greek.label
+        self.detuning = base_greek.detuning
+        self.x_values = base_greek.x_values
+
     def extract_from_path(self, path):
         self.path = path
         file_contents = get_file_contents(path)
@@ -52,3 +59,6 @@ class Greek():
             print(f"Warning: trial does not have data for 0 detuning\n{self.trial_obj}")
             detuning_0_index = 0
         return detuning_0_index
+
+    def fit_curve(self):
+        pass
