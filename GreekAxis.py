@@ -1,8 +1,9 @@
 import os
 import sys
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -16,15 +17,14 @@ class GreekAxis():
     to plot onto the axis.
     """
 
-    def __init__(self, trial_obj, greek_obj, axis):
+    def __init__(self, trial_obj, greek_children, axis):
         self.trial_obj = trial_obj
         self.axis = axis
-        self.greek_obj = greek_obj
-        self.greek_children = []
+        self.greek_children = greek_children
 
-    def plot_greek_child(self, greek_child):
-        self.greek_children.append(greek_child)
-        self.make_plot_of_greek(greek_child)
+    def plot_children(self):
+        for greek_child in self.greek_children:
+            self.make_plot_of_greek(greek_child)
 
     def make_plot_of_greek(self, greek_child):
         if hasattr(greek_child, 'deviations') is False:
@@ -63,7 +63,7 @@ class GreekAxis():
 
     def add_y_axis_labels(self):
         self.reset_y_ticks_and_labels()
-        self.axis.set_ylabel(f"{self.greek_obj.name_latex} (Hz)")
+        self.axis.set_ylabel(f"{self.name_latex} ({self.units})")
 
     def reset_y_ticks_and_labels(self):
         # This code appears unnecessary but ticks can go missing if it is not included

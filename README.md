@@ -123,13 +123,17 @@ The Power class does not do much, and most of the things you might think are ass
 
 #### Trial
 
-This is where most of the reading and writing of information about the transmission and the spectrum happens here. One of it's main jobs is to create the detuning objects. It is at this stage where the transmission files need to be paired up with the spectrum files, and this is done by reading the timestamp. For each detuning there is one transmission and there can be many spectrum files.
+This is where most of the reading and writing of information about the transmission and the spectrum happens. One of it's main jobs is to create the detuning objects. It is at this stage where the transmission files need to be paired up with the spectrum files, and this is done by reading the timestamp. For each detuning there is one transmission and there can be many spectrum files.
 
-The other main purpose of this class is to manage the collection of data about the transmission and spectra files (through the process_transmission and process_spectrum methods of DataSet) and save them to files. When this information needs to be accessed, the reading of those files will also be processed by this class. Whenever anything else needs to be processed at the trial level, they will refer to the attributes of the objects of this class as that is where the data is stored.
+The other main purpose of this class is to manage the collection of data about the transmission and spectra files (through the process_transmission and process_spectrum methods of DataSet) and save them to files. When this information needs to be accessed, the reading of those files will also be processed by this class. Whenever anything else needs to be processed at the trial level, they will refer to the attributes of the objects of this class as that is where the data is stored. For example, omega and gamma are found in GreekTrial, and one the attributes of this class is the trial object it is associated with, and that is how the class interacts with the trial data.
 
 #### GreekTrial
 
+This is where all handling of omega and gamma is handled at the trial level. It organises the finding of quantities to do with omega and gamma, saving them to files, and also reading them from files. It has two main functions which are called using the methods process_greek(average=None) and average_greek. It is also used when plotting omega and gamma, as that data will need to be read from the files in order to plot them. Each data series of is stored as an instance of the Greek class.
+
 #### TrialPlot
+
+This class if used for plotting anything at the trial level, apart from omega and gamma. 
 
 #### GreekFigure
 

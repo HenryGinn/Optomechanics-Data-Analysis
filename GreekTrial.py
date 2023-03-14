@@ -1,4 +1,8 @@
 import os
+from copy import deepcopy
+
+import numpy as np
+
 from GreekDetuning import GreekDetuning
 from Greek import Greek
 from Utils import get_file_contents
@@ -91,7 +95,7 @@ class GreekTrial():
         self.average_greek_file_path = os.path.join(greek_folder_path, file_name)
 
     def write_average_greek_to_file(self, file, detuning_obj):
-        if hasattr(detuning_obj, "omega_average"):
+        if detuning_obj.omega_average is not None:
             file = self.do_write_average_greek_to_file(file, detuning_obj)
         return file
 
@@ -152,12 +156,37 @@ class GreekTrial():
         self.files = self.trial.get_data_files(self.path)
 
     def set_children(self):
-        self.children = [self.get_child(file_name)
-                         for file_name in self.files]
+        children = [self.get_children(file_name) for file_name in self.files]
+        self.omega_children, self.gamma_children, self.amplitude_children = zip(*children)
 
-    def get_child(self, file_name):
+    def get_children(self, file_name):
         label = self.get_label_from_file_name(file_name)
-        child = Greek(self.trial, self, label)
         path = os.path.join(self.path, file_name)
+        child = Greek(self.trial, self, label)
         child.extract_from_path(path)
-        return child
+        omega_child = self.get_omega_child(child)
+        gamma_child = self.get_gamma_child(child)
+        amplitude_child = self.get_amplitude_child(child)
+        return omega_child, gamma_child, amplitude_child
+
+    def get_omega_child(self, child):
+        omega_child = deepcopy(child)
+        omega_child.greek = np.abs(omega_child.omega)
+        omega_child.offset_greek_by_0_value()
+        if hasattr(omega_child, "omega_deviations"):
+            omega_child.deviations = omega_child.omega_deviations
+        return omega_child
+
+    def get_gamma_child(self, child):
+        gamma_child = deepcopy(child)
+        gamma_child.greek = gamma_child.gamma
+        if hasattr(gamma_child, "gamma_deviations"):
+            gamma_child.deviations = gamma_child.gamma_deviations
+        return gamma_child
+
+    def get_amplitude_child(self, child):
+        amplitude_child = deepcopy(child)
+        amplitude_child.greek = amplitude_child.amplitude
+        if hasattr(amplitude_child, "amplitude_deviations"):
+            amplitude_child.deviations = amplitude_child.amplitude_deviations
+        return amplitude_child

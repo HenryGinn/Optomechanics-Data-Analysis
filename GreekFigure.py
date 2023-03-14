@@ -1,5 +1,7 @@
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
+
 from GreekAxis import GreekAxis
 from GreekTrial import GreekTrial
 
@@ -16,115 +18,70 @@ class GreekFigure():
 
     def create_greek_figure(self, format_type):
         self.set_greek_obj()
-        if self.omega_files_valid():
-            self.do_create_omega_figure(format_type)
+        if self.greek_files_valid():
+            self.do_create_greek_figure(format_type)
+        
+    def set_greek_obj(self):
+        self.greek_obj = GreekTrial(self.trial)
+        self.greek_obj.path = self.trial.data_set.greek_path
+        self.greek_obj.set_files()
+        self.greek_obj.set_children()
 
-    def set_omega_obj(self):
-        self.omega_obj = OmegaTrial(self.trial)
-        self.omega_obj.set_omega_children()
+    def greek_files_valid(self):
+        greek_non_empty = self.file_list_has_data(self.greek_obj.path, self.greek_obj.files)
+        return greek_non_empty
 
-    def omega_files_valid(self):
-        omega_non_empty = self.file_list_has_data(self.omega_obj.path, self.omega_obj.files)
-        return omega_non_empty
-
-    def do_create_omega_figure(self, format_type):
-        self.fig, axis_omega = plt.subplots()
+    def do_create_greek_figure(self, format_type):
+        self.fig, (axis_omega, axis_gamma, axis_amplitude) = plt.subplots(3, sharex=True)
         self.plot_omega(axis_omega)
-        self.add_omega_labels()
-        self.save_omega_figure(format_type)
+        self.plot_gamma(axis_gamma)
+        self.plot_amplitude(axis_amplitude)
+        self.add_greek_figure_labels()
+        self.save_greek_figure(format_type)
 
     def plot_omega(self, axis):
-        self.omega_axis = GreekAxis(self, self.omega_obj, axis)
-        self.plot_greeks(self.omega_obj, self.omega_axis)
+        self.omega_axis = GreekAxis(self.trial, self.greek_obj.omega_children, axis)
+        self.omega_axis.name = "Omega"
+        self.omega_axis.name_latex = "$\Omega_m$"
+        self.omega_axis.units = "Hz"
+        self.omega_axis.plot_children()
 
-    def add_omega_labels(self):
-        self.fig.suptitle("Omega")
-        self.omega_axis.add_plot_labels()
-    
-    def save_omega_figure(self, format_type):
-        figure_file_name = self.get_figure_file_name(format_type, "Omega")
-        figure_path = os.path.join(self.trial.data_set.omega_path, figure_file_name)
-        self.save_figure(figure_path, format_type)
-        
-
-    def create_gamma_figure(self, format_type):
-        self.set_gamma_obj()
-        if self.gamma_files_valid():
-            self.do_create_gamma_figure(format_type)
-
-    def set_gamma_obj(self):
-        self.gamma_obj = GammaTrial(self.trial)
-        self.gamma_obj.set_gamma_children()
-
-    def gamma_files_valid(self):
-        gamma_non_empty = self.file_list_has_data(self.gamma_obj.path, self.gamma_obj.files)
-        return gamma_non_empty
-
-    def do_create_gamma_figure(self, format_type):
-        self.fig, axis_gamma = plt.subplots()
-        self.plot_gamma(axis_gamma)
-        self.add_gamma_labels()
-        self.save_gamma_figure(format_type)
-        
     def plot_gamma(self, axis):
-        self.gamma_axis = GreekAxis(self, self.gamma_obj, axis)
-        self.plot_greeks(self.gamma_obj, self.gamma_axis)
+        self.gamma_axis = GreekAxis(self.trial, self.greek_obj.gamma_children, axis)
+        self.gamma_axis.name = "Gamma"
+        self.gamma_axis.name_latex = "$\Gamma_m$"
+        self.gamma_axis.units = "Hz"
+        self.gamma_axis.plot_children()
 
-    def add_gamma_labels(self):
-        self.fig.suptitle("Gamma")
-        self.gamma_axis.add_plot_labels()
-    
-    def save_gamma_figure(self, format_type):
-        figure_file_name = self.get_figure_file_name(format_type, "Gamma")
-        figure_path = os.path.join(self.trial.data_set.gamma_path, figure_file_name)
-        self.save_figure(figure_path, format_type)
+    def plot_amplitude(self, axis):
+        self.amplitude_axis = GreekAxis(self.trial, self.greek_obj.amplitude_children, axis)
+        self.amplitude_axis.name = "Amplitude"
+        self.amplitude_axis.name_latex = "Amplitude"
+        self.amplitude_axis.units = "dBm"
+        self.amplitude_axis.plot_children()
 
-    
-    def create_omega_and_gamma_figure(self, format_type):
-        self.set_omega_obj()
-        self.set_gamma_obj()
-        if self.omega_and_gamma_files_valid():
-            self.do_create_omega_and_gamma_figure(format_type)
-
-    def omega_and_gamma_files_valid(self):
-        if self.omega_files_valid():
-            if self.gamma_files_valid():
-                return True
-        return False
-
-    def do_create_omega_and_gamma_figure(self, format_type):
-        self.fig, (axis_omega, axis_gamma) = plt.subplots(2, sharex=True)
-        self.plot_omega(axis_omega)
-        self.plot_gamma(axis_gamma)
-        self.add_omega_and_gamma_figure_labels()
-        self.save_omega_and_gamma_figure(format_type)
-
-    def add_omega_and_gamma_figure_labels(self):
-        self.add_omega_and_gamma_title()
+    def add_greek_figure_labels(self):
+        self.fig.suptitle("My Title")
         self.omega_axis.add_y_axis_labels()
         self.gamma_axis.add_y_axis_labels()
-        self.gamma_axis.add_x_axis_labels()
+        self.amplitude_axis.add_y_axis_labels()
+        self.amplitude_axis.add_x_axis_labels()
+    
+    def save_greek_figure(self, format_type):
+        figure_file_name = self.get_figure_file_name(format_type, "OmegaAndGamma")
+        figure_path = os.path.join(self.trial.data_set.greek_path, figure_file_name)
+        self.save_figure(figure_path, format_type)
 
-    def add_omega_and_gamma_title(self):
-        figure_title = self.get_omega_and_gamma_figure_title()
+    def add_greek_title(self):
+        figure_title = self.get_greek_figure_title()
         self.fig.suptitle(figure_title)
 
-    def get_omega_and_gamma_figure_title(self):
+    def get_greek_figure_title(self):
         data_set = self.trial.data_set.folder_name
         power_string = self.trial.power_obj.power_string
         trial_number = self.trial.trial_number
         plot_title = f"{data_set}, {power_string} dBm, Trial {trial_number}"
         return plot_title
-
-    def save_omega_and_gamma_figure(self, format_type):
-        figure_file_name = self.get_figure_file_name(format_type, "OmegaAndGamma")
-        figure_path = os.path.join(self.trial.data_set.omega_and_gamma_path, figure_file_name)
-        self.save_figure(figure_path, format_type)
-
-    def plot_greeks(self, greek_obj, axis):
-        for greek_child in greek_obj.children:
-            axis.plot_greek_child(greek_child)
-            #greek_obj.fit_curve(greek_child)
 
     def file_list_has_data(self, folder_path, file_list):
         for file_name in file_list:
