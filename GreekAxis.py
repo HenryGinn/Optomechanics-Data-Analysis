@@ -17,20 +17,19 @@ class GreekAxis():
     to plot onto the axis.
     """
 
-    def __init__(self, trial_obj, greek_children, axis):
+    def __init__(self, trial_obj, axis):
         self.trial_obj = trial_obj
         self.axis = axis
-        self.greek_children = greek_children
 
-    def plot_children(self):
-        for greek_child in self.greek_children:
-            self.make_plot_of_greek(greek_child)
+    def plot_lines(self):
+        for greek_line in self.lines:
+            self.make_plot_of_greek(greek_line)
 
-    def make_plot_of_greek(self, greek_child):
-        if hasattr(greek_child, 'deviations') is False:
-            self.axis.plot(greek_child.x_values, greek_child.greek, '.-', label=greek_child.label)
+    def make_plot_of_greek(self, greek_line):
+        if hasattr(greek_line, 'deviations') is False:
+            self.axis.plot(greek_line.x_values, greek_line.greek, '.-', label=greek_line.label)
         else:
-            self.axis.errorbar(greek_child.x_values, greek_child.greek, fmt='.-', yerr=greek_child.deviations, label=greek_child.label)
+            self.axis.errorbar(greek_line.x_values, greek_line.greek, fmt='.-', yerr=greek_line.deviations, label=greek_line.label)
 
     def add_plot_labels(self):
         self.add_axis_labels()

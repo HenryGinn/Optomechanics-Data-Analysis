@@ -5,9 +5,6 @@ import numpy as np
 
 from GreekDetuning import GreekDetuning
 from Greek import Greek
-from Omega import Omega
-from Gamma import Gamma
-from Amplitude import Amplitude
 from Utils import get_file_contents
 from Utils import get_last_number_in_file_name
 
@@ -159,18 +156,15 @@ class GreekTrial():
         self.files = self.trial.get_data_files(self.path)
 
     def set_children(self):
-        children = [self.get_children(file_name) for file_name in self.files]
-        self.omega_children, self.gamma_children, self.amplitude_children = zip(*children)
+        self.children = [self.get_child(file_name) for file_name in self.files]
 
-    def get_children(self, file_name):
-        self.set_base_child(file_name)
-        omega_child = Omega(self.base_child)
-        gamma_child = Gamma(self.base_child)
-        amplitude_child = Amplitude(self.base_child)
-        return omega_child, gamma_child, amplitude_child
+    def get_child(self, file_name):
+        child = self.get_base_child(file_name)
+        return child
 
-    def set_base_child(self, file_name):
+    def get_base_child(self, file_name):
         label = self.get_label_from_file_name(file_name)
         path = os.path.join(self.path, file_name)
-        self.base_child = Greek(self.trial, self, label)
-        self.base_child.extract_from_path(path)
+        base_child = Greek(self.trial, self, label)
+        base_child.extract_from_path(path)
+        return base_child
