@@ -78,9 +78,10 @@ class Greek():
         return function_values
 
     def get_gamma_fitting_parameters(self):
-        initial_fitting_parameters = [40, 1000, 1]
+        initial_fitting_parameters = [40, 1000000, 500]
         gamma_fitting_parameters = sc.leastsq(self.get_residuals_gamma,
                                               initial_fitting_parameters)[0]
+        gamma_fitting_parameters = initial_fitting_parameters
         return gamma_fitting_parameters
 
     def get_residuals_gamma(self, fitting_parameters):
@@ -95,5 +96,5 @@ class Greek():
         minus = self.x_values - self.omega - self.omega_0_value
         term_plus = kappa/(plus**2 + kappa**2/4)
         term_minus = kappa/(minus**2 + kappa**2/4)
-        function_values = gamma_0 + coefficient*(term_plus + term_minus)
+        function_values = gamma_0 + coefficient*(term_plus - term_minus)
         return function_values

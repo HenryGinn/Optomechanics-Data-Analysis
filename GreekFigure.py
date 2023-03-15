@@ -108,12 +108,11 @@ class GreekFigure():
 
     def fit_greek_axes(self):
         for greek_child in self.greek_obj.children:
-            self.fit_omega(greek_child)
+            #self.fit_omega(greek_child)
             self.fit_gamma(greek_child)
 
     def fit_omega(self, greek_child):
         omega_fitting_parameters = greek_child.get_omega_fitting_parameters()
-        print(omega_fitting_parameters)
         line = GreekLine(greek_child)
         line.label = f"{line.label} Fit"
         line.greek = greek_child.evaluate_omega_curve(omega_fitting_parameters)
