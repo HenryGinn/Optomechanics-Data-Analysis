@@ -42,11 +42,20 @@ class Greek():
         else:
             self.detuning, self.drift, self.omega, self.omega_deviation, self.gamma, self.gamma_deviation, self.amplitude, self.amplitude_deviations = file_contents
         self.x_values = self.detuning - self.drift
+
+    def set_fitting_limits(self):
+        self.gamma_left_limit = self.get_detuning_index(-10)
+        self.gamma_right_limit = self.get_detuning_index(10)
+
+    def get_detuning_index(self, detuning_MHz):
+        detunings_shifted = self.x_values - detuning_MHz*10**6
+        detuning_index = np.argmin(np.abs(detunings_shifted))
+        return detuning_index
     
-    def offset_omega_by_0_value(self):
+    def set_omega_offset(self):
         detuning_0_index = self.get_detuning_0_index()
         self.omega_0_value = self.omega[detuning_0_index]
-        self.omega -= self.omega_0_value
+        self.omega_offset = self.omega - self.omega_0_value
 
     def get_detuning_0_index(self):
         if 0.0 in self.detuning:
@@ -78,23 +87,27 @@ class Greek():
         return function_values
 
     def get_gamma_fitting_parameters(self):
-        initial_fitting_parameters = [40, 1000000, 500]
+        initial_fitting_parameters = [43, 1000000, 26000000]
         gamma_fitting_parameters = sc.leastsq(self.get_residuals_gamma,
                                               initial_fitting_parameters)[0]
-        gamma_fitting_parameters = initial_fitting_parameters
+        #gamma_fitting_parameters = initial_fitting_parameters
         return gamma_fitting_parameters
 
     def get_residuals_gamma(self, fitting_parameters):
         function_values = self.evaluate_gamma_curve(fitting_parameters)
-        residuals = function_values - self.gamma
+        residuals = (function_values - self.gamma)
+        residuals = self.filter_residuals(residuals)
         return residuals
 
     def evaluate_gamma_curve(self, fitting_parameters):
-        gamma_0, g, kappa = fitting_parameters
-        coefficient = g**2 * np.sign(self.x_values)
-        plus = self.x_values + self.omega + self.omega_0_value
-        minus = self.x_values - self.omega - self.omega_0_value
-        term_plus = kappa/(plus**2 + kappa**2/4)
-        term_minus = kappa/(minus**2 + kappa**2/4)
-        function_values = gamma_0 + coefficient*(term_plus - term_minus)
+        gamma_0, f, kappa = fitting_parameters
+        multiplier =  f / (kappa**2 + 4*self.x_values**2) * 10**18
+        term_plus = kappa/((self.x_values + self.omega_0_value)**2 + kappa**2/4)
+        term_minus = kappa/((self.x_values - self.omega_0_value)**2 + kappa**2/4)
+        function_values = gamma_0 + multiplier*(term_plus - term_minus)
         return function_values
+
+    def filter_residuals(self, residuals):
+        if hasattr(self, "gamma_left_limit"):
+            residuals = residuals[self.gamma_left_limit:self.gamma_right_limit]
+        return residuals

@@ -34,8 +34,9 @@ class GreekFigure():
         return greek_non_empty
 
     def do_create_greek_figure(self, format_type):
-        self.fig, (axis_omega, axis_gamma, axis_amplitude) = plt.subplots(3, sharex=True)
-        self.plot_greeks(axis_omega, axis_gamma, axis_amplitude)
+        #self.fig, (axis_omega, axis_gamma, axis_amplitude) = plt.subplots(3, sharex=True)
+        self.fig, (axis_omega, axis_gamma) = plt.subplots(2, sharex=True)
+        self.plot_greeks(axis_omega, axis_gamma, None)
         self.add_greek_figure_labels()
         self.save_greek_figure(format_type)
 
@@ -47,8 +48,8 @@ class GreekFigure():
     def create_greek_axes(self, axis_omega, axis_gamma, axis_amplitude):
         self.create_omega_axis(axis_omega)
         self.create_gamma_axis(axis_gamma)
-        self.create_amplitude_axis(axis_amplitude)
-        self.greek_axes = [self.omega_axis, self.gamma_axis, self.amplitude_axis]
+        #self.create_amplitude_axis(axis_amplitude)
+        self.greek_axes = [self.omega_axis, self.gamma_axis]#, self.amplitude_axis]
 
     def create_omega_axis(self, axis):
         self.omega_axis = GreekAxis(self.trial, axis)
@@ -64,8 +65,8 @@ class GreekFigure():
     def get_omega_line(self, child):
         line = GreekLine(child)
         child.omega = np.abs(child.omega)
-        child.offset_omega_by_0_value()
-        line.greek = child.omega
+        child.set_omega_offset()
+        line.greek = child.omega_offset
         if hasattr(child, "omega_deviations"):
             line.deviations = child.omega_deviations
         return line
@@ -110,6 +111,7 @@ class GreekFigure():
         for greek_child in self.greek_obj.children:
             #self.fit_omega(greek_child)
             self.fit_gamma(greek_child)
+            pass
 
     def fit_omega(self, greek_child):
         omega_fitting_parameters = greek_child.get_omega_fitting_parameters()
@@ -134,12 +136,13 @@ class GreekFigure():
     def add_greek_figure_labels(self):
         self.add_figure_title()
         self.add_y_axis_labels()
-        self.amplitude_axis.add_x_axis_labels()
+        self.gamma_axis.add_x_axis_labels()
+        #self.amplitude_axis.add_x_axis_labels()
 
     def add_y_axis_labels(self):
         self.omega_axis.add_y_axis_labels()
         self.gamma_axis.add_y_axis_labels()
-        self.amplitude_axis.add_y_axis_labels()
+        #self.amplitude_axis.add_y_axis_labels()
     
     def save_greek_figure(self, format_type):
         figure_file_name = self.get_figure_file_name(format_type, "OmegaAndGamma")

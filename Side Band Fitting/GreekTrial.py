@@ -163,4 +163,5 @@ class GreekTrial():
         path = os.path.join(self.path, file_name)
         child = Greek(self.trial, self, label)
         child.extract_from_path(path)
+        child.set_fitting_limits()
         return child
