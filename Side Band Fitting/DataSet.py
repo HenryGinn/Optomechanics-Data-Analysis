@@ -123,6 +123,7 @@ class DataSet():
         self.create_data_set_results_folder()
         self.create_S21_folders()
         self.create_greek_folder()
+        self.create_max_gamma_S21_folder()
 
     def create_S21_folders(self):
         self.create_spectrum_folder()
@@ -157,6 +158,12 @@ class DataSet():
         if os.path.isdir(self.greek_path) == False:
             os.mkdir(self.greek_path)
             print(f"Creating Omega and Gamma folder at {self.greek_path}")
+
+    def create_max_gamma_S21_folder(self):
+        self.max_gamma_S21_path = os.path.join(self.data_set_results_path, "Max Gamma S21")
+        if os.path.isdir(self.max_gamma_S21_path) == False:
+            os.mkdir(self.max_gamma_S21_path)
+            print(f"Creating Max Gamma S21 folder at {self.max_gamma_S21_path}")
 
     def create_greek_objects(self):
         for power_obj in self.power_objects:
