@@ -201,15 +201,20 @@ class Trial():
         _, index, frequency, cavity_frequency = transmission_file_contents[detuning_index]
         detuning_obj.extract_transmission_from_file_detuning(index, frequency, cavity_frequency)
 
+    def get_data_files_filtered(self, folder_path, invalid_ending):
+        data_files = self.get_data_files(folder_path)
+        data_files = [file_name for file_name in data_files
+                      if not file_name.endswith(invalid_ending)]
+        return data_files
+
     def get_data_files(self, folder_path):
         all_file_names = sorted(os.listdir(folder_path))
-        data_files = [file_name
-                      for file_name in all_file_names
+        data_files = [file_name for file_name in all_file_names
                       if self.is_valid_file_name(file_name)]
         return data_files
 
     def is_valid_file_name(self, file_name):
-        if file_name.endswith(".txt") and not file_name.endswith("AllSpectraAveraged.txt"):
+        if file_name.endswith(".txt"):
             power = get_number_from_file_name(file_name, "Power")
             trial = get_number_from_file_name(file_name, "Trial")
             if power == float(self.power_obj.power_string):

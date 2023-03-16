@@ -3,6 +3,7 @@ import os
 import sys
 from Power import Power
 import PutTrialsInFolders
+from LargestGamma import LargestGamma
 from OmegaPowerDrift import OmegaPowerDrift
 
 class DataSet():
@@ -184,6 +185,10 @@ class DataSet():
     def plot_greek(self, format_type="pdf"):
         for power_obj in self.power_objects:
             power_obj.plot_greek(format_type)
+
+    def find_largest_gamma(self):
+        largest_gamma = LargestGamma(self)
+        largest_gamma.find_largest_gamma()
 
     def create_trial_plot_objects(self):
         for power_obj in self.power_objects:

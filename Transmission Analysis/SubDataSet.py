@@ -41,9 +41,9 @@ class SubDataSet():
         for power_obj in self.power_objects:
             power_obj.read_raw_transmission()
 
-    def plot_transmission(self, option):
+    def plot_transmission(self, option, group_size):
         for power_obj in self.power_objects:
-            power_obj.plot_transmission(option)
+            power_obj.plot_transmission(option, group_size)
     
     def align_transmission(self):
         for power_obj in self.power_objects:

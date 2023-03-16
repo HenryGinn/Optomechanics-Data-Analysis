@@ -1,6 +1,8 @@
 import os
 
 from Transmission import Transmission
+from Line import Line
+from Plots import Plots
 from Utils import get_number_from_file_name
 from Utils import convert_to_milliwatts
 
@@ -42,16 +44,27 @@ class Power():
         for transmission_obj in self.transmission_objects:
             transmission_obj.read_raw_transmission()
 
-    def plot_transmission(self, option):
+    def plot_transmission(self, option, group_size):
         plot_transmission_options = {"Raw": self.plot_transmission_raw,
                                      "Aligned": self.plot_transmission_aligned}
-        plot_transmission_options[option]()
+        plot_transmission_options[option](group_size)
 
-    def plot_transmission_raw(self):
-        for transmission_obj in self.transmission_objects:
-            transmission_obj.plot_transmission_raw()
+    def plot_transmission_raw(self, group_size):
+        transmission_raw_lines = [self.get_transmission_raw_line(transmission_obj)
+                                  for transmission_obj in self.transmission_objects]
+        plot_obj = Plots(transmission_raw_lines, group_size)
+        plot_obj.plot()
 
-    def plot_transmission_aligned(self):
+    def get_transmission_raw_line(self, transmission_obj):
+        x_values = transmission_obj.frequency
+        y_values = transmission_obj.S21
+        line_obj = Line(x_values, y_values)
+        line_obj.title = str(transmission_obj.transmission_number)
+        line_obj.x_label = "Frequency (Hz)"
+        line_obj.y_label = "S21 (mW)"
+        return line_obj
+
+    def plot_transmission_aligned(self, group_size):
         pass
 
     def align_transmission(self):

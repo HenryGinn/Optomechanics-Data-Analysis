@@ -63,6 +63,11 @@ class GreekTrial():
         if hasattr(self, "greek_files") is False:
             self.greek_path = self.trial.data_set.greek_path
             self.greek_files = self.trial.get_data_files(self.greek_path)
+            
+    def set_greek_files_filtered(self):
+        if hasattr(self, "greek_files") is False:
+            self.greek_path = self.trial.data_set.greek_path
+            self.greek_files = self.trial.get_data_files_filtered(self.greek_path, "AllSpectraAveraged")
 
     def file_has_greek_averages(self, file_name):
         last_string_in_file_name = get_last_number_in_file_name(file_name)
@@ -95,7 +100,7 @@ class GreekTrial():
         self.average_greek_file_path = os.path.join(greek_folder_path, file_name)
 
     def write_average_greek_to_file(self, file, detuning_obj):
-        if detuning_obj.omega_average is not None:
+        if hasattr(detuning_obj, "omega_average"):
             file = self.do_write_average_greek_to_file(file, detuning_obj)
         return file
 
