@@ -1,14 +1,24 @@
 import math
 
 import matplotlib.pyplot as plt
+import numpy as np
 
 class Plot():
 
+    """
+    An instance of Plot will be a single figure.
+    This figure can have multiple subplots, and corresponding to
+    each subplot is a Lines object. A Lines object has a collection
+    of Line objects associated with it.
+    """
+
     aspect_ratio = 2/3
 
-    def __init__(self, line_objects):
-        self.line_objects = line_objects
-        self.count = len(line_objects)
+    def __init__(self, plots_obj, lines_object, plot_index):
+        self.plots_obj = plots_obj
+        self.lines_object = lines_object
+        self.plot_index = plot_index
+        self.count = len(lines_object)
         self.set_grid_size()
 
     def set_grid_size(self):
@@ -47,9 +57,16 @@ class Plot():
 
     def get_row_column_pair_data(self, pair):
         size = pair[0] * pair[1]
-        aspect_ratio = pair[0] / pair[1]
+        aspect_ratio = self.get_aspect_ratio(pair)
         pair_data_dict = {"Size": size, "Aspect Ratio": aspect_ratio}
         return pair_data_dict
+
+    def get_aspect_ratio(self, pair):
+        if pair[0] != 0 and pair[1] != 0:
+            aspect_ratio = pair[0] / pair[1]
+        else:
+            aspect_ratio = None
+        return aspect_ratio
 
     def select_row_column_pair(self):
         if len(self.row_column_pairs) == 1:
@@ -61,22 +78,22 @@ class Plot():
         self.rows, self.columns = self.pairs[0]
 
     def non_exact_ratio_pairs(self):
-        is_big_enough_grid = self.get_is_big_enough_grid()
+        is_grid_big_enough = self.get_is_grid_big_enough()
         row_column_pair_functions = self.get_row_column_pair_functions()
-        row_column_pair_function, *args = row_column_pair_functions[is_big_enough]
+        row_column_pair_function, *args = row_column_pair_functions[is_grid_big_enough]
         row_column_pair_function(*args)
         self.rows, self.columns = self.best_pair
 
-    def get_is_big_enough_grid(self):
-        is_big_enough_grid = tuple([row_column_pair["Size"] >= self.count
+    def get_is_grid_big_enough(self):
+        is_grid_big_enough = tuple([row_column_pair["Size"] >= self.count
                                     for row_column_pair in self.row_column_pairs.values()])
-        return is_big_enough_grid
+        return is_grid_big_enough
 
     def get_row_column_pair_functions(self):
         row_column_pair_functions = {(True, True, True, True): (self.set_best_pair, 0),
-                                     (False, True, True, True): (self.set_best_pair, 1),
-                                     (False, True, False, True): (self.set_best_pair, 2),
-                                     (False, False, True, True): (self.middle_pair_compare,),
+                                     (False, True, True, True): (self.middle_pair_compare,),
+                                     (False, True, False, True): (self.set_best_pair, 1),
+                                     (False, False, True, True): (self.set_best_pair, 2),
                                      (False, False, False, True): (self.set_best_pair, 3)}
         return row_column_pair_functions
 
@@ -94,8 +111,11 @@ class Plot():
         self.aspect_ratio_score_2 = self.get_aspect_ratio_score(aspect_ratio_2)
 
     def get_aspect_ratio_score(self, aspect_ratio):
-        score = max(aspect_ratio / self.aspect_ratio,
-                    self.aspect_ratio / aspect_ratio)
+        if aspect_ratio is not None:
+            score = max(aspect_ratio / self.aspect_ratio,
+                        self.aspect_ratio / aspect_ratio)
+        else:
+            score = None
         return score
 
     def compare_aspect_ratio_scores(self):
@@ -107,16 +127,22 @@ class Plot():
     def create_figure(self):
         fig, axes = plt.subplots(nrows=self.rows, ncols=self.columns)
         self.plot_lines(axes)
-        #self.suptitle("My Title")
+        fig.suptitle(f"{self.plots_obj.title}, Figure {self.plot_index}")
         self.show_plot(fig)
 
     def plot_lines(self, axes):
-        for ax, line_obj in zip(axes.flatten(), self.line_objects):
-            self.plot_line_obj(ax, line_obj)
+        axes_flat = self.get_axes_flat(axes)
+        for ax, lines_obj in zip(axes_flat, self.lines_object):
+            for line_obj in lines_obj.line_objects:
+                ax.plot(line_obj.x_values, line_obj.y_values)
+            ax.set_title(lines_obj.title)
 
-    def plot_line_obj(self, ax, line_obj):
-        ax.plot(line_obj.x_values, line_obj.y_values)
-        ax.set_title(line_obj.title)
+    def get_axes_flat(self, axes):
+        if isinstance(axes, np.ndarray):
+            axes_flat = axes.flatten()
+        else:
+            axes_flat = [axes]
+        return axes_flat
 
     def show_plot(self, fig):
         fig.tight_layout()

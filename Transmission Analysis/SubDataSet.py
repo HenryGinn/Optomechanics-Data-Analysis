@@ -45,9 +45,9 @@ class SubDataSet():
         for power_obj in self.power_objects:
             power_obj.plot_transmission(option, group_size)
     
-    def align_transmission(self):
+    def align_transmission(self, group_size):
         for power_obj in self.power_objects:
-            power_obj.align_transmission()
+            power_obj.align_transmission(group_size)
 
     def __str__(self):
         if self.data_set.folder_structure_type == 1:

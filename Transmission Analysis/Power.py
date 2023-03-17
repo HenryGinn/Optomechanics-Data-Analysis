@@ -1,10 +1,16 @@
 import os
 
+import numpy as np
+
 from Transmission import Transmission
+from AlignedTransmission import AlignedTransmission
+from Lines import Lines
 from Line import Line
 from Plots import Plots
 from Utils import get_number_from_file_name
 from Utils import convert_to_milliwatts
+from Utils import get_group_size
+from Utils import get_group_indexes
 
 class Power():
 
@@ -39,6 +45,7 @@ class Power():
     def create_transmission_objects(self):
         self.transmission_objects = [Transmission(self, file_name, path)
                                      for file_name, path in zip(self.file_names, self.paths)]
+        self.transmission_objects = np.array(self.transmission_objects)
 
     def read_raw_transmission(self):
         for transmission_obj in self.transmission_objects:
@@ -50,26 +57,83 @@ class Power():
         plot_transmission_options[option](group_size)
 
     def plot_transmission_raw(self, group_size):
-        transmission_raw_lines = [self.get_transmission_raw_line(transmission_obj)
+        transmission_raw_plots = [self.get_transmission_raw_lines(transmission_obj)
                                   for transmission_obj in self.transmission_objects]
-        plot_obj = Plots(transmission_raw_lines, group_size)
-        plot_obj.plot()
+        title = f"{self} Transmission"
+        self.create_plots(transmission_raw_plots, group_size, title)
 
-    def get_transmission_raw_line(self, transmission_obj):
+    def get_transmission_raw_lines(self, transmission_obj):
+        lines_obj = self.create_lines_raw_obj(transmission_obj)
+        lines_obj = self.set_lines_labels_raw(lines_obj, transmission_obj)
+        return lines_obj
+
+    def create_lines_raw_obj(self, transmission_obj):
         x_values = transmission_obj.frequency
         y_values = transmission_obj.S21
         line_obj = Line(x_values, y_values)
-        line_obj.title = str(transmission_obj.transmission_number)
-        line_obj.x_label = "Frequency (Hz)"
-        line_obj.y_label = "S21 (mW)"
-        return line_obj
+        lines_obj = Lines([line_obj])
+        return lines_obj
+
+    def set_lines_labels_raw(self, lines_obj, transmission_obj):
+        lines_obj.title = str(transmission_obj.transmission_number)
+        lines_obj.x_label = "Frequency (Hz)"
+        lines_obj.y_label = "S21 (mW)"
+        return lines_obj
+    
+    def create_plots(self, lines_objects, group_size, title):
+        plot_obj = Plots(lines_objects, group_size)
+        plot_obj.title = title
+        plot_obj.plot()
 
     def plot_transmission_aligned(self, group_size):
-        pass
+        transmission_aligned_plots = [self.get_transmission_aligned_lines(transmission_aligned_obj, index)
+                                      for index, transmission_aligned_obj in enumerate(self.transmission_aligned_objects)]
+        title = f"{self} Transmission Aligned"
+        self.create_plots(transmission_aligned_plots, group_size, title)
 
-    def align_transmission(self):
+    def get_transmission_aligned_lines(self, transmission_aligned_obj, index):
+        lines_obj = self.create_aligned_lines_obj(transmission_aligned_obj)
+        lines_obj = self.set_lines_labels_aligned(lines_obj, transmission_aligned_obj, index)
+        return lines_obj
+
+    def create_aligned_lines_obj(self, transmission_aligned_obj):
+        frequency = transmission_aligned_obj.frequency
+        line_objects = [self.get_line_obj_aligned(transmission_obj, frequency)
+                        for transmission_obj in transmission_aligned_obj.transmission_objects]
+        lines_obj = Lines(line_objects)
+        return lines_obj
+
+    def set_lines_labels_aligned(self, lines_obj, transmission_aligned_obj, index):
+        lines_obj.title = f"Group number {index}"
+        lines_obj.x_label = "Frequency (Hz)"
+        lines_obj.y_label = "S21 (mW)"
+        return lines_obj
+
+    def get_line_obj_aligned(self, transmission_obj, frequency):
+        x_values = frequency
+        y_values = transmission_obj.S21_offset
+        line_obj = Line(x_values, y_values)
+        return line_obj
+
+    def align_transmission(self, group_size):
+        self.set_transmission_peaks()
+        group_size = get_group_size(group_size, self.transmission_objects)
+        group_indexes = get_group_indexes(len(self.transmission_objects), group_size)
+        self.set_transmission_aligned_objects(group_indexes)
+
+    def set_transmission_peaks(self):
         for transmission_obj in self.transmission_objects:
             transmission_obj.set_peak()
+
+    def set_transmission_aligned_objects(self, group_indexes):
+        self.transmission_aligned_objects = [self.get_transmission_aligned(indexes)
+                                             for indexes in group_indexes]
+
+    def get_transmission_aligned(self, indexes):
+        transmission_objects = self.transmission_objects[indexes]
+        transmission_aligned = AlignedTransmission(transmission_objects)
+        transmission_aligned.align_transmissions()
+        return transmission_aligned
 
     def __str__(self):
         string = (f"{self.sub_data_set}, {self.power_string} dBm")

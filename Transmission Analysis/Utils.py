@@ -74,6 +74,11 @@ def convert_to_milliwatts(voltage):
     milliwatts = (10**(voltage / 10)) / 1000
     return milliwatts
 
+def get_group_size(group_size, object_list):
+    if group_size is None:
+        group_size = len(object_list)
+    return group_size
+
 def get_group_indexes(length, group_size):
     group_size, group_count = get_group_data(length, group_size)
     end_point_indexes = get_end_point_indexes(length, group_size, group_count)

@@ -67,6 +67,6 @@ class DataSet():
         for sub_data_set in self.sub_data_sets:
             sub_data_set.plot_transmission(option, group_size)
 
-    def align_transmission(self):
+    def align_transmission(self, group_size=None):
         for sub_data_set in self.sub_data_sets:
-            sub_data_set.align_transmission()
+            sub_data_set.align_transmission(group_size)
