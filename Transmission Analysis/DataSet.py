@@ -63,9 +63,9 @@ class DataSet():
         for sub_data_set in self.sub_data_sets:
             sub_data_set.read_raw_transmission()
 
-    def plot_transmission(self, option="Raw", group_size=None):
+    def plot_transmission(self, option="Raw", group_size=None, subplots=None):
         for sub_data_set in self.sub_data_sets:
-            sub_data_set.plot_transmission(option, group_size)
+            sub_data_set.plot_transmission(option, group_size, subplots)
 
     def align_transmission(self, group_size=None):
         for sub_data_set in self.sub_data_sets:
