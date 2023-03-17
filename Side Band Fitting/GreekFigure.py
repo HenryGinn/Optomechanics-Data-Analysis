@@ -10,9 +10,8 @@ from GreekLine import GreekLine
 class GreekFigure():
 
     """
-    This handles a figure involving Omega or Gamma data at the trial level.
-    It manages OmegaTrial and GammaTrial objects, and is an interface
-    for GreekAxis.
+    This handles a figure involving Omega and Gamma data at the trial level.
+    It manages GreekTrial objects, and is an interface for GreekAxis.
     """
 
     def __init__(self, trial_obj):
@@ -67,6 +66,10 @@ class GreekFigure():
         child.omega = np.abs(child.omega)
         child.set_omega_offset()
         line.greek = child.omega_offset
+        line = self.add_omega_deviations(line, child)
+        return line
+
+    def add_omega_deviations(self, line, child):
         if hasattr(child, "omega_deviations"):
             line.deviations = child.omega_deviations
         return line
@@ -85,6 +88,10 @@ class GreekFigure():
     def get_gamma_line(self, child):
         line = GreekLine(child)
         line.greek = child.gamma
+        line = self.add_gamma_deviations(line, child)
+        return line
+
+    def add_gamma_deviations(self, line, child):
         if hasattr(child, "gamma_deviations"):
             line.deviations = child.gamma_deviations
         return line
@@ -103,6 +110,10 @@ class GreekFigure():
     def get_amplitude_line(self, child):
         line = GreekLine(child)
         line.greek = child.amplitude
+        line = self.add_amplitude_deviations(line, child)
+        return line
+
+    def add_amplitude_deviations(self, line, child):
         if hasattr(child, "amplitude_deviations"):
             line.deviations = child.amplitude_deviations
         return line

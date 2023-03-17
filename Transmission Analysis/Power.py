@@ -95,7 +95,7 @@ class Power():
         return line_obj
 
     def set_lines_labels_raw(self, lines_obj, index):
-        lines_obj.title = f"Group number {index}"
+        lines_obj.title = f"Group {index}"
         lines_obj.x_label = "Frequency (Hz)"
         lines_obj.y_label = "S21 (mW)"
         return lines_obj
@@ -119,7 +119,7 @@ class Power():
         return lines_obj
 
     def set_lines_labels_aligned(self, lines_obj, transmission_aligned_obj, index):
-        lines_obj.title = f"Group number {index}"
+        lines_obj.title = f"Group {index}"
         lines_obj.x_label = "Frequency (Hz)"
         lines_obj.y_label = "S21 (mW)"
         return lines_obj

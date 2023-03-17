@@ -126,16 +126,24 @@ class Plot():
 
     def create_figure(self):
         fig, axes = plt.subplots(nrows=self.rows, ncols=self.columns)
-        self.plot_lines(axes)
+        self.plot_axes(axes)
         fig.suptitle(f"{self.plots_obj.title}, Figure {self.plot_index}")
         self.show_plot(fig)
 
-    def plot_lines(self, axes):
+    def plot_axes(self, axes):
         axes_flat = self.get_axes_flat(axes)
         for ax, lines_obj in zip(axes_flat, self.lines_object):
-            for line_obj in lines_obj.line_objects:
-                ax.plot(line_obj.x_values, line_obj.y_values)
+            self.plot_lines(ax, lines_obj)
+            self.set_labels(ax, lines_obj)
+
+    def plot_lines(self, ax, lines_obj):
+        for line_obj in lines_obj.line_objects:
+            ax.plot(line_obj.x_values, line_obj.y_values)
+
+    def set_labels(self, ax, lines_obj):
             ax.set_title(lines_obj.title)
+            ax.set_xlabel(lines_obj.x_label)
+            ax.set_ylabel(lines_obj.y_label)
 
     def get_axes_flat(self, axes):
         if isinstance(axes, np.ndarray):

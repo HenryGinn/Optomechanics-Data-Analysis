@@ -6,3 +6,4 @@ class GreekLine():
         self.detuning = greek_child.detuning
         self.label = greek_child.label
         self.x_values = greek_child.x_values
+        self.greek = None
