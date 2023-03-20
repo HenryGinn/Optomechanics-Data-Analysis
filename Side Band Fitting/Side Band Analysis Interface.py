@@ -14,27 +14,44 @@ of peak", "Transmission peak", and "Colour plots". Options for creating
 plots by detuning are "Frequency of peak"
 """
 
-#my_data_set = DataSet("15112022", folder_structure_type=1)
-#my_data_set = DataSet("16112022_overnight", folder_structure_type=2)
-my_data_set = DataSet("17112022", folder_structure_type=2)
-#my_data_set = DataSet("18112022", folder_structure_type=2)
-#my_data_set = DataSet("19112022", folder_structure_type=3)
-#my_data_set = DataSet("21112022", folder_structure_type=3)
-#my_data_set = DataSet("22112022", folder_structure_type=3)
+def get_data_set(data_set_data):
+    name, structure = data_set_data
+    data_set = DataSet(name, folder_structure_type=structure)
+    return data_set
 
-my_data_set.process_folders()
+def process_data_set(data_set):
+    data_set.process_folders()
 
-#my_data_set.process_transmission()
-#my_data_set.process_spectrum()
+    #data_set.process_transmission()
+    #data_set.process_spectrum()
 
-my_data_set.create_greek_objects()
-#my_data_set.process_greek()
-#my_data_set.average_greek()
-#my_data_set.plot_greek()
+    data_set.create_greek_objects()
+    data_set.process_greek()
+    #data_set.average_greek()
+    #data_set.plot_greek()
 
-my_data_set.find_largest_gamma()
-#my_data_set.omega_power_drift(False)
+    #data_set.find_largest_gamma()
+    #data_set.omega_power_drift(False)
 
-#my_data_set.create_trial_plot_objects()
-#my_data_set.create_trial_plots("Transmission peak")
-#my_data_set.create_detuning_plots("Frequency of peak")
+    #data_set.create_trial_plot_objects()
+    #data_set.create_trial_plots("Transmission peak")
+    #data_set.create_detuning_plots("Frequency of peak")
+
+def process_all_data_sets():
+    for data_set_data in data_sets:
+        data_set = get_data_set(data_set_data)
+        print(f"Processing {data_set.folder_name}\n")
+        process_data_set(data_set)
+
+data_sets = [("15112022", 1),
+             ("16112022_overnight", 2),
+             ("17112022", 2),
+             ("18112022", 2),
+             ("19112022", 3),
+             ("21112022", 3),
+             ("22112022", 3)]
+
+data_set_data = data_sets[1]
+data_set = get_data_set(data_set_data)
+process_data_set(data_set)
+#process_all_data_sets()

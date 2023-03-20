@@ -14,6 +14,7 @@ class Detuning():
     Processing of spectra happens here.
     """
 
+    number_of_spectra_to_remove_from_start = 6
     review_all_S21_simultaneously = False
     output_rejected_spectra = False
     flag_bad_offsets = False
@@ -55,6 +56,11 @@ class Detuning():
     def create_spectrum_objects(self):
         self.spectrum_objects = [Spectrum(self, spectrum_path)
                                  for spectrum_path in self.spectrum_paths]
+        self.remove_first_spectra()
+
+    def remove_first_spectra(self):
+        if len(self.spectrum_objects) > self.number_of_spectra_to_remove_from_start:
+            self.spectrum_objects = self.spectrum_objects[self.number_of_spectra_to_remove_from_start:]
 
     def get_transmission_peak(self):
         self.process_transmission()

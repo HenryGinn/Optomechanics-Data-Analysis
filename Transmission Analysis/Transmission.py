@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+from Fitting import Fitting
 from Utils import get_file_contents
 from Utils import convert_to_milliwatts
 from Utils import get_number_from_file_name
