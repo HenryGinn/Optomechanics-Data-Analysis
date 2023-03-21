@@ -148,7 +148,13 @@ class Plot():
                           "semilogy": ax.semilogy}
         plot_function = plot_functions[self.plots_obj.plot_type]
         for line_obj in lines_obj.line_objects:
-            plot_function(line_obj.x_values, line_obj.y_values)
+            self.plot_line(ax, line_obj, plot_function)
+        
+    def plot_line(self, ax, line_obj, plot_function):
+        plot_function(line_obj.x_values, line_obj.y_values,
+                      color=line_obj.colour,
+                      marker=line_obj.marker,
+                      linestyle=line_obj.linestyle)
 
     def set_labels(self, ax, lines_obj):
             ax.set_title(lines_obj.title)

@@ -133,12 +133,25 @@ class Drift():
     def get_line_objects(self, detuning_obj):
         line_objects = [self.get_line_object(group_obj)
                         for group_obj in detuning_obj.group_objects]
+        line_objects = self.add_markers(detuning_obj, line_objects)
         return line_objects
 
     def get_line_object(self, group_obj):
-        x_values = group_obj.frequency
-        y_values = group_obj.S21
+        x_values = group_obj.spectrum_obj.frequency
+        y_values = group_obj.spectrum_obj.S21
         line_obj = Line(x_values, y_values)
+        return line_obj
+
+    def add_markers(self, detuning_obj, line_objects):
+        if self.markers:
+            line_objects += [self.get_line_object_marker(group_obj)
+                             for group_obj in detuning_obj.group_objects]
+        return line_objects
+
+    def get_line_object_marker(self, group_obj):
+        x_values = group_obj.spectrum_obj.frequency[group_obj.spectrum_obj.peak_indices]
+        y_values = group_obj.spectrum_obj.S21[group_obj.spectrum_obj.peak_indices]
+        line_obj = Line(x_values, y_values, colour="r", marker="*", linestyle="None")
         return line_obj
 
     def set_lines_labels(self, lines_obj, detuning_obj):

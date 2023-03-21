@@ -56,9 +56,10 @@ class DataSet():
         for drift_obj in drift_objects:
             drift_obj.process_spectrum(detunings)
 
-    def plot_spectra(self, subplots=None, drifts=None, detunings=None):
+    def plot_spectra(self, subplots=None, drifts=None, detunings=None, markers=False):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
         for drift_obj in drift_objects:
+            drift_obj.markers = markers
             drift_obj.plot_spectra(subplots, detunings)
 
     def set_peak_coordinates(self, drifts=None, detunings=None):

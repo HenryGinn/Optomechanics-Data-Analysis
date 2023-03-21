@@ -7,10 +7,13 @@ from Utils import flatten
 class Spectrum(Data):
 
     noise_deviations_threshold = 3
-    peak_index_proximity = 2
+    peak_index_proximity = 100
 
-    def __init__(self, group_obj, path):
-        Data.__init__(self, group_obj, path)
+    def __init__(self, group_obj):
+        self.group_obj = group_obj
+    
+    def initialise_from_path(self, path):
+        Data.__init__(self, self.group_obj, path)
 
     def set_peak_coordinates(self):
         non_noise_indices = self.get_non_noise_indices()

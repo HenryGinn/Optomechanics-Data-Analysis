@@ -25,11 +25,18 @@ class Group():
         self.timestamp = get_number_from_file_name("timestamp", self.file_names[0])
 
     def create_spectrum_objects(self):
-        self.spectrum_objects = [Spectrum(self, path) for path in self.spectrum_paths]
+        self.spectrum_objects = [self.get_spectrum_obj(path)
+                                 for path in self.spectrum_paths]
+
+    def get_spectrum_obj(self, path):
+        spectrum_obj = Spectrum(self)
+        spectrum_obj.initialise_from_path(path)
+        return spectrum_obj
 
     def process_spectrum(self):
         self.process_spectrum_objects()
-        self.frequency = self.spectrum_objects[0].frequency
+        self.spectrum_obj = Spectrum(self)
+        self.spectrum_obj.frequency = self.spectrum_objects[0].frequency
         self.align_spectra()
 
     def process_spectrum_objects(self):
@@ -42,7 +49,7 @@ class Group():
         self.set_max_and_min_peak_indexes()
         self.offset_S21()
         self.offset_frequency()
-        self.S21 = np.mean([spectrum_obj.S21_offset for spectrum_obj in self.spectrum_objects], axis=0)
+        self.spectrum_obj.S21 = np.mean([spectrum_obj.S21_offset for spectrum_obj in self.spectrum_objects], axis=0)
 
     def set_peak_indexes(self):
         self.peak_indexes = [spectrum_obj.peak_index
@@ -63,14 +70,14 @@ class Group():
 
     def offset_frequency(self):
         cutoff_size = self.max_peak_index - self.min_peak_index
-        frequency_offset_length = len(self.frequency) - cutoff_size
-        self.frequency = self.frequency[:frequency_offset_length]
-        self.frequency_shift = self.frequency[self.min_peak_index]
-        self.frequency -= self.frequency_shift
+        frequency_offset_length = len(self.spectrum_obj.frequency) - cutoff_size
+        self.spectrum_obj.frequency = self.spectrum_obj.frequency[:frequency_offset_length]
+        self.spectrum_obj.frequency_shift = self.spectrum_obj.frequency[self.min_peak_index]
+        self.spectrum_obj.frequency -= self.spectrum_obj.frequency_shift
 
     def set_peak_coordinates(self):
-        for spectrum_obj in self.spectrum_objects:
-            spectrum_obj.set_peak_coordinates()
+        self.spectrum_obj.set_peak_coordinates()
+        print(self.spectrum_obj.peak_indices)
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"
