@@ -14,10 +14,11 @@ class Plots():
     those figures is handled as a single Plot object.
     """
 
-    def __init__(self, lines_objects, subplot_count):
+    def __init__(self, lines_objects, subplot_count, plot_type="plot"):
         self.lines_objects = np.array(lines_objects)
         self.total = len(lines_objects)
         self.set_subplot_count(subplot_count)
+        self.plot_type = plot_type
         self.partition_lines_objects()
 
     def set_subplot_count(self, subplot_count):

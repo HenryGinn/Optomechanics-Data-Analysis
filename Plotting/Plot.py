@@ -144,8 +144,11 @@ class Plot():
             self.set_labels(ax, lines_obj)
 
     def plot_lines(self, ax, lines_obj):
+        plot_functions = {"plot": ax.plot,
+                          "semilogy": ax.semilogy}
+        plot_function = plot_functions[self.plots_obj.plot_type]
         for line_obj in lines_obj.line_objects:
-            ax.plot(line_obj.x_values, line_obj.y_values)
+            plot_function(line_obj.x_values, line_obj.y_values)
 
     def set_labels(self, ax, lines_obj):
             ax.set_title(lines_obj.title)

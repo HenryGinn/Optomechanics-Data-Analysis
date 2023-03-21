@@ -130,12 +130,12 @@ def get_sliced_list(my_list, my_slice):
 def process_slice(my_list, my_slice):
     if isinstance(my_slice, slice):
         return my_list[my_slice]
-    elif isinstance(my_slice, list) or isinstance(my_slice, tuple):
+    elif hasattr(my_slice, "__iter__"):
         return slice_by_iterable(my_list, my_slice)
     elif isinstance(my_slice, int):
         return slice_by_iterable(my_list, [my_slice])
     else:
-        raise ValueError(f"Slice must be slice, list, tuple, or int, but not {type(my_slice)}")
+        raise ValueError(f"Slice must be iterable of integers, or int, but not {type(my_slice)}")
 
 def slice_by_iterable(my_list, my_slice):
     my_list_type = type(my_list)

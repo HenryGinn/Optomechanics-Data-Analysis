@@ -202,21 +202,9 @@ It can be useful to only consider a single power, trial, detuning, or spectra. C
 
 ### Main Folder Structure
 
-Parent folder: everything is contained inside this one
-    Repo: when saving the repository, this is the folder you want to clone to.
-        Optomechanics-Data-Analysis: this is where all the scripts are saved.
-        This folder will be made when you clone the repository to Repo
-    Data Sets: contains all the raw data
-        15112022: this contains all the information from that day of data collection
-    Results: this folder will be created automatically when
-    create_results_folder is called
-        15112022: this is where all the results for that data set will be stored
-            Omega results
-                Text files: these contain the results for each trial
-                Omega Plot: this is a plot of omega
-            Gamma results
-                Text files: these contain the results for each trial
-                Gamma Plot: this is a plot of gamma
+Results: this folder will be created automatically when create_results_folder is called
+    dd/mm/yyyy: this is where all the results for a given data set will be stored
+        
 
 ### Data Set Folder Structures
 

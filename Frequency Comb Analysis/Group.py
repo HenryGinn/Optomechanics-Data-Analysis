@@ -11,11 +11,7 @@ class Group():
         self.detuning_obj = detuning_obj
         self.path = path
         self.set_paths()
-        self.set_group_number()
-        self.set_timestamp()
-
-    def set_group_number(self):
-        self.group_number = int(self.folder_name[-2])
+        self.set_attributes_initial()
 
     def set_paths(self):
         self.folder_name = os.path.basename(self.path)
@@ -23,18 +19,23 @@ class Group():
         self.spectrum_paths = [os.path.join(self.path, file_name)
                                for file_name in self.file_names]
 
-    def set_timestamp(self):
+    def set_attributes_initial(self):
+        self.drift = self.detuning_obj.drift
+        self.group_number = int(self.folder_name[-2])
         self.timestamp = get_number_from_file_name("timestamp", self.file_names[0])
 
     def create_spectrum_objects(self):
         self.spectrum_objects = [Spectrum(self, path) for path in self.spectrum_paths]
 
     def process_spectrum(self):
+        self.process_spectrum_objects()
+        self.frequency = self.spectrum_objects[0].frequency
+        self.align_spectra()
+
+    def process_spectrum_objects(self):
         for spectrum_obj in self.spectrum_objects:
             spectrum_obj.set_S21_and_frequency_from_file()
             spectrum_obj.set_peak()
-        self.frequency = self.spectrum_objects[0].frequency
-        self.align_spectra()
 
     def align_spectra(self):
         self.set_peak_indexes()

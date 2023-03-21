@@ -2,8 +2,23 @@
 
 ## Contents
 
+1. [Overview and Usage](#overview-and-usage)
 1. [Side Band Fitting](#side-band-fitting)
 1. [Transmission Analysis](#transmission-analysis)
+1. [Frequency Comb Analysis](#frequency-comb-analysis)
+1. [To Do List](#to-do-list)
+
+## Overview and Usage
+
+Parent folder: everything is contained inside this one
+    Repo: when saving the repository, this is the folder you want to clone to.
+        Optomechanics-Data-Analysis: this is where all the scripts are saved.
+        This folder will be made when you clone the repository to Repo
+    Data Sets: contains all the raw data
+        ddmmyyyy: this contains all the information from dd/mm/yyyy
+    Side Band Results: anything produced by Side Band Fitting will be saved here
+    Transmission Results: anything produced by Transmission will be saved here
+    Frequency Comb Results: anything produced by Frequency Come Analysis will be saved here.
 
 ## Side Band Fitting
 
@@ -18,3 +33,11 @@ This part of the program handles spectra measured at a range of detunings and is
 This part of the program looks at transmission curves and is controlled by "Transmission Analysis Interface". Below are a range of its features
 
 - Plot groups of transmission curves overlayed on top of each other with no processing, either before any processing or after they have been aligned. The number of lines on each subplot and the number of subplots can be specified.
+
+## Frequency Comb Analysis
+
+
+
+## To Do List
+
+- Update folder structure in all of the docs

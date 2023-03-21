@@ -10,18 +10,23 @@ from Plotting.PlotUtils import get_group_size
 from Plotting.PlotUtils import get_group_indexes
 from Utils import get_number_from_file_name
 from Utils import get_number_from_string
+from Utils import convert_to_milliwatts
 
 class Drift():
 
     def __init__(self, data_set, folder_name):
         self.data_set = data_set
         self.set_path_data(folder_name)
-        self.drift_value = get_number_from_file_name("Drift", folder_name)
+        self.set_drift(folder_name)
         self.process_folder()
 
     def set_path_data(self, folder_name):
         self.folder_name = folder_name
         self.path = os.path.join(self.data_set.path, folder_name)
+
+    def set_drift(self, folder_name):
+        self.drift_value = get_number_from_file_name("Drift", folder_name)
+        self.drift = convert_to_milliwatts(self.drift_value)
 
     def process_folder(self):
         self.set_folder_groups()
@@ -138,7 +143,7 @@ class Drift():
         lines_obj.y_label = "S21 (dBm)"
 
     def create_plots(self, lines_objects, subplots, title):
-        plot_obj = Plots(lines_objects, subplots)
+        plot_obj = Plots(lines_objects, subplots, "semilogy")
         plot_obj.title = title
         plot_obj.plot()
 

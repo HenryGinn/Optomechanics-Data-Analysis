@@ -14,6 +14,7 @@ class Detuning():
         self.process_detuning()
 
     def process_detuning(self):
+        self.drift = self.drift_obj.drift
         self.set_group_objects()
         self.group_size = len(self.group_objects)
         self.set_timestamps()
