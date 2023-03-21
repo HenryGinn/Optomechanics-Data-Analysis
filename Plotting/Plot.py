@@ -3,6 +3,8 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 
+from Plotting.PlotUtils import update_figure_size
+
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
 plt.rcParams['axes.formatter.limits'] = [-5,5]
@@ -20,7 +22,7 @@ class Plot():
 
     def __init__(self, plots_obj, lines_objects, plot_index):
         self.plots_obj = plots_obj
-        self.lines_objects = lines_objects[0]
+        self.lines_objects = lines_objects
         self.plot_index = plot_index
         self.count = len(self.lines_objects)
         self.set_grid_size()
@@ -131,7 +133,8 @@ class Plot():
     def create_figure(self):
         fig, axes = plt.subplots(nrows=self.rows, ncols=self.columns)
         self.plot_axes(axes)
-        fig.suptitle(f"{self.plots_obj.title}, Figure {self.plot_index}")
+        fig.suptitle(f"{self.plots_obj.title}")
+        update_figure_size()
         self.show_plot(fig)
 
     def plot_axes(self, axes):

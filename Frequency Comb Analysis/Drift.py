@@ -100,33 +100,20 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             print(f"Processing spectrum for {detuning_obj}")
             detuning_obj.process_spectrum()
-        self.plot_spectra()
 
-    def plot_spectra(self, subplots=6):
-        detuning_plots = self.get_detuning_plots()
+    def plot_spectra(self, subplots):
+        detuning_lines_objects = self.get_detuning_lines_objects(self.detuning_objects)
         title = f"{self} Frequency Comb"
-        self.create_plots(detuning_plots, subplots, title)
-        
-    def get_detuning_plots(self):
-        detuning_objects_groups = self.get_detuning_objects_groups()
-        detuning_plots = [self.get_detuning_lines_objects(detuning_objects_group, index)
-                         for index, detuning_objects_group in enumerate(detuning_objects_groups)]
-        return detuning_plots
+        self.create_plots(detuning_lines_objects, subplots, title)
 
-    def get_detuning_objects_groups(self):
-        group_size = len(self.detuning_objects)
-        group_indexes = get_group_indexes(len(self.detuning_objects), group_size)
-        detuning_objects_groups = [self.detuning_objects[indexes] for indexes in group_indexes]
-        return detuning_objects_groups
-
-    def get_detuning_lines_objects(self, detuning_objects_group, index):
-        lines_objects = [self.get_detuning_lines_obj(detuning_obj, index)
+    def get_detuning_lines_objects(self, detuning_objects_group):
+        lines_objects = [self.get_detuning_lines_obj(detuning_obj)
                          for detuning_obj in detuning_objects_group]
         return lines_objects
 
-    def get_detuning_lines_obj(self, detuning_obj, index):
+    def get_detuning_lines_obj(self, detuning_obj):
         lines_obj = self.create_lines_obj(detuning_obj)
-        lines_obj = self.set_lines_labels(lines_obj, index)
+        self.set_lines_labels(lines_obj, detuning_obj)
         return lines_obj
 
     def create_lines_obj(self, detuning_obj):
@@ -145,11 +132,10 @@ class Drift():
         line_obj = Line(x_values, y_values)
         return line_obj
 
-    def set_lines_labels(self, lines_obj, index):
-        lines_obj.title = f"Group {index}"
+    def set_lines_labels(self, lines_obj, detuning_obj):
+        lines_obj.title = f"Detuning: {detuning_obj.detuning} Hz"
         lines_obj.x_label = "Frequency (Hz)"
-        lines_obj.y_label = "S21 (mW)"
-        return lines_obj
+        lines_obj.y_label = "S21 (dBm)"
 
     def create_plots(self, lines_objects, subplots, title):
         plot_obj = Plots(lines_objects, subplots)

@@ -2,12 +2,20 @@ import sys
 import os
 
 from Drift import Drift
+from Utils import get_sliced_list
 
 class DataSet():
 
-    def __init__(self, folder_name):
+    def __init__(self, folder_name, script_path=None):
         self.folder_name = folder_name
+        self.set_script_path(script_path)
         self.setup_data_set()
+
+    def set_script_path(self, script_path):
+        if script_path is None:
+            self.script_path = sys.path[0]
+        else:
+            self.script_path = script_path
 
     def setup_data_set(self):
         self.set_paths()
@@ -15,8 +23,7 @@ class DataSet():
         self.set_drift_objects()
 
     def set_paths(self):
-        script_path = sys.path[0]
-        repo_path = os.path.dirname(script_path)
+        repo_path = os.path.dirname(self.script_path)
         self.parent_path = os.path.dirname(repo_path)
         self.path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
     
@@ -39,10 +46,16 @@ class DataSet():
     def set_drift_objects(self):
         self.drift_objects = [Drift(self, folder_name)
                               for folder_name in os.listdir(self.path)]
+        self.drift_objects = sorted(self.drift_objects, key=lambda x: x.drift_value)
         
     def process_spectrum(self):
         for drift_obj in self.drift_objects:
             drift_obj.process_spectrum()
+
+    def plot_spectra(self, subplots=None, drifts=None):
+        drifts = get_sliced_list(self.drift_objects, drifts)
+        for drift_obj in drifts:
+            drift_obj.plot_spectra(subplots)
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

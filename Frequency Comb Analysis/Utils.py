@@ -120,3 +120,25 @@ def get_number_from_string(string, number_type=float):
         return number_type(string)
     except TypeError:
         raise TypeError(f"Cannot convert {string} to {number_type}")
+
+
+def get_sliced_list(my_list, my_slice):
+    if my_slice is not None:
+        my_list = process_slice(my_list, my_slice)
+    return my_list
+
+def process_slice(my_list, my_slice):
+    if isinstance(my_slice, slice):
+        return my_list[my_slice]
+    elif isinstance(my_slice, list) or isinstance(my_slice, tuple):
+        return slice_by_iterable(my_list, my_slice)
+    elif isinstance(my_slice, int):
+        return slice_by_iterable(my_list, [my_slice])
+    else:
+        raise ValueError(f"Slice must be slice, list, tuple, or int, but not {type(my_slice)}")
+
+def slice_by_iterable(my_list, my_slice):
+    my_list_type = type(my_list)
+    sliced_list = [my_list[index] for index in my_slice]
+    sliced_list = my_list_type(sliced_list)
+    return sliced_list

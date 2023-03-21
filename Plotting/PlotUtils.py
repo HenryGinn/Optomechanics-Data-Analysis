@@ -1,6 +1,7 @@
 import math
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 def get_acceptable_indexes(data, tolerance=4):
     if data.size < 3:
@@ -48,3 +49,9 @@ def construct_group_indexes(length, group_count, end_point_indexes):
                                end_point_indexes[group_number + 1]).astype('int')
                      for group_number in range(group_count)]
     return group_indexes
+
+def update_figure_size(width=8, height=4.8):
+    plt.gcf().set_size_inches(width, height)
+    plt.gca().set_position([0, 0, 1, 1])
+    plt.gcf().subplots_adjust(top=0.92)
+    plt.tight_layout()
