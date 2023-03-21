@@ -11,6 +11,7 @@ from Plotting.PlotUtils import get_group_indexes
 from Utils import get_number_from_file_name
 from Utils import get_number_from_string
 from Utils import convert_to_milliwatts
+from Utils import get_sliced_list
 
 class Drift():
 
@@ -78,6 +79,7 @@ class Drift():
     def set_detuning_objects(self):
         self.detuning_objects = [Detuning(self, detuning, paths)
                                  for detuning, paths in self.detuning_paths_dict.items()]
+        self.detuning_objects = get_sliced_list(self.detuning_objects, self.data_set.detuning_indexes)
         self.detuning_objects = np.array(self.detuning_objects)
 
     def process_transmission_paths(self):
@@ -101,13 +103,15 @@ class Drift():
             for group_obj in detuning_obj.group_objects:
                 group_obj.create_spectrum_objects()
 
-    def process_spectrum(self):
-        for detuning_obj in self.detuning_objects:
+    def process_spectrum(self, detunings):
+        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+        for detuning_obj in detuning_objects:
             print(f"Processing spectrum for {detuning_obj}")
             detuning_obj.process_spectrum()
 
-    def plot_spectra(self, subplots):
-        detuning_lines_objects = self.get_detuning_lines_objects(self.detuning_objects)
+    def plot_spectra(self, subplots, detunings):
+        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+        detuning_lines_objects = self.get_detuning_lines_objects(detuning_objects)
         title = f"{self} Frequency Comb"
         self.create_plots(detuning_lines_objects, subplots, title)
 

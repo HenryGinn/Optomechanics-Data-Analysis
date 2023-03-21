@@ -6,9 +6,11 @@ from Utils import get_sliced_list
 
 class DataSet():
 
-    def __init__(self, folder_name, script_path=None):
+    def __init__(self, folder_name, script_path=None, drifts=None, detunings=None):
         self.folder_name = folder_name
         self.set_script_path(script_path)
+        self.drift_indexes = drifts
+        self.detuning_indexes = detunings
         self.setup_data_set()
 
     def set_script_path(self, script_path):
@@ -47,15 +49,17 @@ class DataSet():
         self.drift_objects = [Drift(self, folder_name)
                               for folder_name in os.listdir(self.path)]
         self.drift_objects = sorted(self.drift_objects, key=lambda x: x.drift_value)
+        self.drift_objects = get_sliced_list(self.drift_objects, self.drift_indexes)
         
-    def process_spectrum(self):
-        for drift_obj in self.drift_objects:
-            drift_obj.process_spectrum()
+    def process_spectrum(self, drifts=None, detunings=None):
+        drift_objects = get_sliced_list(self.drift_objects, drifts)
+        for drift_obj in drift_objects:
+            drift_obj.process_spectrum(detunings)
 
-    def plot_spectra(self, subplots=None, drifts=None):
-        drifts = get_sliced_list(self.drift_objects, drifts)
-        for drift_obj in drifts:
-            drift_obj.plot_spectra(subplots)
+    def plot_spectra(self, subplots=None, drifts=None, detunings=None):
+        drift_objects = get_sliced_list(self.drift_objects, drifts)
+        for drift_obj in drift_objects:
+            drift_obj.plot_spectra(subplots, detunings)
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

@@ -140,5 +140,12 @@ def process_slice(my_list, my_slice):
 def slice_by_iterable(my_list, my_slice):
     my_list_type = type(my_list)
     sliced_list = [my_list[index] for index in my_slice]
-    sliced_list = my_list_type(sliced_list)
+    sliced_list = convert_list_type(sliced_list, my_list_type)
+    return sliced_list
+
+def convert_list_type(sliced_list, my_list_type):
+    if my_list_type == np.ndarray:
+        sliced_list = np.array(sliced_list)
+    else:
+        sliced_list = my_list_type(sliced_list)
     return sliced_list
