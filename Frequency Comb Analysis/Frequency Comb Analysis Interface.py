@@ -4,4 +4,5 @@ from DataSet import DataSet
 
 my_data_set = DataSet("06122022_overnight", drifts=-1, detunings=-1)
 my_data_set.process_spectrum()
-my_data_set.plot_spectra()
+#my_data_set.plot_spectra()
+my_data_set.set_peak_coordinates()

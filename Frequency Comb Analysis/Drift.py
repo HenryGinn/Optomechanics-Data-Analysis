@@ -151,6 +151,11 @@ class Drift():
         plot_obj.title = title
         plot_obj.plot()
 
+    def set_peak_coordinates(self, detunings):
+        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+        for detuning_obj in detuning_objects:
+            detuning_obj.set_peak_coordinates()
+
     def output_folder_groups(self):
         self.output_detuning_folders()
         self.output_transmission_files()

@@ -10,7 +10,7 @@ class Detuning():
     def __init__(self, drift_obj, detuning, paths):
         self.drift_obj = drift_obj
         self.detuning = detuning
-        self.paths = paths
+        self.paths = paths[0:1]
         self.process_detuning()
 
     def process_detuning(self):
@@ -29,6 +29,11 @@ class Detuning():
     def process_spectrum(self):
         for group_obj in self.group_objects:
             group_obj.process_spectrum()
+
+    def set_peak_coordinates(self):
+        print(f"Setting peak coordinates for {self}")
+        for group_obj in self.group_objects:
+            group_obj.set_peak_coordinates()
 
     def __str__(self):
         string = f"{self.drift_obj}, Detuning {self.detuning}"

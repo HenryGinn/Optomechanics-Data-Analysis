@@ -61,6 +61,11 @@ class DataSet():
         for drift_obj in drift_objects:
             drift_obj.plot_spectra(subplots, detunings)
 
+    def set_peak_coordinates(self, drifts=None, detunings=None):
+        drift_objects = get_sliced_list(self.drift_objects, drifts)
+        for drift_obj in drift_objects:
+            drift_obj.set_peak_coordinates(detunings)
+
     def __str__(self):
         string = f"Data Set {self.folder_name}"
         return string

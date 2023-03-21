@@ -15,7 +15,7 @@ class Group():
 
     def set_paths(self):
         self.folder_name = os.path.basename(self.path)
-        self.file_names = [file_name for file_name in os.listdir(self.path)]
+        self.file_names = [file_name for file_name in os.listdir(self.path)][0:1]
         self.spectrum_paths = [os.path.join(self.path, file_name)
                                for file_name in self.file_names]
 
@@ -67,6 +67,10 @@ class Group():
         self.frequency = self.frequency[:frequency_offset_length]
         self.frequency_shift = self.frequency[self.min_peak_index]
         self.frequency -= self.frequency_shift
+
+    def set_peak_coordinates(self):
+        for spectrum_obj in self.spectrum_objects:
+            spectrum_obj.set_peak_coordinates()
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

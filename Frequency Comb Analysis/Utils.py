@@ -10,10 +10,14 @@ def get_acceptable_indexes(data, tolerance=4):
     return acceptable_indexes
 
 def get_acceptable_indexes_non_trivial(data, tolerance):
-    deviations = np.abs(data - np.median(data))
-    modified_deviation = np.average(deviations**(1/4))**4
+    deviations, modified_deviation = get_modified_deviation(data)
     accepted_indexes = np.abs(deviations) < tolerance * modified_deviation
     return accepted_indexes
+
+def get_modified_deviation(data):
+    deviations = np.abs(data - np.median(data))
+    modified_deviation = np.average(deviations**(1/4))**4
+    return deviations, modified_deviation
 
 def get_file_contents_from_path(path):
     with open(path, "r") as file:
@@ -149,3 +153,7 @@ def convert_list_type(sliced_list, my_list_type):
     else:
         sliced_list = my_list_type(sliced_list)
     return sliced_list
+
+def flatten(input_list):
+    flat = [inner for outer in input_list for inner in outer]
+    return flat
