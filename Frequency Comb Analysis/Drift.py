@@ -3,11 +3,7 @@ import os
 import numpy as np
 
 from Detuning import Detuning
-from Plotting.Plots import Plots
-from Plotting.Lines import Lines
-from Plotting.Line import Line
-from Plotting.PlotUtils import get_group_size
-from Plotting.PlotUtils import get_group_indexes
+from DriftPlot import DriftPlot
 from Utils import get_number_from_file_name
 from Utils import get_number_from_string
 from Utils import convert_to_milliwatts
@@ -123,67 +119,6 @@ class Drift():
     def load_aligned_spectra(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.load_aligned_spectra()
-    
-    def plot_spectra(self, subplots, detunings, groups, markers):
-        self.set_plotting_attributes(groups, markers)
-        detuning_lines_objects = self.get_detuning_lines_objects(detunings)
-        title = f"{self} Frequency Comb"
-        self.create_plots(detuning_lines_objects, subplots, title)
-
-    def set_plotting_attributes(self, groups, markers):
-        self.markers = markers
-        self.groups = groups
-
-    def get_detuning_lines_objects(self, detunings):
-        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
-        lines_objects = [self.get_detuning_lines_obj(detuning_obj)
-                         for detuning_obj in detuning_objects]
-        return lines_objects
-
-    def get_detuning_lines_obj(self, detuning_obj):
-        lines_obj = self.create_lines_obj(detuning_obj)
-        self.set_lines_labels(lines_obj, detuning_obj)
-        return lines_obj
-
-    def create_lines_obj(self, detuning_obj):
-        line_objects = self.get_line_objects(detuning_obj)
-        lines_obj = Lines(line_objects)
-        return lines_obj
-
-    def get_line_objects(self, detuning_obj):
-        group_objects = get_sliced_list(detuning_obj.group_objects, self.groups)
-        line_objects = [self.get_line_object(group_obj)
-                        for group_obj in group_objects]
-        line_objects = self.add_markers(group_objects, line_objects)
-        return line_objects
-
-    def get_line_object(self, group_obj):
-        x_values = group_obj.spectrum_obj.frequency
-        y_values = group_obj.spectrum_obj.S21
-        line_obj = Line(x_values, y_values)
-        return line_obj
-
-    def add_markers(self, group_objects, line_objects):
-        if self.markers:
-            line_objects += [self.get_line_object_marker(group_obj)
-                             for group_obj in group_objects]
-        return line_objects
-
-    def get_line_object_marker(self, group_obj):
-        x_values = group_obj.spectrum_obj.peak_frequencies
-        y_values = group_obj.spectrum_obj.peak_S21s
-        line_obj = Line(x_values, y_values, colour="r", marker="*", linestyle="None")
-        return line_obj
-
-    def set_lines_labels(self, lines_obj, detuning_obj):
-        lines_obj.title = f"Detuning: {detuning_obj.detuning} Hz"
-        lines_obj.x_label = "Frequency (Hz)"
-        lines_obj.y_label = "S21 (mW)"
-
-    def create_plots(self, lines_objects, subplots, title):
-        plot_obj = Plots(lines_objects, subplots, "semilogy")
-        plot_obj.title = title
-        plot_obj.plot()
 
     def set_peak_coordinates_paths(self):
         self.create_peak_coordinates_folder()
@@ -203,6 +138,16 @@ class Drift():
     def load_peak_coordinates(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.load_peak_coordinates()
+
+    def fit_peaks(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.fit_peaks()
+
+    def plot_spectra(self, subplots, detunings, groups, markers):
+        self.plot_obj = DriftPlot(self)
+        self.plot_obj.subplots = subplots
+        self.plot_obj.set_data_plotting_instructions(detunings, groups, markers)
+        self.plot_obj.plot_spectra()
     
     def __str__(self):
         string = f"{self.data_set}, Drift {self.drift_value} dBm"

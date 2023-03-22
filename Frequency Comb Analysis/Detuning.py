@@ -58,6 +58,10 @@ class Detuning():
         for group_obj in self.group_objects:
             group_obj.load_peak_coordinates()
 
+    def fit_peaks(self):
+        for group_obj in self.group_objects:
+            group_obj.fit_peaks()
+
     def __str__(self):
         string = f"{self.drift_obj}, Detuning {self.detuning}"
         return string

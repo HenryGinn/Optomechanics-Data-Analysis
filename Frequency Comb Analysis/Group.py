@@ -132,6 +132,9 @@ class Group():
          self.spectrum_obj.peak_frequencies,
          self.spectrum_obj.peak_S21s) = file_contents
 
+    def fit_peaks(self):
+        pass
+
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"
                   f"Group number: {self.group_number}\n"

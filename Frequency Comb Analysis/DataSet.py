@@ -94,6 +94,10 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.set_peak_coordinates_paths()
 
+    def fit_peaks(self):
+        for drift_obj in self.drift_objects:
+            drift_obj.fit_peaks()
+
     def __str__(self):
         string = f"Data Set {self.folder_name}"
         return string
