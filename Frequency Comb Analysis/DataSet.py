@@ -81,8 +81,18 @@ class DataSet():
 
     def set_peak_coordinates(self, drifts=None, detunings=None):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
+        self.set_peak_coordinates_paths()
         for drift_obj in drift_objects:
             drift_obj.set_peak_coordinates(detunings)
+
+    def load_peak_coordinates(self):
+        self.set_peak_coordinates_paths()
+        for drift_obj in self.drift_objects:
+            drift_obj.load_peak_coordinates()
+
+    def set_peak_coordinates_paths(self):
+        for drift_obj in self.drift_objects:
+            drift_obj.set_peak_coordinates_paths()
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

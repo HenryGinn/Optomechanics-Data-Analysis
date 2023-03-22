@@ -92,16 +92,19 @@ class Group():
             file.writelines(f"{S21}\t{frequency}\n")
 
     def load_aligned_spectrum(self):
-        self.spectrum_obj = Spectrum(self)
+        self.create_blank_spectrum_obj()
         file_contents = get_file_contents_from_path(self.aligned_spectrum_path)
         self.spectrum_obj.S21, self.spectrum_obj.frequency = file_contents
+
+    def create_blank_spectrum_obj(self):
+        if not hasattr(self, "spectrum_obj"):
+            self.spectrum_obj = Spectrum(self)
 
     def set_peak_coordinates(self):
         self.spectrum_obj.set_peak_coordinates()
         self.create_peak_coordinates_file()
 
     def create_peak_coordinates_file(self):
-        self.set_peak_coordinates_path()
         with open(self.peak_coordinates_path, "w") as file:
             file.writelines("Index\tFrequency (Hz)\tS21 (mW)\n")
             self.save_peak_coordinates_to_file(file)
@@ -117,6 +120,17 @@ class Group():
             frequency = self.spectrum_obj.frequency[peak_index]
             S21 = self.spectrum_obj.S21[peak_index]
             file.writelines(f"{peak_index}\t{frequency}\t{S21}\n")
+
+    def load_peak_coordinates(self):
+        self.create_blank_spectrum_obj()
+        path = self.peak_coordinates_path
+        file_contents = get_file_contents_from_path(path)
+        self.set_peak_coordinates_from_file_contents(file_contents)
+
+    def set_peak_coordinates_from_file_contents(self, file_contents):
+        (self.spectrum_obj.peak_indices,
+         self.spectrum_obj.peak_frequencies,
+         self.spectrum_obj.peak_S21s) = file_contents
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

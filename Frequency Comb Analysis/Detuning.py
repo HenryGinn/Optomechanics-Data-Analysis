@@ -45,10 +45,18 @@ class Detuning():
         for group_obj in self.group_objects:
             group_obj.load_aligned_spectrum()
 
+    def set_peak_coordinates_paths(self):
+        for group_obj in self.group_objects:
+            group_obj.set_peak_coordinates_path()
+
     def set_peak_coordinates(self):
         print(f"Setting peak coordinates for {self}")
         for group_obj in self.group_objects:
             group_obj.set_peak_coordinates()
+
+    def load_peak_coordinates(self):
+        for group_obj in self.group_objects:
+            group_obj.load_peak_coordinates()
 
     def __str__(self):
         string = f"{self.drift_obj}, Detuning {self.detuning}"

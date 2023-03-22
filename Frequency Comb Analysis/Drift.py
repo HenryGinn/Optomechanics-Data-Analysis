@@ -170,8 +170,8 @@ class Drift():
         return line_objects
 
     def get_line_object_marker(self, group_obj):
-        x_values = group_obj.spectrum_obj.frequency[group_obj.spectrum_obj.peak_indices]
-        y_values = group_obj.spectrum_obj.S21[group_obj.spectrum_obj.peak_indices]
+        x_values = group_obj.spectrum_obj.peak_frequencies
+        y_values = group_obj.spectrum_obj.peak_S21s
         line_obj = Line(x_values, y_values, colour="r", marker="*", linestyle="None")
         return line_obj
 
@@ -185,16 +185,24 @@ class Drift():
         plot_obj.title = title
         plot_obj.plot()
 
-    def set_peak_coordinates(self, detunings):
-        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+    def set_peak_coordinates_paths(self):
         self.create_peak_coordinates_folder()
-        for detuning_obj in detuning_objects:
-            detuning_obj.set_peak_coordinates()
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.set_peak_coordinates_paths()
 
     def create_peak_coordinates_folder(self):
         self.peak_coordinates_path = os.path.join(self.data_set.peak_coordinates_path,
                                                   f"{self.drift_value} dBm")
         make_folder(self.peak_coordinates_path)
+
+    def set_peak_coordinates(self, detunings):
+        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+        for detuning_obj in detuning_objects:
+            detuning_obj.set_peak_coordinates()
+
+    def load_peak_coordinates(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.load_peak_coordinates()
     
     def __str__(self):
         string = f"{self.data_set}, Drift {self.drift_value} dBm"
