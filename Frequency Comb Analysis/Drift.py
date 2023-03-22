@@ -143,10 +143,10 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             detuning_obj.fit_peaks()
 
-    def plot_spectra(self, subplots, detunings, groups, markers):
-        self.plot_obj = DriftPlot(self)
-        self.plot_obj.subplots = subplots
-        self.plot_obj.set_data_plotting_instructions(detunings, groups, markers)
+    def plot_spectra(self, subplots, detunings, groups, markers, fit):
+        self.plot_obj = DriftPlot(self, subplots)
+        self.plot_obj.set_data_plotting_instructions(detunings, groups)
+        self.plot_obj.set_peak_plotting_instructions(markers, fit)
         self.plot_obj.plot_spectra()
     
     def __str__(self):

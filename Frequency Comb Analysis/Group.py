@@ -3,6 +3,7 @@ import os
 import numpy as np
 
 from Spectrum import Spectrum
+from FitPeaks import FitPeaks
 from Utils import get_number_from_file_name
 from Utils import get_file_contents_from_path
 
@@ -133,7 +134,8 @@ class Group():
          self.spectrum_obj.peak_S21s) = file_contents
 
     def fit_peaks(self):
-        pass
+        self.peaks_fit_obj = FitPeaks(self)
+        self.peaks_fit_obj.fit_peaks()
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

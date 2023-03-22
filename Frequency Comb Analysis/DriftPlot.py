@@ -7,18 +7,22 @@ from Plotting.PlotUtils import get_group_indexes
 
 class DriftPlot():
 
-    def __init__(self, drift_obj):
+    def __init__(self, drift_obj, subplots):
         self.drift_obj = drift_obj
+        self.subplots = subplots
 
     def plot_spectra(self):
         detuning_lines_objects = self.get_detuning_lines_objects()
         title = f"{self.drift_obj} Frequency Comb"
         self.create_plots(detuning_lines_objects, title)
 
-    def set_data_plotting_instructions(self, detunings, groups, markers):
+    def set_data_plotting_instructions(self, detunings, groups):
         self.detunings = detunings
-        self.markers = markers
         self.groups = groups
+
+    def set_peak_plotting_instructions(self, markers, fit):
+        self.markers = markers
+        self.fit = fit
 
     def get_detuning_lines_objects(self):
         detuning_objects = get_sliced_list(self.drift_obj.detuning_objects,
@@ -39,9 +43,14 @@ class DriftPlot():
 
     def get_line_objects(self, detuning_obj):
         group_objects = get_sliced_list(detuning_obj.group_objects, self.groups)
+        line_objects = self.get_lines(group_objects)
+        line_objects = self.add_markers(group_objects, line_objects)
+        line_objects = self.add_fit(group_objects, line_objects)
+        return line_objects
+
+    def get_lines(self, group_objects):
         line_objects = [self.get_line_object(group_obj)
                         for group_obj in group_objects]
-        line_objects = self.add_markers(group_objects, line_objects)
         return line_objects
 
     def get_line_object(self, group_obj):
@@ -60,6 +69,23 @@ class DriftPlot():
         x_values = group_obj.spectrum_obj.peak_frequencies
         y_values = group_obj.spectrum_obj.peak_S21s
         line_obj = Line(x_values, y_values, colour="r", marker="*", linestyle="None")
+        return line_obj
+
+    def add_fit(self, group_objects, line_objects):
+        if self.fit:
+            for group_obj in group_objects:
+                line_objects += self.get_line_objects_fit(group_obj)
+        return line_objects
+
+    def get_line_objects_fit(self, group_obj):
+        line_obj_left = self.get_line_obj_fit(group_obj.peaks_fit_obj.peak_lines[0])
+        line_obj_right = self.get_line_obj_fit(group_obj.peaks_fit_obj.peak_lines[1])
+        return line_obj_left, line_obj_right
+
+    def get_line_obj_fit(self, peak_line_obj):
+        x_values = peak_line_obj.x_values_fit
+        y_values = peak_line_obj.y_values_fit
+        line_obj = Line(x_values, y_values, colour="k")
         return line_obj
 
     def set_lines_labels(self, lines_obj, detuning_obj):
