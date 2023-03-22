@@ -98,6 +98,25 @@ class Group():
 
     def set_peak_coordinates(self):
         self.spectrum_obj.set_peak_coordinates()
+        self.create_peak_coordinates_file()
+
+    def create_peak_coordinates_file(self):
+        self.set_peak_coordinates_path()
+        with open(self.peak_coordinates_path, "w") as file:
+            file.writelines("Index\tFrequency (Hz)\tS21 (mW)\n")
+            self.save_peak_coordinates_to_file(file)
+
+    def set_peak_coordinates_path(self):
+        detuning = self.detuning_obj.detuning
+        file_name = f"Detuning_{detuning}_Group_{self.group_number}.txt"
+        base_path = self.detuning_obj.drift_obj.peak_coordinates_path
+        self.peak_coordinates_path = os.path.join(base_path, file_name)
+
+    def save_peak_coordinates_to_file(self, file):
+        for peak_index in self.spectrum_obj.peak_indices:
+            frequency = self.spectrum_obj.frequency[peak_index]
+            S21 = self.spectrum_obj.S21[peak_index]
+            file.writelines(f"{peak_index}\t{frequency}\t{S21}\n")
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

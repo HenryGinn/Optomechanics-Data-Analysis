@@ -73,11 +73,11 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.load_aligned_spectra()
 
-    def plot_spectra(self, subplots=None, drifts=None, detunings=None, markers=False):
+    def plot_spectra(self, subplots=None, drifts=None, detunings=None,
+                     groups=None, markers=False):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
         for drift_obj in drift_objects:
-            drift_obj.markers = markers
-            drift_obj.plot_spectra(subplots, detunings)
+            drift_obj.plot_spectra(subplots, detunings, groups, markers)
 
     def set_peak_coordinates(self, drifts=None, detunings=None):
         drift_objects = get_sliced_list(self.drift_objects, drifts)

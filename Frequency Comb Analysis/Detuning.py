@@ -12,7 +12,7 @@ class Detuning():
     def __init__(self, drift_obj, detuning, paths):
         self.drift_obj = drift_obj
         self.detuning = detuning
-        self.paths = paths[0:1]
+        self.paths = paths
         self.process_detuning()
 
     def process_detuning(self):

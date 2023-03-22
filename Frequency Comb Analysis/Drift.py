@@ -124,15 +124,20 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             detuning_obj.load_aligned_spectra()
     
-    def plot_spectra(self, subplots, detunings):
-        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
-        detuning_lines_objects = self.get_detuning_lines_objects(detuning_objects)
+    def plot_spectra(self, subplots, detunings, groups, markers):
+        self.set_plotting_attributes(groups, markers)
+        detuning_lines_objects = self.get_detuning_lines_objects(detunings)
         title = f"{self} Frequency Comb"
         self.create_plots(detuning_lines_objects, subplots, title)
 
-    def get_detuning_lines_objects(self, detuning_objects_group):
+    def set_plotting_attributes(self, groups, markers):
+        self.markers = markers
+        self.groups = groups
+
+    def get_detuning_lines_objects(self, detunings):
+        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
         lines_objects = [self.get_detuning_lines_obj(detuning_obj)
-                         for detuning_obj in detuning_objects_group]
+                         for detuning_obj in detuning_objects]
         return lines_objects
 
     def get_detuning_lines_obj(self, detuning_obj):
@@ -146,9 +151,10 @@ class Drift():
         return lines_obj
 
     def get_line_objects(self, detuning_obj):
+        group_objects = get_sliced_list(detuning_obj.group_objects, self.groups)
         line_objects = [self.get_line_object(group_obj)
-                        for group_obj in detuning_obj.group_objects]
-        line_objects = self.add_markers(detuning_obj, line_objects)
+                        for group_obj in group_objects]
+        line_objects = self.add_markers(group_objects, line_objects)
         return line_objects
 
     def get_line_object(self, group_obj):
@@ -157,10 +163,10 @@ class Drift():
         line_obj = Line(x_values, y_values)
         return line_obj
 
-    def add_markers(self, detuning_obj, line_objects):
+    def add_markers(self, group_objects, line_objects):
         if self.markers:
             line_objects += [self.get_line_object_marker(group_obj)
-                             for group_obj in detuning_obj.group_objects]
+                             for group_obj in group_objects]
         return line_objects
 
     def get_line_object_marker(self, group_obj):
@@ -181,29 +187,15 @@ class Drift():
 
     def set_peak_coordinates(self, detunings):
         detuning_objects = get_sliced_list(self.detuning_objects, detunings)
+        self.create_peak_coordinates_folder()
         for detuning_obj in detuning_objects:
             detuning_obj.set_peak_coordinates()
 
-    def output_folder_groups(self):
-        self.output_detuning_folders()
-        self.output_transmission_files()
-        self.output_probe_power()
-
-    def output_detuning_folders(self):
-        print(f"\nOutputting Detuning Folders for {self.drift_value} dBm")
-        for folder_path in self.detuning_folders:
-            print(os.path.basename(folder_path))
-
-    def output_transmission_files(self):
-        print(f"\nOutputting Transmission Files for {self.drift_value} dBm")
-        for transmission_path in self.transmission_paths:
-            print(os.path.basename(transmission_path))
-
-    def output_probe_power(self):
-        print((f"\nOutputting Probe Power File for {self.drift_value} dBm\n"
-               f"{self.drift_probe_path}\n"
-               f"{os.path.basename(self.drift_probe_path)}"))
-
+    def create_peak_coordinates_folder(self):
+        self.peak_coordinates_path = os.path.join(self.data_set.peak_coordinates_path,
+                                                  f"{self.drift_value} dBm")
+        make_folder(self.peak_coordinates_path)
+    
     def __str__(self):
         string = f"{self.data_set}, Drift {self.drift_value} dBm"
         return string
