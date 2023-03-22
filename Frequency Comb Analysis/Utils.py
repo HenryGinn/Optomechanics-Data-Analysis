@@ -1,4 +1,5 @@
 import math
+import os
 
 import numpy as np
 
@@ -154,6 +155,9 @@ def convert_list_type(sliced_list, my_list_type):
         sliced_list = my_list_type(sliced_list)
     return sliced_list
 
-def flatten(input_list):
-    flat = [inner for outer in input_list for inner in outer]
-    return flat
+def make_folder(path, message=False):
+    name = os.path.basename(path)
+    if not os.path.isdir(path):
+        if message:
+            print(f"Making '{name}' folder at {path}")
+        os.mkdir(path)

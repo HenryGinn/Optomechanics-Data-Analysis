@@ -2,7 +2,6 @@ import numpy as np
 
 from Data import Data
 from Utils import get_modified_deviation
-from Utils import flatten
 
 class Spectrum(Data):
 

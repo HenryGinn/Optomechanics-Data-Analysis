@@ -4,6 +4,7 @@ import numpy as np
 
 from Spectrum import Spectrum
 from Utils import get_number_from_file_name
+from Utils import get_file_contents_from_path
 
 class Group():
 
@@ -15,7 +16,7 @@ class Group():
 
     def set_paths(self):
         self.folder_name = os.path.basename(self.path)
-        self.file_names = [file_name for file_name in os.listdir(self.path)][0:1]
+        self.file_names = [file_name for file_name in os.listdir(self.path)]
         self.spectrum_paths = [os.path.join(self.path, file_name)
                                for file_name in self.file_names]
 
@@ -33,11 +34,16 @@ class Group():
         spectrum_obj.initialise_from_path(path)
         return spectrum_obj
 
-    def process_spectrum(self):
+    def set_aligned_spectrum_path(self):
+        self.aligned_spectrum_path = os.path.join(self.detuning_obj.aligned_spectra_path,
+                                                  f"Group {self.group_number}")
+
+    def set_aligned_spectra(self):
         self.process_spectrum_objects()
         self.spectrum_obj = Spectrum(self)
         self.spectrum_obj.frequency = self.spectrum_objects[0].frequency
         self.align_spectra()
+        self.create_aligned_spectrum_file()
 
     def process_spectrum_objects(self):
         for spectrum_obj in self.spectrum_objects:
@@ -72,12 +78,26 @@ class Group():
         cutoff_size = self.max_peak_index - self.min_peak_index
         frequency_offset_length = len(self.spectrum_obj.frequency) - cutoff_size
         self.spectrum_obj.frequency = self.spectrum_obj.frequency[:frequency_offset_length]
-        self.spectrum_obj.frequency_shift = self.spectrum_obj.frequency[self.min_peak_index]
-        self.spectrum_obj.frequency -= self.spectrum_obj.frequency_shift
+        frequency_shift = self.spectrum_obj.frequency[self.min_peak_index]
+        self.spectrum_obj.frequency -= frequency_shift
+
+    def create_aligned_spectrum_file(self):
+        with open(self.aligned_spectrum_path, "w") as file:
+            file.writelines("S21 (mW)\tFrequency (Hz)\n")
+            self.save_aligned_spectrum(file)
+
+    def save_aligned_spectrum(self, file):
+        for S21, frequency in zip(self.spectrum_obj.S21,
+                                  self.spectrum_obj.frequency):
+            file.writelines(f"{S21}\t{frequency}\n")
+
+    def load_aligned_spectrum(self):
+        self.spectrum_obj = Spectrum(self)
+        file_contents = get_file_contents_from_path(self.aligned_spectrum_path)
+        self.spectrum_obj.S21, self.spectrum_obj.frequency = file_contents
 
     def set_peak_coordinates(self):
         self.spectrum_obj.set_peak_coordinates()
-        print(self.spectrum_obj.peak_indices)
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

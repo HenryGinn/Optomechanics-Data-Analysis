@@ -1,9 +1,11 @@
 import sys
 sys.path.append("..")
+import os
 
 import numpy as np
 
 from Group import Group
+from Utils import make_folder
 
 class Detuning():
 
@@ -26,9 +28,22 @@ class Detuning():
     def set_timestamps(self):
         self.timestamps = [group.timestamp for group in self.group_objects]
 
-    def process_spectrum(self):
+    def create_aligned_spectra_folder(self):
+        self.aligned_spectra_path = os.path.join(self.drift_obj.aligned_spectra_path,
+                                                 f"{self.detuning} dBm")
+        make_folder(self.aligned_spectra_path)
+
+    def set_aligned_spectra_paths(self):
         for group_obj in self.group_objects:
-            group_obj.process_spectrum()
+            group_obj.set_aligned_spectrum_path()
+
+    def set_aligned_spectra(self):
+        for group_obj in self.group_objects:
+            group_obj.set_aligned_spectra()
+
+    def load_aligned_spectra(self):
+        for group_obj in self.group_objects:
+            group_obj.load_aligned_spectrum()
 
     def set_peak_coordinates(self):
         print(f"Setting peak coordinates for {self}")

@@ -12,6 +12,7 @@ from Utils import get_number_from_file_name
 from Utils import get_number_from_string
 from Utils import convert_to_milliwatts
 from Utils import get_sliced_list
+from Utils import make_folder
 
 class Drift():
 
@@ -103,12 +104,26 @@ class Drift():
             for group_obj in detuning_obj.group_objects:
                 group_obj.create_spectrum_objects()
 
-    def process_spectrum(self, detunings):
+    def create_aligned_spectra_folder(self):
+        self.aligned_spectra_path = os.path.join(self.data_set.aligned_spectra_path,
+                                                 self.folder_name)
+        make_folder(self.aligned_spectra_path)
+
+    def populate_aligned_spectra_folder(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.create_aligned_spectra_folder()
+            detuning_obj.set_aligned_spectra_paths()
+
+    def set_aligned_spectra(self, detunings):
         detuning_objects = get_sliced_list(self.detuning_objects, detunings)
         for detuning_obj in detuning_objects:
             print(f"Processing spectrum for {detuning_obj}")
-            detuning_obj.process_spectrum()
+            detuning_obj.set_aligned_spectra()
 
+    def load_aligned_spectra(self):
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.load_aligned_spectra()
+    
     def plot_spectra(self, subplots, detunings):
         detuning_objects = get_sliced_list(self.detuning_objects, detunings)
         detuning_lines_objects = self.get_detuning_lines_objects(detuning_objects)
@@ -157,7 +172,7 @@ class Drift():
     def set_lines_labels(self, lines_obj, detuning_obj):
         lines_obj.title = f"Detuning: {detuning_obj.detuning} Hz"
         lines_obj.x_label = "Frequency (Hz)"
-        lines_obj.y_label = "S21 (dBm)"
+        lines_obj.y_label = "S21 (mW)"
 
     def create_plots(self, lines_objects, subplots, title):
         plot_obj = Plots(lines_objects, subplots, "semilogy")

@@ -3,6 +3,7 @@ import os
 
 from Drift import Drift
 from Utils import get_sliced_list
+from Utils import make_folder
 
 class DataSet():
 
@@ -23,6 +24,7 @@ class DataSet():
         self.set_paths()
         self.make_results_folders()
         self.set_drift_objects()
+        self.set_aligned_spectra_paths()
 
     def set_paths(self):
         repo_path = os.path.dirname(self.script_path)
@@ -32,29 +34,44 @@ class DataSet():
     def make_results_folders(self):
         self.make_parent_results_folder()
         self.make_data_set_results_folder()
+        self.make_peak_coordinates_folder()
 
     def make_parent_results_folder(self):
         self.parent_results_path = os.path.join(self.parent_path, "Frequency Comb Results")
-        if not os.path.isdir(self.parent_results_path):
-            print(f"Making 'Frequency Comb Results' folder at {self.parent_results_path}")
-            os.mkdir(self.parent_results_path)
+        make_folder(self.parent_results_path, message=True)
 
     def make_data_set_results_folder(self):
         self.results_path = os.path.join(self.parent_results_path, self.folder_name)
-        if not os.path.isdir(self.results_path):
-            print(f"Making results folder at {self.results_path}")
-            os.mkdir(self.results_path)
+        make_folder(self.results_path, message=True)
+
+    def make_peak_coordinates_folder(self):
+        self.peak_coordinates_path = os.path.join(self.results_path, "Peak Coordinates")
+        make_folder(self.peak_coordinates_path, message=True)
 
     def set_drift_objects(self):
         self.drift_objects = [Drift(self, folder_name)
                               for folder_name in os.listdir(self.path)]
         self.drift_objects = sorted(self.drift_objects, key=lambda x: x.drift_value)
         self.drift_objects = get_sliced_list(self.drift_objects, self.drift_indexes)
+
+    def set_aligned_spectra_paths(self):
+        self.make_aligned_spectra_folder()
+        for drift_obj in self.drift_objects:
+            drift_obj.create_aligned_spectra_folder()
+            drift_obj.populate_aligned_spectra_folder()
+
+    def make_aligned_spectra_folder(self):
+        self.aligned_spectra_path = os.path.join(self.results_path, "Aligned Spectra")
+        make_folder(self.aligned_spectra_path, message=True)
         
-    def process_spectrum(self, drifts=None, detunings=None):
+    def set_aligned_spectra(self, drifts=None, detunings=None):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
         for drift_obj in drift_objects:
-            drift_obj.process_spectrum(detunings)
+            drift_obj.set_aligned_spectra(detunings)
+
+    def load_aligned_spectra(self):
+        for drift_obj in self.drift_objects:
+            drift_obj.load_aligned_spectra()
 
     def plot_spectra(self, subplots=None, drifts=None, detunings=None, markers=False):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
