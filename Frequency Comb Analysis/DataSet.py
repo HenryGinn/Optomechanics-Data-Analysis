@@ -35,6 +35,7 @@ class DataSet():
         self.make_parent_results_folder()
         self.make_data_set_results_folder()
         self.make_peak_coordinates_folder()
+        self.make_peak_fitting_folder()
 
     def make_parent_results_folder(self):
         self.parent_results_path = os.path.join(self.parent_path, "Frequency Comb Results")
@@ -47,6 +48,10 @@ class DataSet():
     def make_peak_coordinates_folder(self):
         self.peak_coordinates_path = os.path.join(self.results_path, "Peak Coordinates")
         make_folder(self.peak_coordinates_path, message=True)
+
+    def make_peak_fitting_folder(self):
+        self.peak_fitting_path = os.path.join(self.results_path, "Peak Fitting")
+        make_folder(self.peak_fitting_path, message=True)
 
     def set_drift_objects(self):
         self.drift_objects = [Drift(self, folder_name)

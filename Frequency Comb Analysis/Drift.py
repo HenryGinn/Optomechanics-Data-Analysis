@@ -142,6 +142,15 @@ class Drift():
     def fit_peaks(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.fit_peaks()
+        self.save_peak_lines()
+
+    def save_peak_lines(self):
+        peak_lines_path = os.path.join(self.data_set.peak_fitting_path,
+                                       f"{self.drift_value} dBm")
+        with open(peak_lines_path, "w") as file:
+            file.writelines("Detuning (Hz)\tGroup\tLeft Gradient\tLeft Intercept\tRight Gradient\tRight Intercept\n")
+            for detuning_obj in self.detuning_objects:
+                detuning_obj.save_peak_lines_to_file(file)
 
     def plot_spectra(self, subplots, detunings, groups, markers, fit):
         self.plot_obj = DriftPlot(self, subplots)

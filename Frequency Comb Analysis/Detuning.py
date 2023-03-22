@@ -24,6 +24,8 @@ class Detuning():
     def set_group_objects(self):
         self.group_objects = np.array([Group(self, path)
                                        for path in self.paths])
+        self.group_objects = sorted(self.group_objects,
+                                    key=lambda x: x.group_number)
 
     def set_timestamps(self):
         self.timestamps = [group.timestamp for group in self.group_objects]
@@ -61,6 +63,10 @@ class Detuning():
     def fit_peaks(self):
         for group_obj in self.group_objects:
             group_obj.fit_peaks()
+
+    def save_peak_lines_to_file(self, file):
+        for group_obj in self.group_objects:
+            group_obj.save_peak_lines_to_file(file)
 
     def __str__(self):
         string = f"{self.drift_obj}, Detuning {self.detuning}"

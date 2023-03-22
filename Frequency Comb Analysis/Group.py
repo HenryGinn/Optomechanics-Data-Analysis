@@ -137,6 +137,15 @@ class Group():
         self.peaks_fit_obj = FitPeaks(self)
         self.peaks_fit_obj.fit_peaks()
 
+    def save_peak_lines_to_file(self, file):
+        detuning = self.detuning_obj.detuning
+        group = self.group_number
+        left_gradient = self.peaks_fit_obj.peak_lines[0].fitting_parameters[0]
+        left_intercept = self.peaks_fit_obj.peak_lines[0].fitting_parameters[1]
+        right_gradient = self.peaks_fit_obj.peak_lines[1].fitting_parameters[0]
+        right_intercept = self.peaks_fit_obj.peak_lines[1].fitting_parameters[1]
+        file.writelines(f"{detuning}\t{group}\t{left_gradient}\t{left_intercept}\t{right_gradient}\t{right_intercept}\n")
+
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"
                   f"Group number: {self.group_number}\n"
