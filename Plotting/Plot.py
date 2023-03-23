@@ -133,7 +133,7 @@ class Plot():
     def create_figure(self):
         fig, axes = plt.subplots(nrows=self.rows, ncols=self.columns)
         self.plot_axes(axes)
-        fig.suptitle(f"{self.plots_obj.title}")
+        self.set_suptitle(fig)
         update_figure_size()
         self.show_plot(fig)
 
@@ -157,8 +157,20 @@ class Plot():
                       linestyle=line_obj.linestyle)
 
     def set_labels(self, ax, lines_obj):
+        self.set_title(ax, lines_obj)
+        self.set_x_label(ax, lines_obj)
+        self.set_y_label(ax, lines_obj)
+
+    def set_title(self, ax, lines_obj):
+        if hasattr(lines_obj, "title"):
             ax.set_title(lines_obj.title)
+
+    def set_x_label(self, ax, lines_obj):
+        if hasattr(lines_obj, "x_label"):
             ax.set_xlabel(lines_obj.x_label)
+
+    def set_y_label(self, ax, lines_obj):
+        if hasattr(lines_obj, "y_label"):
             ax.set_ylabel(lines_obj.y_label)
 
     def get_axes_flat(self, axes):
@@ -167,6 +179,10 @@ class Plot():
         else:
             axes_flat = [axes]
         return axes_flat
+
+    def set_suptitle(self, fig):
+        if hasattr(self.plots_obj, "title"):
+            fig.suptitle(f"{self.plots_obj.title}")
 
     def show_plot(self, fig):
         fig.tight_layout()

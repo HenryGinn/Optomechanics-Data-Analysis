@@ -161,3 +161,7 @@ def make_folder(path, message=False):
         if message:
             print(f"Making '{name}' folder at {path}")
         os.mkdir(path)
+
+def flatten_by_one(input_list):
+    flatter_list = [element for sub_list in input_list for element in sub_list]
+    return flatter_list

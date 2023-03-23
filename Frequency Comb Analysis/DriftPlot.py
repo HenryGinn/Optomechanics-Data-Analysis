@@ -112,6 +112,6 @@ class DriftPlot():
         lines_obj.y_label = "S21 (mW)"
 
     def create_plots(self, lines_objects, title):
-        plot_obj = Plots(lines_objects, self.subplots, "semilogy")
+        plot_obj = Plots(lines_objects, self.subplots, plot_type="semilogy")
         plot_obj.title = title
         plot_obj.plot()

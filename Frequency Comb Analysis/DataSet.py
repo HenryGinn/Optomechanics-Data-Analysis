@@ -55,8 +55,8 @@ class DataSet():
         make_folder(self.peak_coordinates_path, message=True)
 
     def make_peak_fitting_folder(self):
-        self.peak_fitting_path = os.path.join(self.results_path, "Peak Fitting")
-        make_folder(self.peak_fitting_path, message=True)
+        self.peak_fit_path = os.path.join(self.results_path, "Peak Fitting")
+        make_folder(self.peak_fit_path, message=True)
 
     def set_drift_objects(self):
         self.drift_objects = [Drift(self, folder_name)
@@ -115,15 +115,29 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.set_peak_coordinates_paths()
 
-    def save_fit_peaks(self):
+    def save_peak_fits(self):
+        self.set_peak_fit_paths()
         for drift_obj in self.drift_objects:
-            drift_obj.save_fit_peaks()
+            drift_obj.save_peak_fits()
+
+    def load_peak_fits(self):
+        self.set_peak_fit_paths()
+        for drift_obj in self.drift_objects:
+            drift_obj.load_peak_fits()
+
+    def set_peak_fit_paths(self):
+        for drift_obj in self.drift_objects:
+            drift_obj.set_peak_fit_path()
     
     def plot_spectra(self, subplots=None, drifts=None, detunings=None,
                      groups=None, noise=False, markers=False, fit=False):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
         for drift_obj in drift_objects:
             drift_obj.plot_spectra(subplots, detunings, groups, noise, markers, fit)
+
+    def plot_peak_fits(self, groups=None):
+        for drift_obj in self.drift_objects:
+            drift_obj.plot_peak_fits(groups)
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

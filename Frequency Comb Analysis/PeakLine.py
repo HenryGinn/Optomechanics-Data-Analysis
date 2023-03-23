@@ -39,17 +39,18 @@ class PeakLine():
         return point_1, point_2, point_difference
 
     def get_line_residuals(self, fitting_parameters):
-        function_values = self.evaluate_line(self.x_values, fitting_parameters)
+        function_values = evaluate_line(self.x_values, fitting_parameters)
         residuals = function_values - self.y_values
         return residuals
 
-    def evaluate_line(self, x_values, fitting_parameters):
-        gradient, y_intercept = fitting_parameters
-        function_values = gradient*x_values + y_intercept
-        return function_values
-
     def set_values_fit(self):
         self.x_values_fit = np.array([self.x_values[0], self.x_values[-1]])
-        self.y_values_fit = self.evaluate_line(self.x_values_fit,
+        self.y_values_fit = evaluate_line(self.x_values_fit,
                                                self.fitting_parameters)
         self.y_values_fit = np.exp(self.y_values_fit)
+
+
+def evaluate_line(x_values, fitting_parameters):
+    gradient, y_intercept = fitting_parameters
+    function_values = gradient*x_values + y_intercept
+    return function_values

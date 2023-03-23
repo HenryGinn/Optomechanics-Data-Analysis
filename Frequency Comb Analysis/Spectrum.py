@@ -1,7 +1,6 @@
 import numpy as np
 
 from Data import Data
-from Utils import get_modified_deviation
 
 class Spectrum(Data):
 

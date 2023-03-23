@@ -4,6 +4,7 @@ import numpy as np
 
 from Detuning import Detuning
 from DriftPlot import DriftPlot
+from DriftPeakFit import DriftPeakFit
 from Utils import get_number_from_file_name
 from Utils import get_number_from_string
 from Utils import convert_to_milliwatts
@@ -159,15 +160,17 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             detuning_obj.load_peak_coordinates()
 
-    def save_fit_peaks(self):
+    def set_peak_fit_path(self):
+        self.peak_fit_path = os.path.join(self.data_set.peak_fit_path,
+                                          f"{self.drift_value} dBm")
+
+    def save_peak_fits(self):
         for detuning_obj in self.detuning_objects:
             detuning_obj.fit_peaks()
-        self.save_peak_lines()
+        self.save_peak_fit()
 
-    def save_peak_lines(self):
-        peak_lines_path = os.path.join(self.data_set.peak_fitting_path,
-                                       f"{self.drift_value} dBm")
-        with open(peak_lines_path, "w") as file:
+    def save_peak_fit(self):
+        with open(self.peak_fit_path, "w") as file:
             self.save_peak_lines_to_file(file)
 
     def save_peak_lines_to_file(self, file):
@@ -176,11 +179,21 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             detuning_obj.save_peak_lines_to_file(file)
 
+    def load_peak_fits(self):
+        self.drift_peak_fit = DriftPeakFit(self)
+        self.drift_peak_fit.load_peak_fits()
+
     def plot_spectra(self, subplots, detunings, groups, noise, markers, fit):
         self.plot_obj = DriftPlot(self, subplots)
         self.plot_obj.set_data_plotting_instructions(detunings, groups)
         self.plot_obj.set_peak_plotting_instructions(noise, markers, fit)
         self.plot_obj.plot_spectra()
+
+    def plot_peak_fits(self, groups):
+        if hasattr(self, "drift_peak_fit"):
+            self.drift_peak_fit.plot_peak_fits(groups)
+        else:
+            raise AttributeError("Run 'load_peak_fits' method first")
     
     def __str__(self):
         string = f"{self.data_set}, Drift {self.drift_value} dBm"
