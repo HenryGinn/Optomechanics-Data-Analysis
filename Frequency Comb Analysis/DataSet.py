@@ -135,9 +135,9 @@ class DataSet():
         for drift_obj in drift_objects:
             drift_obj.plot_spectra(subplots, detunings, groups, noise, markers, fit)
 
-    def plot_peak_fits(self, groups=None):
+    def plot_peak_fits(self, groups=None, legend=True):
         for drift_obj in self.drift_objects:
-            drift_obj.plot_peak_fits(groups)
+            drift_obj.plot_peak_fits(groups, legend)
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

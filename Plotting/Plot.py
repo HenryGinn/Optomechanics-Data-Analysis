@@ -131,15 +131,15 @@ class Plot():
             self.set_best_pair(2)
 
     def create_figure(self):
-        fig, axes = plt.subplots(nrows=self.rows, ncols=self.columns)
-        self.plot_axes(axes)
-        self.set_suptitle(fig)
+        fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns)
+        self.plot_axes()
+        self.add_plot_peripherals(fig)
         update_figure_size()
         self.show_plot(fig)
 
-    def plot_axes(self, axes):
-        axes_flat = self.get_axes_flat(axes)
-        for ax, lines_obj in zip(axes_flat, self.lines_objects):
+    def plot_axes(self):
+        self.flatten_axes()
+        for ax, lines_obj in zip(self.axes, self.lines_objects):
             self.plot_lines(ax, lines_obj)
             self.set_labels(ax, lines_obj)
 
@@ -154,7 +154,8 @@ class Plot():
         plot_function(line_obj.x_values, line_obj.y_values,
                       color=line_obj.colour,
                       marker=line_obj.marker,
-                      linestyle=line_obj.linestyle)
+                      linestyle=line_obj.linestyle,
+                      label=line_obj.label)
 
     def set_labels(self, ax, lines_obj):
         self.set_title(ax, lines_obj)
@@ -173,16 +174,24 @@ class Plot():
         if hasattr(lines_obj, "y_label"):
             ax.set_ylabel(lines_obj.y_label)
 
-    def get_axes_flat(self, axes):
-        if isinstance(axes, np.ndarray):
-            axes_flat = axes.flatten()
+    def flatten_axes(self):
+        if isinstance(self.axes, np.ndarray):
+            self.axes = self.axes.flatten()
         else:
-            axes_flat = [axes]
-        return axes_flat
+            self.axes = [self.axes]
+
+    def add_plot_peripherals(self, fig):
+        self.set_suptitle(fig)
+        self.set_legend(fig)
 
     def set_suptitle(self, fig):
         if hasattr(self.plots_obj, "title"):
             fig.suptitle(f"{self.plots_obj.title}")
+
+    def set_legend(self, fig):
+        if self.plots_obj.legend:
+            for ax in self.axes:
+                ax.legend()
 
     def show_plot(self, fig):
         fig.tight_layout()

@@ -189,9 +189,9 @@ class Drift():
         self.plot_obj.set_peak_plotting_instructions(noise, markers, fit)
         self.plot_obj.plot_spectra()
 
-    def plot_peak_fits(self, groups):
+    def plot_peak_fits(self, groups, legend):
         if hasattr(self, "drift_peak_fit"):
-            self.drift_peak_fit.plot_peak_fits(groups)
+            self.drift_peak_fit.plot_peak_fits(groups, legend)
         else:
             raise AttributeError("Run 'load_peak_fits' method first")
     

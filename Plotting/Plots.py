@@ -14,11 +14,18 @@ class Plots():
     those figures is handled as a single Plot object.
     """
 
-    def __init__(self, lines_objects, subplot_count, plot_type="plot"):
+    def __init__(self, lines_objects, subplot_count=None,
+                 plot_type="plot", legend=False):
+        self.process_lines_objects(lines_objects)
+        self.process_subplots(subplot_count)
+        self.process_plot_options(plot_type, legend)
+
+    def process_lines_objects(self, lines_objects):
         self.lines_objects = np.array(lines_objects)
         self.total = len(lines_objects)
+
+    def process_subplots(self, subplot_count):
         self.set_subplot_count(subplot_count)
-        self.plot_type = plot_type
         self.partition_lines_objects()
 
     def set_subplot_count(self, subplot_count):
@@ -28,6 +35,10 @@ class Plots():
         group_indexes = get_group_indexes(self.total, self.subplot_count)
         self.lines_object_groups = [self.lines_objects[indexes]
                                     for indexes in group_indexes]
+
+    def process_plot_options(self, plot_type, legend):
+        self.plot_type = plot_type
+        self.legend = legend
     
     def plot(self):
         for index, lines_object_group in enumerate(self.lines_object_groups):
