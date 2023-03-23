@@ -70,10 +70,9 @@ class Detuning():
         for group_obj in self.group_objects:
             group_obj.set_peak_coordinates_path()
 
-    def set_peak_coordinates(self):
-        print(f"Setting peak coordinates for {self}")
+    def save_peak_coordinates(self):
         for group_obj in self.group_objects:
-            group_obj.set_peak_coordinates()
+            group_obj.save_peak_coordinates()
 
     def load_peak_coordinates(self):
         for group_obj in self.group_objects:

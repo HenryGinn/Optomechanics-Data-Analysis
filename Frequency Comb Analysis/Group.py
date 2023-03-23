@@ -116,7 +116,7 @@ class Group():
         path = self.noise_threshold_path
         _, self.spectrum_obj.noise_threshold = get_file_contents_from_path(path)
 
-    def set_peak_coordinates(self):
+    def save_peak_coordinates(self):
         self.spectrum_obj.set_peak_coordinates()
         self.create_peak_coordinates_file()
 

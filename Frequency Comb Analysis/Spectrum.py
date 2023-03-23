@@ -5,9 +5,9 @@ from Utils import get_modified_deviation
 
 class Spectrum(Data):
 
-    window_width = 25
-    noise_deviations_threshold = 15
-    peak_index_proximity = 3
+    window_width = 10
+    peak_index_proximity = 100
+    noise_multiplier_threshold = 3.5
 
     def __init__(self, group_obj):
         self.group_obj = group_obj
@@ -21,9 +21,7 @@ class Spectrum(Data):
 
     def get_noise_threshold(self, index):
         S21_within_window = self.get_S21_within_window(index)
-        _, modified_deviation = get_modified_deviation(S21_within_window)
-        deviation = self.noise_deviations_threshold * modified_deviation
-        noise_threshold = np.minimum(np.median(S21_within_window) + deviation, 1.5e-11)
+        noise_threshold = np.median(S21_within_window) * self.noise_multiplier_threshold
         return noise_threshold
 
     def get_S21_within_window(self, index):

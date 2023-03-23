@@ -149,10 +149,11 @@ class Drift():
                                                   f"{self.drift_value} dBm")
         make_folder(self.peak_coordinates_path)
 
-    def set_peak_coordinates(self, detunings):
+    def save_peak_coordinates(self, detunings):
+        print(f"Setting peak coordinates for {self}")
         detuning_objects = get_sliced_list(self.detuning_objects, detunings)
         for detuning_obj in detuning_objects:
-            detuning_obj.set_peak_coordinates()
+            detuning_obj.save_peak_coordinates()
 
     def load_peak_coordinates(self):
         for detuning_obj in self.detuning_objects:

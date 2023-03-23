@@ -80,6 +80,7 @@ class DataSet():
             drift_obj.set_aligned_spectra(detunings)
 
     def load_aligned_spectra(self):
+        print("Loading aligned spectra")
         for drift_obj in self.drift_objects:
             drift_obj.load_aligned_spectra()
 
@@ -89,6 +90,7 @@ class DataSet():
             drift_obj.save_noise_threshold()
 
     def load_noise_threshold(self):
+        print("Loading noise threshold")
         self.set_noise_threshold_paths()
         for drift_obj in self.drift_objects:
             drift_obj.load_noise_threshold()
@@ -97,13 +99,14 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.set_noise_threshold_paths()
 
-    def set_peak_coordinates(self, drifts=None, detunings=None):
+    def save_peak_coordinates(self, drifts=None, detunings=None):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
         self.set_peak_coordinates_paths()
         for drift_obj in drift_objects:
-            drift_obj.set_peak_coordinates(detunings)
+            drift_obj.save_peak_coordinates(detunings)
 
     def load_peak_coordinates(self):
+        print("Loading peak coordinates")
         self.set_peak_coordinates_paths()
         for drift_obj in self.drift_objects:
             drift_obj.load_peak_coordinates()
