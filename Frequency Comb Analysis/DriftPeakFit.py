@@ -52,6 +52,7 @@ class DriftPeakFit():
         line_objects = [self.get_line_obj(index) for index in indexes]
         lines_obj = Lines(line_objects)
         lines_obj = self.get_lines_labels(lines_obj, group_number)
+        lines_obj.set_rainbow_lines()
         return lines_obj
 
     def get_line_obj(self, index):

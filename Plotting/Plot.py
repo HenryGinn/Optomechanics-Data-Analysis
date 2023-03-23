@@ -22,10 +22,13 @@ class Plot():
 
     def __init__(self, plots_obj, lines_objects, plot_index):
         self.plots_obj = plots_obj
-        self.lines_objects = lines_objects
+        self.process_lines_objects(lines_objects)
         self.plot_index = plot_index
-        self.count = len(self.lines_objects)
         self.set_grid_size()
+
+    def process_lines_objects(self, lines_objects):
+        self.lines_objects = lines_objects
+        self.count = len(self.lines_objects)
 
     def set_grid_size(self):
         self.set_row_and_column_sizes()
