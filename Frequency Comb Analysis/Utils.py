@@ -165,3 +165,21 @@ def make_folder(path, message=False):
 def flatten_by_one(input_list):
     flatter_list = [element for sub_list in input_list for element in sub_list]
     return flatter_list
+
+def get_prefixed_number(input_number):
+    power_of_thousand = get_power_of_thousand(input_number)
+    prefix = get_prefix(power_of_thousand)
+    base_number = input_number / 1000**power_of_thousand
+    prefixed_number = f"{round(base_number)}{prefix}"
+    return prefixed_number
+
+def get_power_of_thousand(input_number):
+    power_of_thousand = np.log(input_number) / np.log(1000)
+    power_of_thousand = np.floor(np.round(power_of_thousand, 5))
+    return power_of_thousand
+
+def get_prefix(power_of_thousand):
+    prefix_dict = {-5: "f", -4: "n", -3: "$\mu$", -2: "m", 0: "",
+                   1: "k", 2: "M", 3: "G", 4: "T", 5: "P"}
+    prefix = prefix_dict[power_of_thousand]
+    return prefix

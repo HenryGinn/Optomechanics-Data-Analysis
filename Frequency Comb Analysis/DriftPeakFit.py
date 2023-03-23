@@ -7,6 +7,7 @@ from PeakLine import evaluate_line
 from Utils import get_file_contents_from_path
 from Utils import flatten_by_one
 from Utils import get_sliced_list
+from Utils import get_prefixed_number
 
 class DriftPeakFit():
 
@@ -45,8 +46,8 @@ class DriftPeakFit():
         return group_indexes
 
     def set_x_values(self):
-        self.left_x_values = np.array([-10**6, 0])
-        self.right_x_values = np.array([0, 10**6])
+        self.left_x_values = np.array([-2.5e5, 0])
+        self.right_x_values = np.array([0, 2.5e5])
 
     def get_lines_obj(self, group_number, indexes):
         line_objects = [self.get_line_obj(index) for index in indexes]
@@ -56,7 +57,7 @@ class DriftPeakFit():
         return lines_obj
 
     def get_line_obj(self, index):
-        label = self.detunings[index]
+        label = get_prefixed_number(self.detunings[index])
         y_values = self.get_y_values(index)
         x_values = np.concatenate((self.left_x_values, self.right_x_values))
         line_obj = Line(x_values, y_values, label=label)
