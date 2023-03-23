@@ -174,8 +174,7 @@ class Drift():
             self.save_peak_lines_to_file(file)
 
     def save_peak_lines_to_file(self, file):
-        file.writelines(("Detuning (Hz)\tGroup\tLeft Gradient\tLeft Intercept"
-                         "\tRight Gradient\tRight Intercept\n"))
+        file.writelines("Detuning (Hz)\tGroup\tGradient\tIntercept\n")
         for detuning_obj in self.detuning_objects:
             detuning_obj.save_peak_lines_to_file(file)
 

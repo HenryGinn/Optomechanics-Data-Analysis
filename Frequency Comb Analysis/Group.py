@@ -154,23 +154,17 @@ class Group():
 
     def save_peak_lines_to_file(self, file):
         self.write_group_data_to_file(file)
-        self.write_left_peak_to_file(file)
-        self.write_right_peak_to_file(file)
+        self.write_line_data_to_file(file)
 
     def write_group_data_to_file(self, file):
         detuning = self.detuning_obj.detuning
         group = self.group_number
         file.writelines(f"{detuning}\t{group}\t")
 
-    def write_left_peak_to_file(self, file):
-        left_gradient = self.peaks_fit_obj.peak_lines[0].fitting_parameters[0]
-        left_intercept = self.peaks_fit_obj.peak_lines[0].fitting_parameters[1]
-        file.writelines(f"{left_gradient}\t{left_intercept}\t")
-
-    def write_right_peak_to_file(self, file):
-        right_gradient = self.peaks_fit_obj.peak_lines[1].fitting_parameters[0]
-        right_intercept = self.peaks_fit_obj.peak_lines[1].fitting_parameters[1]
-        file.writelines(f"{right_gradient}\t{right_intercept}\n")
+    def write_line_data_to_file(self, file):
+        gradient = self.peaks_fit_obj.fitting_parameters[0]
+        intercept = self.peaks_fit_obj.fitting_parameters[1]
+        file.writelines(f"{gradient}\t{intercept}\n")
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"
