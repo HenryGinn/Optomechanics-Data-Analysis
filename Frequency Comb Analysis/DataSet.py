@@ -34,6 +34,7 @@ class DataSet():
     def make_results_folders(self):
         self.make_parent_results_folder()
         self.make_data_set_results_folder()
+        self.make_noise_threshold_folder()
         self.make_peak_coordinates_folder()
         self.make_peak_fitting_folder()
 
@@ -44,6 +45,10 @@ class DataSet():
     def make_data_set_results_folder(self):
         self.results_path = os.path.join(self.parent_results_path, self.folder_name)
         make_folder(self.results_path, message=True)
+
+    def make_noise_threshold_folder(self):
+        self.noise_threshold_path = os.path.join(self.results_path, "Noise Threshold")
+        make_folder(self.noise_threshold_path, message=True)
 
     def make_peak_coordinates_folder(self):
         self.peak_coordinates_path = os.path.join(self.results_path, "Peak Coordinates")
@@ -78,11 +83,19 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.load_aligned_spectra()
 
-    def plot_spectra(self, subplots=None, drifts=None, detunings=None,
-                     groups=None, markers=False, fit=False):
-        drift_objects = get_sliced_list(self.drift_objects, drifts)
-        for drift_obj in drift_objects:
-            drift_obj.plot_spectra(subplots, detunings, groups, markers, fit)
+    def save_noise_threshold(self):
+        self.set_noise_threshold_paths()
+        for drift_obj in self.drift_objects:
+            drift_obj.save_noise_threshold()
+
+    def load_noise_threshold(self):
+        self.set_noise_threshold_paths()
+        for drift_obj in self.drift_objects:
+            drift_obj.load_noise_threshold()
+
+    def set_noise_threshold_paths(self):
+        for drift_obj in self.drift_objects:
+            drift_obj.set_noise_threshold_paths()
 
     def set_peak_coordinates(self, drifts=None, detunings=None):
         drift_objects = get_sliced_list(self.drift_objects, drifts)
@@ -99,9 +112,15 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.set_peak_coordinates_paths()
 
-    def fit_peaks(self):
+    def save_fit_peaks(self):
         for drift_obj in self.drift_objects:
-            drift_obj.fit_peaks()
+            drift_obj.save_fit_peaks()
+    
+    def plot_spectra(self, subplots=None, drifts=None, detunings=None,
+                     groups=None, noise=False, markers=False, fit=False):
+        drift_objects = get_sliced_list(self.drift_objects, drifts)
+        for drift_obj in drift_objects:
+            drift_obj.plot_spectra(subplots, detunings, groups, noise, markers, fit)
 
     def __str__(self):
         string = f"Data Set {self.folder_name}"

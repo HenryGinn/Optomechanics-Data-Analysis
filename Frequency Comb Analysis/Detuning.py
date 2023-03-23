@@ -47,6 +47,25 @@ class Detuning():
         for group_obj in self.group_objects:
             group_obj.load_aligned_spectrum()
 
+    def set_noise_threshold_paths(self):
+        self.create_noise_threshold_folder()
+        for group_obj in self.group_objects:
+            group_obj.noise_threshold_path = os.path.join(self.noise_threshold_path,
+                                                      f"Group {group_obj.group_number}")
+
+    def create_noise_threshold_folder(self):
+        self.noise_threshold_path = os.path.join(self.drift_obj.noise_threshold_path,
+                                             f"{self.detuning}")
+        make_folder(self.noise_threshold_path)
+        
+    def save_noise_threshold(self):
+        for group_obj in self.group_objects:
+            group_obj.save_noise_threshold()
+
+    def load_noise_threshold(self):
+        for group_obj in self.group_objects:
+            group_obj.load_noise_threshold()
+
     def set_peak_coordinates_paths(self):
         for group_obj in self.group_objects:
             group_obj.set_peak_coordinates_path()

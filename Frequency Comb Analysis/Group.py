@@ -101,6 +101,21 @@ class Group():
         if not hasattr(self, "spectrum_obj"):
             self.spectrum_obj = Spectrum(self)
 
+    def save_noise_threshold(self):
+        self.spectrum_obj.set_noise_threshold()
+        with open(self.noise_threshold_path, "w") as file:
+            file.writelines("Frequency (Hz)\tNoise Threshold (mW)\n")
+            self.save_noise_threshold_to_file(file)
+
+    def save_noise_threshold_to_file(self, file):
+        for frequency, noise in zip(self.spectrum_obj.frequency,
+                                    self.spectrum_obj.noise_threshold):
+            file.writelines(f"{frequency}\t{noise}\n")
+
+    def load_noise_threshold(self):
+        path = self.noise_threshold_path
+        _, self.spectrum_obj.noise_threshold = get_file_contents_from_path(path)
+
     def set_peak_coordinates(self):
         self.spectrum_obj.set_peak_coordinates()
         self.create_peak_coordinates_file()
@@ -138,13 +153,24 @@ class Group():
         self.peaks_fit_obj.fit_peaks()
 
     def save_peak_lines_to_file(self, file):
+        self.write_group_data_to_file(file)
+        self.write_left_peak_to_file(file)
+        self.write_right_peak_to_file(file)
+
+    def write_group_data_to_file(self, file):
         detuning = self.detuning_obj.detuning
         group = self.group_number
+        file.writelines(f"{detuning}\t{group}\t")
+
+    def write_left_peak_to_file(self, file):
         left_gradient = self.peaks_fit_obj.peak_lines[0].fitting_parameters[0]
         left_intercept = self.peaks_fit_obj.peak_lines[0].fitting_parameters[1]
+        file.writelines(f"{left_gradient}\t{left_intercept}\t")
+
+    def write_right_peak_to_file(self, file):
         right_gradient = self.peaks_fit_obj.peak_lines[1].fitting_parameters[0]
         right_intercept = self.peaks_fit_obj.peak_lines[1].fitting_parameters[1]
-        file.writelines(f"{detuning}\t{group}\t{left_gradient}\t{left_intercept}\t{right_gradient}\t{right_intercept}\n")
+        file.writelines(f"{right_gradient}\t{right_intercept}\n")
 
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"

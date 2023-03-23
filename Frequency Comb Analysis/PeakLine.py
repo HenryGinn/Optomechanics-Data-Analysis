@@ -15,9 +15,20 @@ class PeakLine():
                                              self.initial_fitting_parameters)[0]
 
     def set_initial_fitting_parameters(self):
+        if len(self.x_values) > 1:
+            self.set_initial_fitting_parameters_diagonal()
+        else:
+            self.set_initial_fitting_parameters_vertical()
+
+    def set_initial_fitting_parameters_diagonal(self):
         point_1, point_2, point_difference = self.get_points()
         gradient = point_difference["y"] / point_difference["x"]
         y_intercept = point_difference["x"]*point_1["x"] - point_difference["y"]*point_1["y"]
+        self.initial_fitting_parameters = [gradient, y_intercept]
+
+    def set_initial_fitting_parameters_vertical(self):
+        gradient = 1
+        y_intercept = self.y_values[0]
         self.initial_fitting_parameters = [gradient, y_intercept]
 
     def get_points(self):

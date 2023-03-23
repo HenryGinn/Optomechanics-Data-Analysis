@@ -20,7 +20,8 @@ class DriftPlot():
         self.detunings = detunings
         self.groups = groups
 
-    def set_peak_plotting_instructions(self, markers, fit):
+    def set_peak_plotting_instructions(self, noise, markers, fit):
+        self.noise = noise
         self.markers = markers
         self.fit = fit
 
@@ -44,8 +45,7 @@ class DriftPlot():
     def get_line_objects(self, detuning_obj):
         group_objects = get_sliced_list(detuning_obj.group_objects, self.groups)
         line_objects = self.get_lines(group_objects)
-        line_objects = self.add_markers(group_objects, line_objects)
-        line_objects = self.add_fit(group_objects, line_objects)
+        line_objects = self.add_peak_attributes(group_objects, line_objects)
         return line_objects
 
     def get_lines(self, group_objects):
@@ -57,6 +57,24 @@ class DriftPlot():
         x_values = group_obj.spectrum_obj.frequency
         y_values = group_obj.spectrum_obj.S21
         line_obj = Line(x_values, y_values)
+        return line_obj
+
+    def add_peak_attributes(self, group_objects, line_objects):
+        line_objects = self.add_noise(group_objects, line_objects)
+        line_objects = self.add_markers(group_objects, line_objects)
+        line_objects = self.add_fit(group_objects, line_objects)
+        return line_objects
+
+    def add_noise(self, group_objects, line_objects):
+        if self.noise:
+            for group_obj in group_objects:
+                line_objects.append(self.get_line_object_noise(group_obj.spectrum_obj))
+        return line_objects
+
+    def get_line_object_noise(self, spectrum_obj):
+        x_values = spectrum_obj.frequency
+        y_values = spectrum_obj.noise_threshold
+        line_obj = Line(x_values, y_values, colour="k")
         return line_obj
 
     def add_markers(self, group_objects, line_objects):

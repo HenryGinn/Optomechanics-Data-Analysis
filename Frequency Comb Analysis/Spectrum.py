@@ -5,8 +5,9 @@ from Utils import get_modified_deviation
 
 class Spectrum(Data):
 
-    noise_deviations_threshold = 3
-    peak_index_proximity = 100
+    window_width = 25
+    noise_deviations_threshold = 15
+    peak_index_proximity = 3
 
     def __init__(self, group_obj):
         self.group_obj = group_obj
@@ -14,17 +15,28 @@ class Spectrum(Data):
     def initialise_from_path(self, path):
         Data.__init__(self, self.group_obj, path)
 
+    def set_noise_threshold(self):
+        self.noise_threshold = [self.get_noise_threshold(index)
+                                for index in range(len(self.S21))]
+
+    def get_noise_threshold(self, index):
+        S21_within_window = self.get_S21_within_window(index)
+        _, modified_deviation = get_modified_deviation(S21_within_window)
+        deviation = self.noise_deviations_threshold * modified_deviation
+        noise_threshold = np.minimum(np.median(S21_within_window) + deviation, 1.5e-11)
+        return noise_threshold
+
+    def get_S21_within_window(self, index):
+        left_index = max(0, index - self.window_width)
+        right_index = min(len(self.S21) - 1, index + self.window_width)
+        S21_within_window = np.minimum(self.S21, 10**-11)[left_index:right_index]
+        return S21_within_window
+
     def set_peak_coordinates(self):
-        non_noise_indices = self.get_non_noise_indices()
+        non_noise_indices = np.nonzero(self.S21 > self.noise_threshold)[0]
         close_to_indices = self.get_close_to_indices(non_noise_indices)
         self.set_peak_clusters(non_noise_indices, close_to_indices)
-        self.set_peak_indices()
-
-    def get_non_noise_indices(self):
-        _, modified_deviation = get_modified_deviation(self.S21)
-        noise = np.median(self.S21) + self.noise_deviations_threshold * modified_deviation
-        non_noise_indices = np.nonzero(self.S21 > noise)[0]
-        return non_noise_indices
+        self.set_peak_values()
 
     def get_close_to_indices(self, non_noise_indices):
         close_to_indices = {index_outer: self.get_close_to_index(index_outer, non_noise_indices)
@@ -59,6 +71,8 @@ class Spectrum(Data):
         intersection_non_empty = (len(intersection) != 0)
         return intersection_non_empty
 
-    def set_peak_indices(self):
+    def set_peak_values(self):
         self.peak_indices = [max(cluster_indices, key=lambda x: self.S21[x])
                              for cluster_indices in self.peak_clusters]
+        self.peak_frequencies = self.frequency[self.peak_indices]
+        self.peak_S21s = self.S21[self.peak_indices]
