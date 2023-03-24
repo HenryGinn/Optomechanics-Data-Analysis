@@ -64,14 +64,14 @@ def is_index_valid(index, file_name):
     is_valid = is_number and is_not_at_end_of_file
     return is_valid
 
-def get_file_contents(file, file_name):
-    file_contents = [process_line(line, file_name) for line in file]
+def get_file_contents(file):
+    file_contents = [process_line(line, file) for line in file]
     file_contents = [np.array(column) for column in zip(*file_contents)]
     return file_contents
 
-def process_line(line, file_name):
+def process_line(line, file):
     line = line.strip().split("\t")
-    line = [convert_to_float(number, file_name) for number in line]
+    line = [convert_to_float(number, file.name) for number in line]
     return line
 
 def convert_to_float(number, file_name):

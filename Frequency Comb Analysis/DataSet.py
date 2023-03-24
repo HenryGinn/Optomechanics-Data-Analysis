@@ -2,6 +2,7 @@ import sys
 import os
 
 from Drift import Drift
+from EnvelopeTrends import EnvelopeTrends
 from Utils import get_sliced_list
 from Utils import make_folder
 
@@ -25,6 +26,7 @@ class DataSet():
         self.make_results_folders()
         self.set_drift_objects()
         self.set_aligned_spectra_paths()
+        self.envelope_trends_obj = EnvelopeTrends(self)
 
     def set_paths(self):
         repo_path = os.path.dirname(self.script_path)
@@ -139,6 +141,9 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.plot_peak_fits(groups, legend)
 
+    def envelope_trends(self, command):
+        self.envelope_trends_obj.execute(command)
+    
     def __str__(self):
         string = f"Data Set {self.folder_name}"
         return string
