@@ -117,7 +117,7 @@ class EnvelopeTrends():
         line_objects = [self.get_line_object_gradient(drift_obj)
                         for drift_obj in self.data_set_obj.drift_objects]
         lines_obj = self.get_lines_obj_from_line_objects(line_objects)
-        lines_obj.x_label = "Drift (dBm)"
+        lines_obj.x_label = "Detuning (Hz)"
         lines_obj.y_label = "Gradient"
         return lines_obj
 
@@ -134,7 +134,7 @@ class EnvelopeTrends():
         line_objects = [self.get_line_object_intercept(drift_obj)
                         for drift_obj in self.data_set_obj.drift_objects]
         lines_obj = self.get_lines_obj_from_line_objects(line_objects)
-        lines_obj.x_label = "Drift (dBm)"
+        lines_obj.x_label = "Detuning (Hz)"
         lines_obj.y_label = "Intercept"
         return lines_obj
 

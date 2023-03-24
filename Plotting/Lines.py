@@ -23,3 +23,17 @@ class Lines():
     def set_legend(self, legend, loc=0):
         self.legend = legend
         self.legend_loc = loc
+
+    def set_limits(self):
+        self.set_x_limits()
+        self.set_y_limits()
+
+    def set_x_limits(self):
+        x_limit_lower = min([min(line_obj.x_values) for line_obj in self.line_objects])
+        x_limit_upper = max([max(line_obj.x_values) for line_obj in self.line_objects])
+        self.x_limits = [x_limit_lower, x_limit_upper]
+
+    def set_y_limits(self):
+        y_limit_lower = min([min(line_obj.y_values) for line_obj in self.line_objects])
+        y_limit_upper = max([max(line_obj.y_values) for line_obj in self.line_objects])
+        self.y_limits = [y_limit_lower, y_limit_upper]

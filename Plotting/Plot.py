@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Plotting.PlotUtils import update_figure_size
+from Plotting.PlotUtils import get_pretty_axis
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -147,11 +148,17 @@ class Plot():
             self.set_labels(ax, lines_obj)
 
     def plot_lines(self, ax, lines_obj):
+        plot_function = self.get_plot_function(ax)
+        for line_obj in lines_obj.line_objects:
+            self.plot_line(ax, line_obj, plot_function)
+        lines_obj.set_limits()
+        self.prettify_axes(ax, lines_obj)
+
+    def get_plot_function(self, ax):
         plot_functions = {"plot": ax.plot,
                           "semilogy": ax.semilogy}
         plot_function = plot_functions[self.plots_obj.plot_type]
-        for line_obj in lines_obj.line_objects:
-            self.plot_line(ax, line_obj, plot_function)
+        return plot_function
         
     def plot_line(self, ax, line_obj, plot_function):
         plot_function(line_obj.x_values, line_obj.y_values,
@@ -196,6 +203,20 @@ class Plot():
             for ax, lines_obj in zip(self.axes, self.lines_objects):
                 if lines_obj.legend:
                     ax.legend(loc=lines_obj.legend_loc)
+
+    def prettify_axes(self, ax, lines_obj):
+        self.prettify_x_axis(ax, lines_obj.x_limits)
+        self.prettify_y_axis(ax, lines_obj.y_limits)
+
+    def prettify_x_axis(self, ax, limits):
+        tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
+        ax.set_xticks(tick_positions, labels=tick_labels)
+        print(prefix)
+
+    def prettify_y_axis(self, ax, limits):
+        tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
+        ax.set_yticks(tick_positions, labels=tick_labels)
+        print(prefix)
 
     def show_plot(self, fig):
         fig.tight_layout()

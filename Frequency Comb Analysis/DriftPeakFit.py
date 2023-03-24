@@ -3,12 +3,12 @@ import numpy as np
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
+from Plotting.PlotUtils import get_prefixed_number
 from FitPeaks import FitPeaks
 from FitPeaks import evaluate_abs
 from Utils import get_file_contents_from_path
 from Utils import flatten_by_one
 from Utils import get_sliced_list
-from Utils import get_prefixed_number
 
 class DriftPeakFit():
 
