@@ -6,6 +6,7 @@ class Lines():
     def __init__(self, line_objects):
         self.line_objects = line_objects
         self.count = len(line_objects)
+        self.set_legend(False)
 
     def set_rainbow_lines(self):
         self.set_colours()
@@ -18,3 +19,7 @@ class Lines():
         values = np.ones(self.count)
         hsv_tuples = np.array(list(zip(hues, saturations, values)))
         self.colours = hsv_to_rgb(hsv_tuples)
+
+    def set_legend(self, legend, loc=0):
+        self.legend = legend
+        self.legend_loc = loc

@@ -193,8 +193,9 @@ class Plot():
 
     def set_legend(self, fig):
         if self.plots_obj.legend:
-            for ax in self.axes:
-                ax.legend(loc=1)
+            for ax, lines_obj in zip(self.axes, self.lines_objects):
+                if lines_obj.legend:
+                    ax.legend(loc=lines_obj.legend_loc)
 
     def show_plot(self, fig):
         fig.tight_layout()

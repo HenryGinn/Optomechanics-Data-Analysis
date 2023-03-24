@@ -99,8 +99,13 @@ class EnvelopeTrends():
     def create_plot(self):
         self.ensure_loaded()
         lines_objects = self.get_lines_objects()
-        self.plots_obj = Plots(lines_objects)
-        self.plots_obj.plot()
+        plots_obj = Plots(lines_objects, legend=True)
+        plots_obj.title = f"Peak Envelope Data for {self.data_set_obj}"
+        plots_obj.plot()
+
+    def ensure_loaded(self):
+        if not self.loaded:
+            self.execute("Load")
 
     def get_lines_objects(self):
         lines_obj_gradient = self.get_lines_obj_gradient()
@@ -111,7 +116,9 @@ class EnvelopeTrends():
     def get_lines_obj_gradient(self):
         line_objects = [self.get_line_object_gradient(drift_obj)
                         for drift_obj in self.data_set_obj.drift_objects]
-        lines_obj = Lines(line_objects)
+        lines_obj = self.get_lines_obj_from_line_objects(line_objects)
+        lines_obj.x_label = "Drift (dBm)"
+        lines_obj.y_label = "Gradient"
         return lines_obj
 
     def get_line_object_gradient(self, drift_obj):
@@ -126,7 +133,9 @@ class EnvelopeTrends():
     def get_lines_obj_intercept(self):
         line_objects = [self.get_line_object_intercept(drift_obj)
                         for drift_obj in self.data_set_obj.drift_objects]
-        lines_obj = Lines(line_objects)
+        lines_obj = self.get_lines_obj_from_line_objects(line_objects)
+        lines_obj.x_label = "Drift (dBm)"
+        lines_obj.y_label = "Intercept"
         return lines_obj
 
     def get_line_object_intercept(self, drift_obj):
@@ -138,6 +147,8 @@ class EnvelopeTrends():
         line_obj.deviations = deviations
         return line_obj
 
-    def ensure_loaded(self):
-        if not self.loaded:
-            self.execute("Load")
+    def get_lines_obj_from_line_objects(self, line_objects):
+        lines_obj = Lines(line_objects)
+        lines_obj.set_rainbow_lines()
+        lines_obj.set_legend(True)
+        return lines_obj
