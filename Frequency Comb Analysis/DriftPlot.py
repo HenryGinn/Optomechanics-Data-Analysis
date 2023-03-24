@@ -1,7 +1,6 @@
 import numpy as np
 
 from Utils import get_sliced_list
-from FitPeaks import evaluate_abs
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
@@ -99,9 +98,8 @@ class DriftPlot():
         return line_objects
 
     def get_line_obj_fit(self, group_obj):
-        x_values = np.array([group_obj.peaks_fit_obj.peak_frequencies[0], 0, group_obj.peaks_fit_obj.peak_frequencies[-1]])
-        y_values = evaluate_abs(x_values, group_obj.peaks_fit_obj.fitting_parameters)
-        y_values = np.exp(y_values)
+        x_values = group_obj.envelope_x_values
+        y_values = group_obj.envelope_y_values
         line_obj = Line(x_values, y_values, colour="k")
         return line_obj
 

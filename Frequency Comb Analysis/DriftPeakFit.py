@@ -3,6 +3,7 @@ import numpy as np
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
+from FitPeaks import FitPeaks
 from FitPeaks import evaluate_abs
 from Utils import get_file_contents_from_path
 from Utils import flatten_by_one
@@ -22,11 +23,26 @@ class DriftPeakFit():
     def load_from_file_contents(self, file_contents):
         (self.detunings, self.group_numbers,
          self.gradients, self.intercepts) = file_contents
+        self.update_drift_objects()
+
+    def update_drift_objects(self):
+        group_number = 0
+        for detuning_obj in self.drift_obj.detuning_objects:
+            for group_obj in detuning_obj.group_objects:
+                self.update_group_obj(group_obj, group_number)
+                group_number += 1
+
+    def update_group_obj(self, group_obj, group_number):
+        group_obj.peaks_fit_obj = FitPeaks(group_obj)
+        gradient = self.gradients[group_number]
+        intercept = self.intercepts[group_number]
+        group_obj.peaks_fit_obj.fitting_parameters = [gradient, intercept]
+        group_obj.set_envolope_values()
 
     def plot_peak_fits(self, groups, legend):
         lines_objects = self.get_lines_objects(groups)
         plots_obj = Plots(lines_objects, plot_type="semilogy", legend=legend)
-        plots_obj.title = f"Envelope of Frequency Comb Peaks for {self.drift_obj}"
+        plots_obj.title = f"Envelopes of Frequency Comb Peaks for {self.drift_obj}"
         plots_obj.plot()
 
     def get_lines_objects(self, groups):
@@ -54,6 +70,10 @@ class DriftPeakFit():
         label = get_prefixed_number(self.detunings[index])
         gradient = self.gradients[index]
         intercept = self.intercepts[index]
+        line_obj = self.get_line_from_parameters(gradient, intercept, label)
+        return line_obj
+
+    def get_line_from_parameters(self, gradient, intercept, label):
         x_values = np.array([-2.5e5, 0, 2.5e5])
         y_values = evaluate_abs(x_values, (gradient, intercept))
         y_values = np.exp(y_values)

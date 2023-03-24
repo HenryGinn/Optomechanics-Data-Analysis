@@ -23,6 +23,7 @@ class Group():
 
     def set_attributes_initial(self):
         self.drift = self.detuning_obj.drift
+        self.detuning = self.detuning_obj.detuning
         self.group_number = int(self.folder_name[-2])
         self.timestamp = get_number_from_file_name("timestamp", self.file_names[0])
 
@@ -150,6 +151,8 @@ class Group():
 
     def fit_peaks(self):
         self.peaks_fit_obj = FitPeaks(self)
+        self.peaks_fit_obj.spectrum_obj = self.spectrum_obj
+        self.peaks_fit_obj.set_peak_data()
         self.peaks_fit_obj.fit_peaks()
 
     def save_peak_lines_to_file(self, file):
@@ -166,6 +169,12 @@ class Group():
         intercept = self.peaks_fit_obj.fitting_parameters[1]
         file.writelines(f"{gradient}\t{intercept}\n")
 
+    def set_envolope_values(self):
+        if hasattr(self, "spectrum_obj"):
+            self.peaks_fit_obj.set_envelope_values()
+            self.envelope_x_values = self.peaks_fit_obj.envelope_x_values
+            self.envelope_y_values = self.peaks_fit_obj.envelope_y_values
+        
     def __str__(self):
         string = (f"Detuning: {self.detuning_obj.detuning}\n"
                   f"Group number: {self.group_number}\n"
