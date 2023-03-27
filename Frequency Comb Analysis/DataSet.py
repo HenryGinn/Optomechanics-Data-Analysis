@@ -2,6 +2,7 @@ import sys
 import os
 
 from Drift import Drift
+from AverageGroups import AverageGroups
 from EnvelopeTrends import EnvelopeTrends
 from PeakGaps import PeakGaps
 from Utils import get_sliced_list
@@ -83,6 +84,7 @@ class DataSet():
             drift_obj.set_aligned_spectra(detunings)
 
     def set_feature_objects(self):
+        self.average_groups_obj = AverageGroups(self)
         self.envelope_trends_obj = EnvelopeTrends(self)
         self.peak_gaps_obj = PeakGaps(self)
 
@@ -146,10 +148,14 @@ class DataSet():
         for drift_obj in self.drift_objects:
             drift_obj.plot_peak_fits(groups, legend)
 
+    def average_groups(self, command="Load"):
+        self.average_groups_obj.execute(command)
+
     def envelope_trends(self, command="Plot"):
         self.envelope_trends_obj.execute(command)
 
     def peak_gaps(self, command="Plot"):
+        self.average_groups_obj.execute("Load")
         self.peak_gaps_obj.execute(command)
     
     def __str__(self):

@@ -11,6 +11,8 @@ from Utils import process_line
 
 class EnvelopeTrends(CombFunction):
 
+    name = "Envelope Trends"
+
     def __init__(self, data_set_obj):
         CombFunction.__init__(self, data_set_obj)
         self.set_commands()
@@ -52,7 +54,6 @@ class EnvelopeTrends(CombFunction):
 
     def load_data(self):
         self.ensure_data_file_exists()
-        print(self.path)
         with open(self.path, "r") as file:
             file.readline()
             self.load_envelope_data_from_file(file)
@@ -60,7 +61,7 @@ class EnvelopeTrends(CombFunction):
 
     def ensure_data_file_exists(self):
         self.set_paths()
-        if not os.path.exists(self.path):
+        if not os.path.exists(self.folder_path):
             self.execute("Save")
 
     def load_envelope_data_from_file(self, file):
@@ -76,17 +77,7 @@ class EnvelopeTrends(CombFunction):
 
     def set_paths(self):
         self.set_folder_path()
-        self.set_file_path()
-
-    def set_folder_path(self):
-        path = os.path.join(self.data_set_obj.results_path,
-                            "Envelope Trends")
-        self.data_set_obj.envelope_trends_path = path
-        make_folder(path, message=True)
-
-    def set_file_path(self):
-        self.path = os.path.join(self.data_set_obj.envelope_trends_path,
-                                 "Envelope Trends")
+        self.path = os.path.join(self.folder_path, "Envelope Trends")
 
     def create_plot(self):
         self.ensure_loaded()

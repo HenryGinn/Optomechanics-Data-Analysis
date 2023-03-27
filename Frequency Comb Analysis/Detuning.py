@@ -32,7 +32,7 @@ class Detuning():
 
     def create_aligned_spectra_folder(self):
         self.aligned_spectra_path = os.path.join(self.drift_obj.aligned_spectra_path,
-                                                 f"{self.detuning} dBm")
+                                                 f"{self.detuning} Hz")
         make_folder(self.aligned_spectra_path)
 
     def set_aligned_spectra_paths(self):

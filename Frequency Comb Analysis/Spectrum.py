@@ -8,11 +8,11 @@ class Spectrum(Data):
     peak_index_proximity = 100
     noise_multiplier_threshold = 3.5
 
-    def __init__(self, group_obj):
-        self.group_obj = group_obj
+    def __init__(self, parent_obj):
+        self.parent_obj = parent_obj
     
     def initialise_from_path(self, path):
-        Data.__init__(self, self.group_obj, path)
+        Data.__init__(self, self.parent_obj, path)
 
     def set_noise_threshold(self):
         self.noise_threshold = [self.get_noise_threshold(index)
