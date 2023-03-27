@@ -2,29 +2,20 @@ import os
 
 import numpy as np
 
+from CombFunction import CombFunction
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
 from Utils import make_folder
 from Utils import process_line
 
-class EnvelopeTrends():
+class EnvelopeTrends(CombFunction):
 
     def __init__(self, data_set_obj):
-        self.data_set_obj = data_set_obj
-        self.set_functions()
-        self.loaded = False
+        CombFunction.__init__(self, data_set_obj)
+        self.set_commands()
 
-    def set_functions(self):
-        self.functions = {"Save": self.save_envelope_data,
-                          "Load": self.load_envelope_data,
-                          "Plot": self.create_plot}
-
-    def execute(self, command, *args):
-        function = self.functions[command]
-        function(*args)
-
-    def save_envelope_data(self):
+    def save_data(self):
         self.set_paths()
         with open(self.path, "w") as file:
             file.writelines("Drift (dBm)\tDetuning (Hz)\tGradient Average\tGradient Standard Deviation\tIntercept\tIntercept Standard Deviation\n")
@@ -59,14 +50,15 @@ class EnvelopeTrends():
         intercept_standard_deviation = np.std(intercepts)
         file.writelines(f"{intercept_mean}\t{intercept_standard_deviation}\n")
 
-    def load_envelope_data(self):
-        self.ensure_envelope_data_file_exists()
+    def load_data(self):
+        self.ensure_data_file_exists()
+        print(self.path)
         with open(self.path, "r") as file:
             file.readline()
             self.load_envelope_data_from_file(file)
         self.loaded = True
 
-    def ensure_envelope_data_file_exists(self):
+    def ensure_data_file_exists(self):
         self.set_paths()
         if not os.path.exists(self.path):
             self.execute("Save")
@@ -99,13 +91,9 @@ class EnvelopeTrends():
     def create_plot(self):
         self.ensure_loaded()
         lines_objects = self.get_lines_objects()
-        plots_obj = Plots(lines_objects, legend=True)
+        plots_obj = Plots(lines_objects)
         plots_obj.title = f"Peak Envelope Data for {self.data_set_obj}"
         plots_obj.plot()
-
-    def ensure_loaded(self):
-        if not self.loaded:
-            self.execute("Load")
 
     def get_lines_objects(self):
         lines_obj_gradient = self.get_lines_obj_gradient()

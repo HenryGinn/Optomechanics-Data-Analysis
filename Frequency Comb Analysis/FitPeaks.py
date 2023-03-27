@@ -20,7 +20,7 @@ class FitPeaks():
                                              initial_fitting_parameters)[0]
         
     def get_residuals(self, fitting_parameters):
-        function_values = self.evaluate_abs(self.peak_frequencies, fitting_parameters)
+        function_values = evaluate_abs(self.peak_frequencies, fitting_parameters)
         residuals = function_values - self.peak_S21s_log
         return residuals
 

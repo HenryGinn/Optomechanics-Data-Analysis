@@ -3,10 +3,14 @@ from matplotlib.colors import hsv_to_rgb
 
 class Lines():
 
-    def __init__(self, line_objects):
+    def __init__(self, line_objects, plot_type="plot", legend=None):
         self.line_objects = line_objects
         self.count = len(line_objects)
-        self.set_legend(False)
+        self.process_plot_options(plot_type, legend)
+
+    def process_plot_options(self, plot_type, legend):
+        self.plot_type = plot_type
+        self.legend = legend
 
     def set_rainbow_lines(self):
         self.set_colours()

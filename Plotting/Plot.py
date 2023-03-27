@@ -148,16 +148,16 @@ class Plot():
             self.set_labels(ax, lines_obj)
 
     def plot_lines(self, ax, lines_obj):
-        plot_function = self.get_plot_function(ax)
+        plot_function = self.get_plot_function(ax, lines_obj)
         for line_obj in lines_obj.line_objects:
             self.plot_line(ax, line_obj, plot_function)
         lines_obj.set_limits()
-        self.prettify_axes(ax, lines_obj)
+        #self.prettify_axes(ax, lines_obj)
 
-    def get_plot_function(self, ax):
+    def get_plot_function(self, ax, lines_obj):
         plot_functions = {"plot": ax.plot,
                           "semilogy": ax.semilogy}
-        plot_function = plot_functions[self.plots_obj.plot_type]
+        plot_function = plot_functions[lines_obj.plot_type]
         return plot_function
         
     def plot_line(self, ax, line_obj, plot_function):
@@ -199,10 +199,9 @@ class Plot():
             fig.suptitle(f"{self.plots_obj.title}")
 
     def set_legend(self, fig):
-        if self.plots_obj.legend:
-            for ax, lines_obj in zip(self.axes, self.lines_objects):
-                if lines_obj.legend:
-                    ax.legend(loc=lines_obj.legend_loc)
+        for ax, lines_obj in zip(self.axes, self.lines_objects):
+            if lines_obj.legend:
+                ax.legend(loc=lines_obj.legend_loc)
 
     def prettify_axes(self, ax, lines_obj):
         self.prettify_x_axis(ax, lines_obj.x_limits)

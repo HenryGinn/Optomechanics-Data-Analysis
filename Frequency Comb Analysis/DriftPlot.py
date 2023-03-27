@@ -41,7 +41,7 @@ class DriftPlot():
 
     def create_lines_obj(self, detuning_obj):
         line_objects = self.get_line_objects(detuning_obj)
-        lines_obj = Lines(line_objects)
+        lines_obj = Lines(line_objects, plot_type="semilogy")
         return lines_obj
 
     def get_line_objects(self, detuning_obj):
@@ -109,6 +109,6 @@ class DriftPlot():
         lines_obj.y_label = "S21 (mW)"
 
     def create_plots(self, lines_objects, title):
-        plot_obj = Plots(lines_objects, self.subplots, plot_type="semilogy")
+        plot_obj = Plots(lines_objects, self.subplots)
         plot_obj.title = title
         plot_obj.plot()
