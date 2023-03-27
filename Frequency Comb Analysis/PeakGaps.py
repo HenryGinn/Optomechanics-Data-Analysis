@@ -13,10 +13,6 @@ class PeakGaps(CombFunction):
         CombFunction.__init__(self, data_set_obj)
         self.set_commands()
 
-    def save_data(self):
-        print(f"Saving '{self.name}' Data")
-        self.set_paths()
-
     def set_paths(self):
         self.set_folder_path()
         self.set_file_path()
@@ -35,6 +31,24 @@ class PeakGaps(CombFunction):
         for detuning_obj in drift_obj.detuning_objects:
             path = os.path.join(drift_obj.peak_gaps_path, f"{detuning_obj.detuning} Hz")
             detuning_obj.peak_gaps_path = path
+
+    def save_data(self):
+        print(f"Saving '{self.name}' Data")
+        self.set_paths()
+        for drift_obj in self.data_set_obj.drift_objects:
+            for detuning_obj in drift_obj.detuning_objects:
+                self.save_detuning_data(detuning_obj)
+
+    def save_detuning_data(self, detuning_obj):
+        with open(detuning_obj.peak_gaps_path, "w") as file:
+            file.writelines("Gap Number\tGap (Hz)")
+            sefl.save_gap_data_to_file(detuning_obj, file)
+
+    def save_gap_data_to_file(self, detuning_obj, file):
+        self.set_gap_data(detuning_obj)
+
+    def set_gap_data(self, detuning_obj):
+        pass
 
     def load_data(self):
         self.set_paths()

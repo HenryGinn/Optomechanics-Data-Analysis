@@ -43,13 +43,13 @@ class AverageGroups(CombFunction):
         print(f"Saving '{self.name}' Data")
         self.set_paths()
         for drift_obj in self.data_set_obj.drift_objects:
-            self.save_drift_data(drift_obj)
+            for detuning_obj in drift_obj.detuning_objects:
+                self.save_detuning_data(detuning_obj)
 
-    def save_drift_data(self, drift_obj):
-        for detuning_obj in drift_obj.detuning_objects:
-            with open(detuning_obj.average_group_path, "w") as file:
-                file.writelines("Frequency (Hz)\tS21 (mW)\n")
-                self.save_detuning_data_to_file(detuning_obj, file)
+    def save_detuning_data(self, detuning_obj)
+        with open(detuning_obj.average_group_path, "w") as file:
+            file.writelines("Frequency (Hz)\tS21 (mW)\n")
+            self.save_detuning_data_to_file(detuning_obj, file)
 
     def save_detuning_data_to_file(self, detuning_obj, file):
         self.set_average_group_data(detuning_obj)
