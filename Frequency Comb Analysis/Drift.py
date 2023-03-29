@@ -3,8 +3,6 @@ import os
 import numpy as np
 
 from Detuning import Detuning
-from DriftPlot import DriftPlot
-from DriftPeakFit import DriftPeakFit
 from Utils import get_number_from_file_name
 from Utils import get_number_from_string
 from Utils import convert_to_milliwatts
@@ -100,87 +98,6 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             for group_obj in detuning_obj.group_objects:
                 group_obj.create_spectrum_objects()
-
-    def create_aligned_spectra_folder(self):
-        self.aligned_spectra_path = os.path.join(self.data_set.aligned_spectra_path,
-                                                 self.folder_name)
-        make_folder(self.aligned_spectra_path)
-
-    def populate_aligned_spectra_folder(self):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.create_aligned_spectra_folder()
-            detuning_obj.set_aligned_spectra_paths()
-
-    def set_aligned_spectra(self, detunings):
-        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
-        print(f"Processing spectrum for {self}")
-        for detuning_obj in detuning_objects:
-            detuning_obj.set_aligned_spectra()
-
-    def load_aligned_spectra(self):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.load_aligned_spectra()
-
-    def set_noise_threshold_paths(self):
-        self.create_noise_threshold_folder()
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.set_noise_threshold_paths()
-
-    def create_noise_threshold_folder(self):
-        self.noise_threshold_path = os.path.join(self.data_set.noise_threshold_path,
-                                             f"{self.drift_value} dBm")
-        make_folder(self.noise_threshold_path)
-
-    def save_noise_threshold(self):
-        print(f"Finding noise floor for {self}")
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.save_noise_threshold()
-
-    def load_noise_threshold(self):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.load_noise_threshold()
-
-    def set_peak_coordinates_paths(self):
-        self.create_peak_coordinates_folder()
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.set_peak_coordinates_paths()
-
-    def create_peak_coordinates_folder(self):
-        self.peak_coordinates_path = os.path.join(self.data_set.peak_coordinates_path,
-                                                  f"{self.drift_value} dBm")
-        make_folder(self.peak_coordinates_path)
-
-    def save_peak_coordinates(self, detunings):
-        print(f"Setting peak coordinates for {self}")
-        detuning_objects = get_sliced_list(self.detuning_objects, detunings)
-        for detuning_obj in detuning_objects:
-            detuning_obj.save_peak_coordinates()
-
-    def load_peak_coordinates(self):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.load_peak_coordinates()
-
-    def set_peak_fit_path(self):
-        self.peak_fit_path = os.path.join(self.data_set.peak_fit_path,
-                                          f"{self.drift_value} dBm")
-
-    def save_peak_fits(self):
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.fit_peaks()
-        self.save_peak_fit()
-
-    def save_peak_fit(self):
-        with open(self.peak_fit_path, "w") as file:
-            self.save_peak_lines_to_file(file)
-
-    def save_peak_lines_to_file(self, file):
-        file.writelines("Detuning (Hz)\tGroup\tGradient\tIntercept\n")
-        for detuning_obj in self.detuning_objects:
-            detuning_obj.save_peak_lines_to_file(file)
-
-    def load_peak_fits(self):
-        self.drift_peak_fit = DriftPeakFit(self)
-        self.drift_peak_fit.load_peak_fits()
 
     def plot_spectra(self, subplots, detunings, groups, noise, markers, fit):
         self.plot_obj = DriftPlot(self, subplots)

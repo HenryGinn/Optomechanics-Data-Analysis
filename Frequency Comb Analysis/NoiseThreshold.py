@@ -11,7 +11,6 @@ class NoiseThreshold(CombFunction):
 
     name = "Noise Threshold"
     window_width = 10
-    peak_index_proximity = 100
     noise_multiplier_threshold = 3.5
 
     def __init__(self, data_set_obj):
