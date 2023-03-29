@@ -4,30 +4,11 @@ from Data import Data
 
 class Spectrum(Data):
 
-    window_width = 10
-    peak_index_proximity = 100
-    noise_multiplier_threshold = 3.5
-
     def __init__(self, parent_obj):
         self.parent_obj = parent_obj
     
     def initialise_from_path(self, path):
         Data.__init__(self, self.parent_obj, path)
-
-    def set_noise_threshold(self):
-        self.noise_threshold = [self.get_noise_threshold(index)
-                                for index in range(len(self.S21))]
-
-    def get_noise_threshold(self, index):
-        S21_within_window = self.get_S21_within_window(index)
-        noise_threshold = np.median(S21_within_window) * self.noise_multiplier_threshold
-        return noise_threshold
-
-    def get_S21_within_window(self, index):
-        left_index = max(0, index - self.window_width)
-        right_index = min(len(self.S21) - 1, index + self.window_width)
-        S21_within_window = np.minimum(self.S21, 10**-11)[left_index:right_index]
-        return S21_within_window
 
     def set_peak_coordinates(self):
         non_noise_indices = np.nonzero(self.S21 > self.noise_threshold)[0]

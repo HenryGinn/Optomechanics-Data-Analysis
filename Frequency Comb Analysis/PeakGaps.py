@@ -50,15 +50,8 @@ class PeakGaps(CombFunction):
     def set_gap_data(self, detuning_obj):
         pass
 
-    def load_data(self):
-        self.set_paths()
-        if self.data_is_saved():
-            self.do_load_data()
-        else:
-            self.execute("Save")
-
     def do_load_data(self):
-        print(f"Loading '{self.name}' Data")
+        pass
 
     def data_is_saved(self):
         return np.all([os.path.exists(detuning_obj.average_group_path)

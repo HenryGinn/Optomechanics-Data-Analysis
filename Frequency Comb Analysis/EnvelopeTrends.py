@@ -17,6 +17,10 @@ class EnvelopeTrends(CombFunction):
         CombFunction.__init__(self, data_set_obj)
         self.set_commands()
 
+    def set_paths(self):
+        self.set_folder_path()
+        self.path = os.path.join(self.folder_path, "Envelope Trends")
+
     def save_data(self):
         self.set_paths()
         with open(self.path, "w") as file:
@@ -52,12 +56,10 @@ class EnvelopeTrends(CombFunction):
         intercept_standard_deviation = np.std(intercepts)
         file.writelines(f"{intercept_mean}\t{intercept_standard_deviation}\n")
 
-    def load_data(self):
-        self.ensure_data_file_exists()
+    def do_load_data(self):
         with open(self.path, "r") as file:
             file.readline()
             self.load_envelope_data_from_file(file)
-        self.loaded = True
 
     def ensure_data_file_exists(self):
         self.set_paths()
@@ -74,10 +76,6 @@ class EnvelopeTrends(CombFunction):
         line = process_line(line, file)
         (_, _, detuning_obj.gradient_mean, detuning_obj.gradient_deviation,
          detuning_obj.intercept_mean, detuning_obj.intercept_deviation) = line
-
-    def set_paths(self):
-        self.set_folder_path()
-        self.path = os.path.join(self.folder_path, "Envelope Trends")
 
     def create_plot(self):
         self.ensure_loaded()
