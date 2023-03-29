@@ -9,6 +9,7 @@ from PeakCoordinates import PeakCoordinates
 from PeakFits import PeakFits
 from EnvelopeTrends import EnvelopeTrends
 from PeakGaps import PeakGaps
+from PlotSpectra import PlotSpectra
 from Utils import get_sliced_list
 from Utils import make_folder
 
@@ -64,13 +65,8 @@ class DataSet():
         self.peak_fits_obj = PeakFits(self)
         self.envelope_trends_obj = EnvelopeTrends(self)
         self.peak_gaps_obj = PeakGaps(self)
+        self.plot_spectra_obj = PlotSpectra(self)
     
-    def plot_spectra(self, subplots=None, drifts=None, detunings=None,
-                     groups=None, noise=False, markers=False, fit=False):
-        drift_objects = get_sliced_list(self.drift_objects, drifts)
-        for drift_obj in drift_objects:
-            drift_obj.plot_spectra(subplots, detunings, groups, noise, markers, fit)
-
     def plot_peak_fits(self, groups=None, legend=True):
         for drift_obj in self.drift_objects:
             drift_obj.plot_peak_fits(groups, legend)
@@ -94,8 +90,11 @@ class DataSet():
         self.envelope_trends_obj.execute(command)
 
     def peak_gaps(self, command="Plot"):
-        self.average_groups_obj.execute("Load")
         self.peak_gaps_obj.execute(command)
+
+    def plot_spectra(self, subplots=None, noise=False,
+                     markers=False, fit=False):
+        self.plot_spectra_obj.plot(subplots, noise, markers, fit)
     
     def __str__(self):
         string = f"Data Set {self.folder_name}"

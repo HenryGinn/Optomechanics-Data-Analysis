@@ -86,20 +86,12 @@ class AverageGroups(CombFunction):
         detuning_obj.spectrum_obj.frequency = np.array(list(frequency_S21_dict.keys()))
         detuning_obj.spectrum_obj.S21 = np.mean(list(frequency_S21_dict.values()), axis=1)
 
-    def load_data(self):
-        self.set_paths()
-        if self.data_is_saved():
-            self.do_load_data()
-        else:
-            self.execute("Save")
-
     def data_is_saved(self):
         return np.all([os.path.exists(detuning_obj.average_group_path)
                        for drift_obj in self.data_set_obj.drift_objects
                        for detuning_obj in drift_obj.detuning_objects])
 
     def do_load_data(self):
-        print(f"Loading '{self.name}' Data")
         self.load_data_from_folders()
         self.loaded = True
 
