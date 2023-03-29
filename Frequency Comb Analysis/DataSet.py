@@ -7,6 +7,7 @@ from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
 from PeakCoordinates import PeakCoordinates
 from PeakFits import PeakFits
+from EnvelopeVertices import EnvelopeVertices
 from EnvelopeTrends import EnvelopeTrends
 from PeakGaps import PeakGaps
 from PlotSpectra import PlotSpectra
@@ -63,6 +64,7 @@ class DataSet():
         self.noise_threshold_obj = NoiseThreshold(self)
         self.peak_coordinates_obj = PeakCoordinates(self)
         self.peak_fits_obj = PeakFits(self)
+        self.envelope_vertices_obj = EnvelopeVertices(self)
         self.envelope_trends_obj = EnvelopeTrends(self)
         self.peak_gaps_obj = PeakGaps(self)
         self.plot_spectra_obj = PlotSpectra(self)
