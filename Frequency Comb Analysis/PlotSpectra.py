@@ -10,35 +10,41 @@ from Plotting.PlotUtils import get_group_indexes
 class PlotSpectra():
 
     name = "Plot Spectra"
+    noise = False
+    markers = False
+    fit = False
 
     def __init__(self, data_set_obj):
         self.data_set_obj = data_set_obj
 
-    def plot(self, subplots, noise, markers, fit):
-        self.load_data(subplots, noise, markers, fit)
+    def plot(self, **kwargs):
+        self.kwargs = kwargs
+        self.data_set_obj.average_groups("Load")
+        self.process_kwargs()
         for drift_obj in self.data_set_obj.drift_objects:
             self.plot_drift_objects(drift_obj)
 
-    def load_data(self, subplots, noise, markers, fit):
-        self.data_set_obj.average_groups("Load")
-        self.subplots = subplots
-        self.process_noise(noise)
-        self.process_markers(markers)
-        self.process_fit(fit)
+    def process_kwargs(self):
+        self.process_noise()
+        self.process_markers()
+        self.process_fit()
 
-    def process_noise(self, noise):
-        self.noise = noise
-        if noise:
+    def process_noise(self):
+        if "noise" in self.kwargs:
+            self.noise = self.kwargs["noise"]
+        if self.noise:
             self.data_set_obj.noise_threshold("Load")
 
-    def process_markers(self, markers):
-        self.markers = markers
-        if markers:
+    def process_markers(self):
+        if "markers" in self.kwargs:
+            self.markers = self.kwargs["markers"]
+        if self.markers:
             self.data_set_obj.peak_coordinates("Load")
 
-    def process_fit(self, fit):
-        self.fit = fit
-        if fit:
+    def process_fit(self):
+        if "fit" in self.kwargs:
+            self.fit = self.kwargs["fit"]
+        if self.fit:
             self.data_set_obj.envelope_vertices("Load")
 
     def plot_drift_objects(self, drift_obj):
@@ -117,6 +123,6 @@ class PlotSpectra():
         lines_obj.y_label = "S21 (mW)"
 
     def create_plots(self, lines_objects, title):
-        plot_obj = Plots(lines_objects, self.subplots)
+        plot_obj = Plots(lines_objects, self.kwargs)
         plot_obj.title = title
         plot_obj.plot()

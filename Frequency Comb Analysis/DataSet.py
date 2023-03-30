@@ -90,9 +90,8 @@ class DataSet():
     def peak_gaps(self, command="Plot", **kwargs):
         self.peak_gaps_obj.execute(command, **kwargs)
 
-    def plot_spectra(self, subplots=None, noise=False,
-                     markers=False, fit=False):
-        self.plot_spectra_obj.plot(subplots, noise, markers, fit)
+    def plot_spectra(self, **kwargs):
+        self.plot_spectra_obj.plot(**kwargs)
     
     def __str__(self):
         string = f"Data Set {self.folder_name}"

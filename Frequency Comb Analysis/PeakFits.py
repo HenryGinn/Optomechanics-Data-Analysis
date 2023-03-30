@@ -95,10 +95,10 @@ class PeakFits(CombFunction):
         for detuning_obj in drift_obj.detuning_objects:
             detuning_obj.fitting_parameters = peak_fits_data[detuning_obj.detuning]
 
-    def plot(self):
+    def plot(self, **kwargs):
         lines_objects = self.get_lines_objects()
         title = f"{self.data_set_obj} {self.name}"
-        self.create_plots(lines_objects, title)
+        self.create_plots(lines_objects, title, kwargs)
 
     def get_lines_objects(self):
         lines_obj_gradient = self.get_lines_obj_gradient()
@@ -141,8 +141,8 @@ class PeakFits(CombFunction):
         lines_obj.set_rainbow_lines(value=0.9)
         return lines_obj
 
-    def create_plots(self, lines_objects, title):
-        plot_obj = Plots(lines_objects)
+    def create_plots(self, lines_objects, title, kwargs):
+        plot_obj = Plots(lines_objects, kwargs)
         plot_obj.title = title
         plot_obj.plot()
 
