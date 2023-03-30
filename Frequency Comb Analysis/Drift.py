@@ -98,18 +98,6 @@ class Drift():
         for detuning_obj in self.detuning_objects:
             for group_obj in detuning_obj.group_objects:
                 group_obj.create_spectrum_objects()
-
-    def plot_spectra(self, subplots, detunings, groups, noise, markers, fit):
-        self.plot_obj = DriftPlot(self, subplots)
-        self.plot_obj.set_data_plotting_instructions(detunings, groups)
-        self.plot_obj.set_peak_plotting_instructions(noise, markers, fit)
-        self.plot_obj.plot_spectra()
-
-    def plot_peak_fits(self, groups, legend):
-        if hasattr(self, "drift_peak_fit"):
-            self.drift_peak_fit.plot_peak_fits(groups, legend)
-        else:
-            raise AttributeError("Run 'load_peak_fits' method first")
     
     def __str__(self):
         string = f"{self.data_set}, Drift {self.drift_value} dBm"

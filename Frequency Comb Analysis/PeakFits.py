@@ -4,6 +4,9 @@ import numpy as np
 import scipy.optimize as sc
 
 from CombFunction import CombFunction
+from Plotting.Plots import Plots
+from Plotting.Lines import Lines
+from Plotting.Line import Line
 from Utils import get_file_contents_from_path
 
 class PeakFits(CombFunction):
@@ -91,6 +94,57 @@ class PeakFits(CombFunction):
                           for detuning, gradient, intercept in file_contents}
         for detuning_obj in drift_obj.detuning_objects:
             detuning_obj.fitting_parameters = peak_fits_data[detuning_obj.detuning]
+
+    def plot(self):
+        lines_objects = self.get_lines_objects()
+        title = f"{self.data_set_obj} {self.name}"
+        self.create_plots(lines_objects, title)
+
+    def get_lines_objects(self):
+        lines_obj_gradient = self.get_lines_obj_gradient()
+        lines_obj_intercept = self.get_lines_obj_intercept()
+        lines_objects = [lines_obj_gradient, lines_obj_intercept]
+        return lines_objects
+
+    def get_lines_obj_gradient(self):
+        line_objects = [self.get_line_objects_gradient(drift_obj)
+                        for drift_obj in self.data_set_obj.drift_objects]
+        lines_obj_gradient = Lines(line_objects, legend=True)
+        lines_obj_gradient = self.set_labels(lines_obj_gradient, "Gradient")
+        return lines_obj_gradient
+
+    def get_line_objects_gradient(self, drift_obj):
+        label = drift_obj.drift_value
+        x_values = [detuning_obj.detuning for detuning_obj in drift_obj.detuning_objects]
+        y_values = [detuning_obj.fitting_parameters[0] for detuning_obj in drift_obj.detuning_objects]
+        line_obj = Line(x_values, y_values, label=label)
+        return line_obj
+
+    def get_lines_obj_intercept(self):
+        line_objects = [self.get_line_objects_intercept(drift_obj)
+                        for drift_obj in self.data_set_obj.drift_objects]
+        lines_obj_intercept = Lines(line_objects, legend=True)
+        lines_obj_intercept = self.set_labels(lines_obj_intercept, "Intercept (Hz)")
+        return lines_obj_intercept
+
+    def get_line_objects_intercept(self, drift_obj):
+        label = drift_obj.drift_value
+        x_values = [detuning_obj.detuning for detuning_obj in drift_obj.detuning_objects]
+        y_values = [detuning_obj.fitting_parameters[1] for detuning_obj in drift_obj.detuning_objects]
+        line_obj = Line(x_values, y_values, label=label)
+        return line_obj
+
+    def set_labels(self, lines_obj, y_axis_label):
+        lines_obj.x_prefix = ""
+        lines_obj.x_label = f"Detuning ({lines_obj.x_prefix}Hz)"
+        lines_obj.y_label = y_axis_label
+        lines_obj.set_rainbow_lines(value=0.9)
+        return lines_obj
+
+    def create_plots(self, lines_objects, title):
+        plot_obj = Plots(lines_objects)
+        plot_obj.title = title
+        plot_obj.plot()
 
 def evaluate_abs(x_values, fitting_parameters, centre=0):
     gradient, y_intercept = fitting_parameters

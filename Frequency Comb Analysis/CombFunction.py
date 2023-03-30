@@ -45,4 +45,8 @@ class CombFunction():
             self.execute("Load")
 
     def create_plot(self):
-        print("Sorry, this feature does not have plots implemented")
+        if hasattr(self, "plot"):
+            self.execute("Load")
+            self.plot()
+        else:
+            print("Sorry, this feature does not have a 'plot' method implemented")

@@ -2,15 +2,17 @@ import sys
 import os
 
 from Drift import Drift
+
 from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
 from PeakCoordinates import PeakCoordinates
 from PeakFits import PeakFits
 from EnvelopeVertices import EnvelopeVertices
-from EnvelopeTrends import EnvelopeTrends
 from PeakGaps import PeakGaps
 from PlotSpectra import PlotSpectra
+from PlotPeakFits import PlotPeakFits
+
 from Utils import get_sliced_list
 from Utils import make_folder
 
@@ -65,13 +67,8 @@ class DataSet():
         self.peak_coordinates_obj = PeakCoordinates(self)
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
-        self.envelope_trends_obj = EnvelopeTrends(self)
         self.peak_gaps_obj = PeakGaps(self)
         self.plot_spectra_obj = PlotSpectra(self)
-    
-    def plot_peak_fits(self, groups=None, legend=True):
-        for drift_obj in self.drift_objects:
-            drift_obj.plot_peak_fits(groups, legend)
 
     def align_spectra(self, command="Load"):
         self.align_spectra_obj.execute(command)
@@ -85,14 +82,11 @@ class DataSet():
     def peak_coordinates(self, command="Load"):
         self.peak_coordinates_obj.execute(command)
 
-    def peak_fits(self, command="Load"):
+    def peak_fits(self, command="Plot"):
         self.peak_fits_obj.execute(command)
 
     def envelope_vertices(self, command="Load"):
         self.envelope_vertices_obj.execute(command)
-
-    def envelope_trends(self, command="Plot"):
-        self.envelope_trends_obj.execute(command)
 
     def peak_gaps(self, command="Plot"):
         self.peak_gaps_obj.execute(command)
