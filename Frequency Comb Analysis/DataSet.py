@@ -9,9 +9,8 @@ from NoiseThreshold import NoiseThreshold
 from PeakCoordinates import PeakCoordinates
 from PeakFits import PeakFits
 from EnvelopeVertices import EnvelopeVertices
-from PeakGaps import PeakGaps
 from PlotSpectra import PlotSpectra
-from PlotPeakFits import PlotPeakFits
+from PeakGaps import PeakGaps
 
 from Utils import get_sliced_list
 from Utils import make_folder
@@ -67,29 +66,29 @@ class DataSet():
         self.peak_coordinates_obj = PeakCoordinates(self)
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
-        self.peak_gaps_obj = PeakGaps(self)
         self.plot_spectra_obj = PlotSpectra(self)
+        self.peak_gaps_obj = PeakGaps(self)
 
-    def align_spectra(self, command="Load"):
-        self.align_spectra_obj.execute(command)
+    def align_spectra(self, command="Load", **kwargs):
+        self.align_spectra_obj.execute(command, **kwargs)
 
-    def average_groups(self, command="Load"):
-        self.average_groups_obj.execute(command)
+    def average_groups(self, command="Load", **kwargs):
+        self.average_groups_obj.execute(command, **kwargs)
 
-    def noise_threshold(self, command="Load"):
-        self.noise_threshold_obj.execute(command)
+    def noise_threshold(self, command="Load", **kwargs):
+        self.noise_threshold_obj.execute(command, **kwargs)
 
-    def peak_coordinates(self, command="Load"):
-        self.peak_coordinates_obj.execute(command)
+    def peak_coordinates(self, command="Load", **kwargs):
+        self.peak_coordinates_obj.execute(command, **kwargs)
 
-    def peak_fits(self, command="Plot"):
-        self.peak_fits_obj.execute(command)
+    def peak_fits(self, command="Plot", **kwargs):
+        self.peak_fits_obj.execute(command, **kwargs)
 
-    def envelope_vertices(self, command="Load"):
-        self.envelope_vertices_obj.execute(command)
+    def envelope_vertices(self, command="Plot", **kwargs):
+        self.envelope_vertices_obj.execute(command, **kwargs)
 
-    def peak_gaps(self, command="Plot"):
-        self.peak_gaps_obj.execute(command)
+    def peak_gaps(self, command="Plot", **kwargs):
+        self.peak_gaps_obj.execute(command, **kwargs)
 
     def plot_spectra(self, subplots=None, noise=False,
                      markers=False, fit=False):

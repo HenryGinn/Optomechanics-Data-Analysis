@@ -13,9 +13,9 @@ class CombFunction():
                          "Load": self.load_data,
                          "Plot": self.create_plot}
 
-    def execute(self, command, *args):
+    def execute(self, command, **kwargs):
         function = self.commands[command]
-        function(*args)
+        function(**kwargs)
     
     def set_folder_path(self):
         self.folder_path = os.path.join(self.data_set_obj.results_path, self.name)
@@ -44,9 +44,9 @@ class CombFunction():
         if not self.loaded:
             self.execute("Load")
 
-    def create_plot(self):
+    def create_plot(self, **kwargs):
         if hasattr(self, "plot"):
             self.execute("Load")
-            self.plot()
+            self.plot(**kwargs)
         else:
             print("Sorry, this feature does not have a 'plot' method implemented")

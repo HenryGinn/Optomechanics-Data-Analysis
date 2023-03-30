@@ -14,9 +14,12 @@ class Plots():
     those figures is handled as a single Plot object.
     """
 
-    def __init__(self, lines_objects, subplot_count=None):
+    aspect_ratio = 2/3
+
+    def __init__(self, lines_objects, subplot_count=None,aspect_ratio=None):
         self.process_lines_objects(lines_objects)
         self.process_subplots(subplot_count)
+        self.process_aspect_ratio(aspect_ratio)
 
     def process_lines_objects(self, lines_objects):
         self.lines_objects = np.array(lines_objects)
@@ -25,6 +28,10 @@ class Plots():
     def process_subplots(self, subplot_count):
         self.set_subplot_count(subplot_count)
         self.partition_lines_objects()
+
+    def process_aspect_ratio(self, aspect_ratio):
+        if aspect_ratio is not None:
+            self.aspect_ratio = aspect_ratio
 
     def set_subplot_count(self, subplot_count):
         self.subplot_count = get_group_size(subplot_count, self.lines_objects)

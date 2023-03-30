@@ -19,13 +19,19 @@ class Plot():
     of Line objects associated with it.
     """
 
-    aspect_ratio = 2/3
-
-    def __init__(self, plots_obj, lines_objects, plot_index):
+    def __init__(self, plots_obj, lines_objects,
+                 plot_index, aspect_ratio=None):
         self.plots_obj = plots_obj
+        self.process_aspect_ratio(aspect_ratio)
         self.process_lines_objects(lines_objects)
         self.plot_index = plot_index
         self.set_grid_size()
+
+    def process_aspect_ratio(self, aspect_ratio):
+        if aspect_ratio is not None:
+            self.aspect_ratio = aspect_ratio
+        else:
+            self.aspect_ratio = self.plots_obj.aspect_ratio
 
     def process_lines_objects(self, lines_objects):
         self.lines_objects = lines_objects
@@ -41,12 +47,12 @@ class Plot():
         self.set_column_sizes()
 
     def set_row_sizes(self):
-        row_size = math.sqrt(self.count * self.aspect_ratio)
+        row_size = math.sqrt(self.count / self.aspect_ratio)
         self.row_small = math.floor(row_size)
         self.row_large = math.ceil(row_size)
 
     def set_column_sizes(self):
-        column_size = math.sqrt(self.count / self.aspect_ratio)
+        column_size = math.sqrt(self.count * self.aspect_ratio)
         self.column_small = math.floor(column_size)
         self.column_large = math.ceil(column_size)
 
