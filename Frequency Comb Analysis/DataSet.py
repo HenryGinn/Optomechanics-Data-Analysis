@@ -88,6 +88,9 @@ class DataSet():
     def peak_fits(self, command="Load"):
         self.peak_fits_obj.execute(command)
 
+    def envelope_vertices(self, command="Load"):
+        self.envelope_vertices_obj.execute(command)
+
     def envelope_trends(self, command="Plot"):
         self.envelope_trends_obj.execute(command)
 

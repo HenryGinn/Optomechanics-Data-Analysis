@@ -39,7 +39,7 @@ class PlotSpectra():
     def process_fit(self, fit):
         self.fit = fit
         if fit:
-            self.data_set_obj.peak_fits("Load")
+            self.data_set_obj.envelope_vertices("Load")
 
     def plot_drift_objects(self, drift_obj):
         detuning_lines_objects = self.get_detuning_lines_objects(drift_obj)

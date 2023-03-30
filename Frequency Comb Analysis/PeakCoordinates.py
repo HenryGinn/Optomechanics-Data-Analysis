@@ -34,7 +34,6 @@ class PeakCoordinates(CombFunction):
             detuning_obj.peak_coordinates_path = path
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.align_spectra("Load")
         self.data_set_obj.average_groups("Load")
         self.data_set_obj.noise_threshold("Load")
 

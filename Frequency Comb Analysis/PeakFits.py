@@ -77,20 +77,6 @@ class PeakFits(CombFunction):
         intercept = detuning_obj.fitting_parameters[1]
         file.writelines(f"{detuning}\t{gradient}\t{intercept}\n")
 
-    def set_envelope_values(self, detuning_obj):
-        self.set_envelope_x_values(detuning_obj)
-        self.set_envelope_y_values(detuning_obj)
-
-    def set_envelope_x_values(self, detuning_obj):
-        left_x = detuning_obj.peak_frequencies[0]
-        right_x = detuning_obj.peak_frequencies[-1]
-        detuning_obj.envelope_x_values = np.array([left_x, 0, right_x])
-
-    def set_envelope_y_values(self, detuning_obj):
-        detuning_obj.envelope_y_values = evaluate_abs(detuning_obj.envelope_x_values,
-                                              detuning_obj.fitting_parameters)
-        detuning_obj.envelope_y_values = np.exp(detuning_obj.envelope_y_values)
-
     def data_is_saved(self):
         return np.all([os.path.exists(drift_obj.peak_fits_path)
                        for drift_obj in self.data_set_obj.drift_objects])
@@ -101,8 +87,10 @@ class PeakFits(CombFunction):
 
     def load_drift_obj(self, drift_obj):
         file_contents = zip(*get_file_contents_from_path(drift_obj.peak_fits_path))
-        for detuning_obj, file_line in zip(drift_obj.detuning_objects, file_contents):
-            _, detuning_obj.gradient, detuning_obj.intercept = file_line
+        peak_fits_data = {detuning: [gradient, intercept]
+                          for detuning, gradient, intercept in file_contents}
+        for detuning_obj in drift_obj.detuning_objects:
+            detuning_obj.fitting_parameters = peak_fits_data[detuning_obj.detuning]
 
 def evaluate_abs(x_values, fitting_parameters, centre=0):
     gradient, y_intercept = fitting_parameters
