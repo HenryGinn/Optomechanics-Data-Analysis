@@ -97,7 +97,7 @@ class EnvelopeVertices(CombFunction):
         self.process_args(**kwargs)
         lines_objects = self.get_lines_objects()
         title = f"{self.data_set_obj} {self.name}"
-        self.create_plots(lines_objects, title)
+        self.create_plots(lines_objects, title, **kwargs)
 
     def process_args(self, **kwargs):
         self.process_subplots(**kwargs)
@@ -140,9 +140,9 @@ class EnvelopeVertices(CombFunction):
         lines_obj.y_label = "S21"
         lines_obj.set_rainbow_lines(value=0.9)
 
-    def create_plots(self, lines_objects, title):
+    def create_plots(self, lines_objects, title, **kwargs):
         plots_obj = Plots(lines_objects,
                          subplot_count=self.subplots,
                          aspect_ratio=self.aspect_ratio)
         plots_obj.title = title
-        plots_obj.plot()
+        plots_obj.plot(**kwargs)

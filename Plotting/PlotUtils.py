@@ -50,11 +50,15 @@ def construct_group_indexes(length, group_count, end_point_indexes):
                      for group_number in range(group_count)]
     return group_indexes
 
-def update_figure_size(width=8, height=4.8):
+def update_figure_size(width=10, height=6):
     plt.gcf().set_size_inches(width, height)
-    plt.gca().set_position([0, 0, 1, 1])
-    plt.gcf().subplots_adjust(top=0.92)
-    plt.tight_layout()
+
+def adjust_subplots(bottom=0.1, top=0.9,
+                    left=0.05, right=0.95,
+                    wspace=0.3, hspace=0.3):
+    plt.gcf().subplots_adjust(bottom=bottom, top=top,
+                              right=right, left=left,
+                              wspace=wspace, hspace=hspace)
 
 
 def get_pretty_axis(limits):

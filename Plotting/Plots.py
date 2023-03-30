@@ -41,7 +41,7 @@ class Plots():
         self.lines_object_groups = [self.lines_objects[indexes]
                                     for indexes in group_indexes]
     
-    def plot(self):
+    def plot(self, **kwargs):
         for index, lines_object_group in enumerate(self.lines_object_groups):
             plot = Plot(self, lines_object_group, index)
-            plot.create_figure()
+            plot.create_figure(**kwargs)

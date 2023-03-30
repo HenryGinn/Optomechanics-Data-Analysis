@@ -5,6 +5,7 @@ import numpy as np
 
 from Plotting.PlotUtils import update_figure_size
 from Plotting.PlotUtils import get_pretty_axis
+from Plotting.PlotUtils import adjust_subplots
 
 plt.rcParams['font.size'] = 12
 plt.rcParams['axes.linewidth'] = 0.5
@@ -140,11 +141,11 @@ class Plot():
         else:
             self.set_best_pair(2)
 
-    def create_figure(self):
+    def create_figure(self, **kwargs):
         fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns)
         self.plot_axes()
         self.add_plot_peripherals(fig)
-        update_figure_size()
+        self.modify_figure_sizes(**kwargs)
         self.show_plot(fig)
 
     def plot_axes(self):
@@ -152,6 +153,7 @@ class Plot():
         for ax, lines_obj in zip(self.axes, self.lines_objects):
             self.plot_lines(ax, lines_obj)
             self.set_labels(ax, lines_obj)
+        self.remove_extra_axes()
 
     def plot_lines(self, ax, lines_obj):
         plot_function = self.get_plot_function(ax, lines_obj)
@@ -196,6 +198,11 @@ class Plot():
         else:
             self.axes = [self.axes]
 
+    def remove_extra_axes(self):
+        extra_axes = len(self.axes) - len(self.lines_objects)
+        for ax, _ in zip(self.axes[::-1], range(extra_axes)):
+            ax.remove()
+
     def add_plot_peripherals(self, fig):
         self.set_suptitle(fig)
         self.set_legend(fig)
@@ -213,6 +220,17 @@ class Plot():
         self.prettify_x_axis(ax, lines_obj.x_limits)
         self.prettify_y_axis(ax, lines_obj.y_limits)
 
+    def modify_figure_sizes(self, **kwargs):
+        update_figure_size()
+        adjust_subplots()
+        self.add_subplot_tool(**kwargs)
+
+    def add_subplot_tool(self, **kwargs):
+        if "adjust" in kwargs:
+            if kwargs["adjust"]:
+                plt.subplot_tool()
+
+
     def prettify_x_axis(self, ax, limits):
         tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
         ax.set_xticks(tick_positions, labels=tick_labels)
@@ -224,6 +242,6 @@ class Plot():
         print(prefix)
 
     def show_plot(self, fig):
-        fig.tight_layout()
+        #fig.tight_layout()
         plt.show()
         plt.close()
