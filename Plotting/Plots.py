@@ -60,11 +60,6 @@ class Plots():
             plot_obj.create_figure()
 
     def set_paths(self):
-        if "save" in self.kwargs:
-            if self.kwargs["save"]:
-                self.do_set_paths()
-
-    def do_set_paths(self):
         plot_folder_name = self.get_plot_folder_name()
         self.results_path = os.path.join(self.parent_results_path, "Plots")
         make_folder(self.results_path)

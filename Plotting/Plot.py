@@ -170,21 +170,16 @@ class Plot():
         print(prefix)
 
     def process_plot(self):
-        if self.layouts["Adjust"]:
+        if not ("show" in self.kwargs and not self.kwargs["show"]):
             plt.show()
-        elif "save" in self.kwargs and self.kwargs["save"]:
+        if not("save" in self.kwargs and not self.kwargs["save"]):
             self.save_plot()
-        elif "show" in self.kwargs:
-            if self.kwargs["show"]:
-                plt.show()
-        else:
-            self.plt.show()
 
     def save_plot(self):
         file_name_data = self.get_file_name_data()
         self.path = f"{self.plots_obj.base_path}{file_name_data}"
         self.set_save_format()
-        plt.savefig(self.path, format=self.save_format)
+        self.fig.savefig(self.path, format=self.save_format, dpi=self.fig.dpi, bbox_inches='tight')
 
     def get_file_name_data(self):
         file_name_data = ""
