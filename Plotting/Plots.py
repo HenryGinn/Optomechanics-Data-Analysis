@@ -20,8 +20,9 @@ class Plots():
     aspect_ratio = 2
     title = "My Plot"
 
-    def __init__(self, lines_objects, kwargs):
+    def __init__(self, lines_objects, kwargs, universal_legend=False):
         self.process_lines_objects(lines_objects)
+        self.universal_legend = universal_legend
         self.kwargs = kwargs
         self.process_kwargs()
 

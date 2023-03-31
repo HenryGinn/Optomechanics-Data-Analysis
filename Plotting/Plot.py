@@ -39,6 +39,8 @@ class Plot():
     def process_lines_objects(self, lines_objects):
         self.lines_objects = lines_objects
         self.count = len(self.lines_objects)
+        if self.plots_obj.universal_legend:
+            self.count += 1
 
     def set_grid_size(self):
         self.process_aspect_ratio()
@@ -121,7 +123,7 @@ class Plot():
             self.axes = [self.axes]
 
     def remove_extra_axes(self):
-        extra_axes = len(self.axes) - len(self.lines_objects)
+        extra_axes = len(self.axes) - self.count
         for ax, _ in zip(self.axes[::-1], range(extra_axes)):
             ax.remove()
 
@@ -134,6 +136,19 @@ class Plot():
             self.fig.suptitle(f"{self.plots_obj.title}")
 
     def set_legend(self):
+        if self.plots_obj.universal_legend:
+            self.do_universal_legend()
+        else:
+            self.do_non_universal_legends()
+
+    def do_universal_legend(self):
+        ax = self.axes[-1]
+        for line_obj in self.lines_objects[0].line_objects:
+            ax.plot(1, 1, label=line_obj.label, color=line_obj.colour)
+        ax.legend(loc="center", borderpad=2, labelspacing=1)
+        ax.axis("off")
+
+    def do_non_universal_legends(self):
         for ax, lines_obj in zip(self.axes, self.lines_objects):
             if lines_obj.legend:
                 ax.legend(loc=lines_obj.legend_loc)
@@ -184,7 +199,7 @@ class Plot():
     def get_file_name_data(self):
         file_name_data = ""
         if len(self.plots_obj.lines_object_groups) > 1:
-            file_name_data = "_{self.plot_index}"
+            file_name_data = f"_{self.plot_index + 1}"
         return file_name_data
 
     def set_save_format(self):

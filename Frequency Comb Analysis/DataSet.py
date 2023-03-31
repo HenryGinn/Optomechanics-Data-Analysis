@@ -7,6 +7,7 @@ from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
 from PeakCoordinates import PeakCoordinates
+from PeakCount import PeakCount
 from PeakGaps import PeakGaps
 from PeakFits import PeakFits
 from EnvelopeVertices import EnvelopeVertices
@@ -64,6 +65,7 @@ class DataSet():
         self.average_groups_obj = AverageGroups(self)
         self.noise_threshold_obj = NoiseThreshold(self)
         self.peak_coordinates_obj = PeakCoordinates(self)
+        self.peak_count_obj = PeakCount(self)
         self.peak_gaps_obj = PeakGaps(self)
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
@@ -80,6 +82,9 @@ class DataSet():
 
     def peak_coordinates(self, command="Load", **kwargs):
         self.peak_coordinates_obj.execute(command, **kwargs)
+
+    def peak_count(self, command="Plot", **kwargs):
+        self.peak_count_obj.execute(command, **kwargs)
 
     def peak_gaps(self, command="Plot", **kwargs):
         self.peak_gaps_obj.execute(command, **kwargs)

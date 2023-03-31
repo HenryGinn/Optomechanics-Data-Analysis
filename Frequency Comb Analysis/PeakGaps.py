@@ -108,7 +108,7 @@ class PeakGaps(CombFunction):
         lines_obj.set_rainbow_lines(value=0.9)
 
     def create_plots(self, lines_objects, title, kwargs):
-        plots_obj = Plots(lines_objects, kwargs)
+        plots_obj = Plots(lines_objects, kwargs, universal_legend=True)
         plots_obj.parent_results_path = self.folder_path
         plots_obj.title = title
         plots_obj.plot()
