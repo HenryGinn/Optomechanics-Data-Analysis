@@ -1,6 +1,9 @@
+import os
+
 import numpy as np
 
 from Utils import get_sliced_list
+from Utils import make_folder
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
@@ -16,6 +19,11 @@ class PlotSpectra():
 
     def __init__(self, data_set_obj):
         self.data_set_obj = data_set_obj
+        self.set_folder_path()
+
+    def set_folder_path(self):
+        self.folder_path = os.path.join(self.data_set_obj.results_path, self.name)
+        make_folder(self.folder_path, message=True)
 
     def plot(self, **kwargs):
         self.kwargs = kwargs
@@ -123,6 +131,7 @@ class PlotSpectra():
         lines_obj.y_label = "S21 (mW)"
 
     def create_plots(self, lines_objects, title):
-        plot_obj = Plots(lines_objects, self.kwargs)
-        plot_obj.title = title
-        plot_obj.plot()
+        plots_obj = Plots(lines_objects, self.kwargs)
+        plots_obj.parent_results_path = self.folder_path
+        plots_obj.title = title
+        plots_obj.plot()

@@ -24,7 +24,7 @@ class CombFunction():
     def save_data(self):
         self.set_paths()
         self.load_necessary_data_for_saving()
-        print(f"Saving '{self.name}' Data")
+        print(f"Saving '{self.name}' data")
         self.save_data_set_obj(self.data_set_obj)
         self.loaded = True
 
@@ -36,7 +36,7 @@ class CombFunction():
         if not self.data_is_saved():
             self.execute("Save")
         elif not self.loaded:
-            print(f"Loading '{self.name}' Data")
+            print(f"Loading '{self.name}' data")
             self.do_load_data()
         self.loaded = True
     

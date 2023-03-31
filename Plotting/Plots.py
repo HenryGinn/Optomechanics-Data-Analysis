@@ -1,8 +1,11 @@
+import os
+
 import numpy as np
 
 from Plotting.Plot import Plot
 from Plotting.PlotUtils import get_group_indexes
 from Plotting.PlotUtils import get_group_size
+from Utils import make_folder
 
 class Plots():
 
@@ -14,7 +17,8 @@ class Plots():
     those figures is handled as a single Plot object.
     """
 
-    aspect_ratio = 3/2
+    aspect_ratio = 2
+    title = "My Plot"
 
     def __init__(self, lines_objects, kwargs):
         self.process_lines_objects(lines_objects)
@@ -49,6 +53,26 @@ class Plots():
             self.aspect_ratio = self.kwargs["aspect_ratio"]
     
     def plot(self):
+        self.set_paths()
         for index, lines_object_group in enumerate(self.lines_object_groups):
-            plot = Plot(self, lines_object_group, index)
-            plot.create_figure(**self.kwargs)
+            plot_obj = Plot(self, lines_object_group, index)
+            plot_obj.title = self.title
+            plot_obj.create_figure()
+
+    def set_paths(self):
+        if "save" in self.kwargs:
+            if self.kwargs["save"]:
+                self.do_set_paths()
+
+    def do_set_paths(self):
+        plot_folder_name = self.get_plot_folder_name()
+        self.results_path = os.path.join(self.parent_results_path, "Plots")
+        make_folder(self.results_path)
+        self.base_path = os.path.join(self.results_path, self.title)
+
+    def get_plot_folder_name(self):
+        if len(self.lines_object_groups) == 1:
+            plot_folder_name = f"{self.title} Plots"
+        else:
+            plot_folder_name = f"{self.title}_Subplots_{self.subplot_count} Plots"
+        return plot_folder_name

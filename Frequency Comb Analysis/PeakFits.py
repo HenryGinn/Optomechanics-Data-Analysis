@@ -142,9 +142,10 @@ class PeakFits(CombFunction):
         return lines_obj
 
     def create_plots(self, lines_objects, title, kwargs):
-        plot_obj = Plots(lines_objects, kwargs)
-        plot_obj.title = title
-        plot_obj.plot()
+        plots_obj = Plots(lines_objects, kwargs)
+        plots_obj.parent_results_path = self.folder_path
+        plots_obj.title = title
+        plots_obj.plot()
 
 def evaluate_abs(x_values, fitting_parameters, centre=0):
     gradient, y_intercept = fitting_parameters

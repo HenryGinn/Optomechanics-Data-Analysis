@@ -142,5 +142,6 @@ class EnvelopeVertices(CombFunction):
 
     def create_plots(self, lines_objects, title, kwargs):
         plots_obj = Plots(lines_objects, kwargs)
+        plots_obj.parent_results_path = self.folder_path
         plots_obj.title = title
         plots_obj.plot()

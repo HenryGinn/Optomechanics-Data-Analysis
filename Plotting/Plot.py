@@ -1,3 +1,4 @@
+import os
 import math
 
 import matplotlib.pyplot as plt
@@ -21,35 +22,54 @@ class Plot():
     of Line objects associated with it.
     """
 
+    title = "My Plot"
+    save_format = "pdf"
+    layouts = {"Constrained": True,
+               "Tight": False,
+               "Adjust": False}
+
     def __init__(self, plots_obj, lines_objects,
-                 plot_index, aspect_ratio=None):
+                 plot_index):
         self.plots_obj = plots_obj
+        self.kwargs = plots_obj.kwargs
         self.process_lines_objects(lines_objects)
         self.plot_index = plot_index
-        self.set_grid_size(aspect_ratio)
+        self.set_grid_size()
 
     def process_lines_objects(self, lines_objects):
         self.lines_objects = lines_objects
         self.count = len(self.lines_objects)
 
-    def set_grid_size(self, aspect_ratio):
-        self.process_aspect_ratio(aspect_ratio)
+    def set_grid_size(self):
+        self.process_aspect_ratio()
         plot_shape_obj = PlotShape(self.count, self.aspect_ratio)
         self.rows, self.columns = plot_shape_obj.dimensions
 
-    def process_aspect_ratio(self, aspect_ratio):
-        if aspect_ratio is not None:
-            self.aspect_ratio = aspect_ratio
-        else:
-            self.aspect_ratio = self.plots_obj.aspect_ratio
+    def process_aspect_ratio(self):
+        self.aspect_ratio = self.plots_obj.aspect_ratio
+        if "aspect_ratio" in self.kwargs:
+            if self.kwargs["aspect_ratio"] is not None:
+                self.aspect_ratio = self.kwargs["aspect_ratio"]
     
-    def create_figure(self, **kwargs):
-        fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns)
+    def create_figure(self):
+        self.process_layout_kwargs()
+        self.fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns,
+                                           constrained_layout=self.layouts["Constrained"])
         self.plot_axes()
-        self.add_plot_peripherals(fig)
-        self.modify_figure_sizes(**kwargs)
-        self.show_plot(fig)
+        self.add_plot_peripherals()
+        self.modify_figure_sizes()
+        self.process_plot()
+        plt.close()
 
+    def process_layout_kwargs(self):
+        if "layout" in self.kwargs:
+            self.set_all_layouts_to_false()
+            self.layouts[self.kwargs["layout"]] = True
+
+    def set_all_layouts_to_false(self):
+        for layout in self.layouts:
+            self.layouts[layout] = False
+    
     def plot_axes(self):
         self.flatten_axes()
         for ax, lines_obj in zip(self.axes, self.lines_objects):
@@ -105,15 +125,15 @@ class Plot():
         for ax, _ in zip(self.axes[::-1], range(extra_axes)):
             ax.remove()
 
-    def add_plot_peripherals(self, fig):
-        self.set_suptitle(fig)
-        self.set_legend(fig)
+    def add_plot_peripherals(self):
+        self.set_suptitle()
+        self.set_legend()
 
-    def set_suptitle(self, fig):
+    def set_suptitle(self):
         if hasattr(self.plots_obj, "title"):
-            fig.suptitle(f"{self.plots_obj.title}")
+            self.fig.suptitle(f"{self.plots_obj.title}")
 
-    def set_legend(self, fig):
+    def set_legend(self):
         for ax, lines_obj in zip(self.axes, self.lines_objects):
             if lines_obj.legend:
                 ax.legend(loc=lines_obj.legend_loc)
@@ -122,14 +142,22 @@ class Plot():
         self.prettify_x_axis(ax, lines_obj.x_limits)
         self.prettify_y_axis(ax, lines_obj.y_limits)
 
-    def modify_figure_sizes(self, **kwargs):
-        adjust_subplots()
-        self.add_subplot_tool(**kwargs)
+    def modify_figure_sizes(self):
+        self.set_figure_size()
+        self.adjust_layout()
 
-    def add_subplot_tool(self, **kwargs):
-        if "adjust" in kwargs:
-            if kwargs["adjust"]:
-                plt.subplot_tool()
+    def set_figure_size(self):
+        mng = plt.get_current_fig_manager()
+        #mng.resize(*mng.window.maxsize())
+        mng.window.fullscreen()
+
+    def adjust_layout(self):
+        if self.layouts["Adjust"]:
+            plt.subplot_tool()
+        elif self.layouts["Tight"]:
+            plt.tight_layout()
+        elif not self.layouts["Constrained"]:
+            adjust_subplots()
 
     def prettify_x_axis(self, ax, limits):
         tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
@@ -141,8 +169,29 @@ class Plot():
         ax.set_yticks(tick_positions, labels=tick_labels)
         print(prefix)
 
-    def show_plot(self, fig):
-        mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        plt.show()
-        plt.close()
+    def process_plot(self):
+        if self.layouts["Adjust"]:
+            plt.show()
+        elif "save" in self.kwargs and self.kwargs["save"]:
+            self.save_plot()
+        elif "show" in self.kwargs:
+            if self.kwargs["show"]:
+                plt.show()
+        else:
+            self.plt.show()
+
+    def save_plot(self):
+        file_name_data = self.get_file_name_data()
+        self.path = f"{self.plots_obj.base_path}{file_name_data}"
+        self.set_save_format()
+        plt.savefig(self.path, format=self.save_format)
+
+    def get_file_name_data(self):
+        file_name_data = ""
+        if len(self.plots_obj.lines_object_groups) > 1:
+            file_name_data = "_{self.plot_index}"
+        return file_name_data
+
+    def set_save_format(self):
+        if "format" in self.kwargs:
+            self.save_format = self.kwargs["format"]
