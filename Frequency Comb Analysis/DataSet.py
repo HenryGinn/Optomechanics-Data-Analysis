@@ -7,10 +7,10 @@ from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
 from PeakCoordinates import PeakCoordinates
+from PeakGaps import PeakGaps
 from PeakFits import PeakFits
 from EnvelopeVertices import EnvelopeVertices
 from PlotSpectra import PlotSpectra
-from PeakGaps import PeakGaps
 
 from Utils import get_sliced_list
 from Utils import make_folder
@@ -64,10 +64,10 @@ class DataSet():
         self.average_groups_obj = AverageGroups(self)
         self.noise_threshold_obj = NoiseThreshold(self)
         self.peak_coordinates_obj = PeakCoordinates(self)
+        self.peak_gaps_obj = PeakGaps(self)
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
         self.plot_spectra_obj = PlotSpectra(self)
-        self.peak_gaps_obj = PeakGaps(self)
 
     def align_spectra(self, command="Load", **kwargs):
         self.align_spectra_obj.execute(command, **kwargs)
@@ -81,14 +81,14 @@ class DataSet():
     def peak_coordinates(self, command="Load", **kwargs):
         self.peak_coordinates_obj.execute(command, **kwargs)
 
+    def peak_gaps(self, command="Plot", **kwargs):
+        self.peak_gaps_obj.execute(command, **kwargs)
+
     def peak_fits(self, command="Plot", **kwargs):
         self.peak_fits_obj.execute(command, **kwargs)
 
     def envelope_vertices(self, command="Plot", **kwargs):
         self.envelope_vertices_obj.execute(command, **kwargs)
-
-    def peak_gaps(self, command="Plot", **kwargs):
-        self.peak_gaps_obj.execute(command, **kwargs)
 
     def plot_spectra(self, **kwargs):
         self.plot_spectra_obj.plot(**kwargs)

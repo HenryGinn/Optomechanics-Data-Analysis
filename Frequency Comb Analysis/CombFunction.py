@@ -50,3 +50,25 @@ class CombFunction():
             self.plot(**kwargs)
         else:
             print("Sorry, this feature does not have a 'plot' method implemented")
+
+    def plot(self, **kwargs):
+        self.process_args(**kwargs)
+        lines_objects = self.get_lines_objects()
+        title = f"{self.data_set_obj} {self.name}"
+        self.create_plots(lines_objects, title, kwargs)
+
+    def process_args(self, **kwargs):
+        self.process_subplots(**kwargs)
+        self.process_aspect_ratio(**kwargs)
+
+    def process_subplots(self, **kwargs):
+        if "subplots" in kwargs:
+            self.subplots = kwargs["subplots"]
+        else:
+            self.subplots = None
+
+    def process_aspect_ratio(self, **kwargs):
+        if "aspect_ratio" in kwargs:
+            self.aspect_ratio = kwargs["aspect_ratio"]
+        else:
+            self.aspect_ratio = None
