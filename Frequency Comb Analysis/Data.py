@@ -13,9 +13,10 @@ class Data():
         self.file_name = os.path.basename(path)
 
     def set_S21_and_frequency_from_file(self):
-        file_contents = get_file_contents_from_path(self.path)
-        voltage, self.frequency = file_contents
-        self.set_S21_from_voltage(voltage)
+        if not hasattr(self, "frequency"):
+            file_contents = get_file_contents_from_path(self.path)
+            voltage, self.frequency = file_contents
+            self.set_S21_from_voltage(voltage)
 
     def set_S21_from_voltage(self, voltage):
         self.S21 = convert_to_milliwatts(voltage)

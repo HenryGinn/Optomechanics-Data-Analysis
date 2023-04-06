@@ -3,6 +3,7 @@ import os
 
 from Drift import Drift
 
+from SpectraPeak import SpectraPeak
 from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
@@ -60,6 +61,7 @@ class DataSet():
         self.drift_objects = get_sliced_list(self.drift_objects, self.drift_indexes)
 
     def set_feature_objects(self):
+        self.spectra_peak_obj = SpectraPeak(self)
         self.align_spectra_obj = AlignSpectra(self)
         self.average_groups_obj = AverageGroups(self)
         self.noise_threshold_obj = NoiseThreshold(self)
@@ -68,6 +70,9 @@ class DataSet():
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
         self.plot_spectra_obj = PlotSpectra(self)
+
+    def spectra_peak(self, command="Load", **kwargs):
+        self.spectra_peak_obj.execute(command, **kwargs)
 
     def align_spectra(self, command="Load", **kwargs):
         self.align_spectra_obj.execute(command, **kwargs)
