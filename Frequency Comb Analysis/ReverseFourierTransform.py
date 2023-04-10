@@ -1,6 +1,8 @@
 import os
 
 import numpy as np
+import scipy.fft as fft
+import matplotlib.pyplot as plt
 
 from CombFunction import CombFunction
 from PeakFits import evaluate_abs
@@ -10,16 +12,15 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-class EnvelopeVertices(CombFunction):
+class ReverseFourierTransform(CombFunction):
 
-    name = "Envelope Vertices"
+    name = "Reverse Fourier Transform"
 
     def __init__(self, data_set_obj):
         CombFunction.__init__(self, data_set_obj)
         self.set_commands()
 
     def set_paths(self):
-        print("Setting paths")
         self.set_folder_path()
         for drift_obj in self.data_set_obj.drift_objects:
             self.set_drift_path(drift_obj)
@@ -27,7 +28,7 @@ class EnvelopeVertices(CombFunction):
 
     def set_drift_path(self, drift_obj):
         path = os.path.join(self.folder_path, f"{drift_obj.folder_name}")
-        drift_obj.envelope_vertices_path = path
+        drift_obj.reverse_fourier_transform_path = path
         make_folder(path)
 
     def set_detuning_paths(self, drift_obj):
@@ -35,13 +36,12 @@ class EnvelopeVertices(CombFunction):
             self.set_detuning_path(detuning_obj)
 
     def set_detuning_path(self, detuning_obj):
-        path = os.path.join(detuning_obj.drift_obj.envelope_vertices_path,
+        path = os.path.join(detuning_obj.drift_obj.reverse_fourier_transform_path,
                             f"{detuning_obj.detuning} Hz")
-        detuning_obj.envelope_vertices_path = path
+        detuning_obj.reverse_fourier_transform_path = path
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.peak_coordinates("Load")
-        self.data_set_obj.peak_fits("Load")
+        self.data_set_obj.raw_data_peaks("Load")
 
     def save_data_set_obj(self, data_set_obj):
         for drift_obj in data_set_obj.drift_objects:
@@ -49,36 +49,30 @@ class EnvelopeVertices(CombFunction):
 
     def save_drift_obj(self, drift_obj):
         for detuning_obj in drift_obj.detuning_objects:
-            self.set_envelope_vertices(detuning_obj)
-            self.save_envelope_vertices(detuning_obj)
+            self.set_reverse_fourier_transform(detuning_obj)
+            self.save_reverse_fourier_transform(detuning_obj)
 
-    def set_envelope_vertices(self, detuning_obj):
-        self.set_envelope_x_values(detuning_obj)
-        self.set_envelope_y_values(detuning_obj)
-
-    def set_envelope_x_values(self, detuning_obj):
-        left_x = detuning_obj.spectrum_obj.peak_frequencies[0]
-        right_x = detuning_obj.spectrum_obj.peak_frequencies[-1]
-        detuning_obj.envelope_x_values = np.array([left_x, 0, right_x])
-
-    def set_envelope_y_values(self, detuning_obj):
-        detuning_obj.envelope_y_values = evaluate_abs(detuning_obj.envelope_x_values,
-                                                      detuning_obj.fitting_parameters)
-        detuning_obj.envelope_y_values = np.exp(detuning_obj.envelope_y_values)
-
-    def save_envelope_vertices(self, detuning_obj):
-        with open(detuning_obj.envelope_vertices_path, "w") as file:
-            file.writelines("X Values (Hz)\tY Values (S21)\n")
-            self.save_envelope_vertices_to_file(detuning_obj, file)
+    def set_reverse_fourier_transform(self, detuning_obj):
+        offset_frequencies = [spectrum_obj.peak_frequency
+                              for group_obj in detuning_obj.group_objects
+                              for spectrum_obj in group_obj.spectrum_objects]
+        for i in detuning_obj.group_objects:
+            for j in i.spectrum_objects:
+                print(j.peak_frequency)
+        input()
     
-    def save_envelope_vertices_to_file(self, detuning_obj, file):
-        x_values = detuning_obj.envelope_x_values
-        y_values = detuning_obj.envelope_y_values
-        for x_value, y_value in zip(x_values, y_values):
-            file.writelines(f"{x_value}\t{y_value}\n")
+    def save_reverse_fourier_transform(self, detuning_obj):
+        with open(detuning_obj.reverse_fourier_transform_path, "w") as file:
+            file.writelines("Value\n")
+            self.save_reverse_fourier_transform_to_file(detuning_obj, file)
+    
+    def save_reverse_fourier_transform_to_file(self, detuning_obj, file):
+        y_values = detuning_obj.fourier_y
+        for y_value in y_values:
+            file.writelines(f"{y_value}\n")
 
     def data_is_saved(self):
-        return np.all([os.path.exists(detuning_obj.envelope_vertices_path)
+        return np.all([os.path.exists(detuning_obj.reverse_fourier_transform_path)
                        for drift_obj in self.data_set_obj.drift_objects
                        for detuning_obj in drift_obj.detuning_objects])
 
@@ -91,8 +85,8 @@ class EnvelopeVertices(CombFunction):
             self.load_detuning_obj(detuning_obj)
 
     def load_detuning_obj(self, detuning_obj):
-        file_contents = get_file_contents_from_path(detuning_obj.envelope_vertices_path)
-        detuning_obj.envelope_x_values, detuning_obj.envelope_y_values = file_contents
+        file_contents = get_file_contents_from_path(detuning_obj.reverse_fourier_transform_path)
+        detuning_obj.fourier_y = file_contents
 
     def plot(self, **kwargs):
         self.process_args(**kwargs)
@@ -124,21 +118,21 @@ class EnvelopeVertices(CombFunction):
     def get_lines_obj(self, drift_obj):
         line_objects = [self.get_line_obj(detuning_obj)
                         for detuning_obj in drift_obj.detuning_objects]
-        lines_obj = Lines(line_objects, plot_type="semilogy")
+        lines_obj = Lines(line_objects, plot_type="plot")
         lines_obj.title = f"{drift_obj.drift_value} dBm"
         self.set_labels(lines_obj)
         return lines_obj
 
     def get_line_obj(self, detuning_obj):
         label = detuning_obj.detuning
-        x_values = detuning_obj.envelope_x_values
-        y_values = detuning_obj.envelope_y_values
+        x_values = np.arange(len(detuning_obj.fourier_y))
+        y_values = detuning_obj.fourier_y
         line_obj = Line(x_values, y_values, label=label)
         return line_obj
 
     def set_labels(self, lines_obj):
-        lines_obj.x_label = "Frequency (Hz)"
-        lines_obj.y_label = "S21"
+        lines_obj.x_label = None
+        lines_obj.y_label = None
         lines_obj.set_rainbow_lines(value=0.9)
 
     def create_plots(self, lines_objects, title, kwargs):

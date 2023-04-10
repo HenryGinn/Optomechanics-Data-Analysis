@@ -18,11 +18,11 @@ class Plots():
     """
 
     aspect_ratio = 2
+    universal_legend = False
     title = "My Plot"
 
-    def __init__(self, lines_objects, kwargs, universal_legend=False):
+    def __init__(self, lines_objects, kwargs):
         self.process_lines_objects(lines_objects)
-        self.universal_legend = universal_legend
         self.kwargs = kwargs
         self.process_kwargs()
 
@@ -33,6 +33,7 @@ class Plots():
     def process_kwargs(self):
         self.process_subplots()
         self.process_aspect_ratio()
+        self.process_universal_legend()
 
     def process_subplots(self):
         self.set_subplot_count()
@@ -52,6 +53,10 @@ class Plots():
     def process_aspect_ratio(self):
         if "aspect_ratio" in self.kwargs:
             self.aspect_ratio = self.kwargs["aspect_ratio"]
+
+    def process_universal_legend(self):
+        if "universal_legend" in self.kwargs:
+            self.universal_legend = self.kwargs["universal_legend"]
     
     def plot(self):
         self.set_paths()

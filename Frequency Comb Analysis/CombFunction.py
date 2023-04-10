@@ -11,7 +11,8 @@ class CombFunction():
     def set_commands(self):
         self.commands = {"Save": self.save_data,
                          "Load": self.load_data,
-                         "Plot": self.create_plot}
+                         "Plot": self.create_plot,
+                         "Plot New": self.create_plot_new}
 
     def execute(self, command, **kwargs):
         function = self.commands[command]
@@ -45,7 +46,7 @@ class CombFunction():
             self.execute("Load")
 
     def create_plot(self, **kwargs):
-        if hasattr(self, "plot"):
+        if hasattr(self, "create_plots"):
             self.execute("Load")
             self.plot(**kwargs)
         else:
@@ -72,3 +73,7 @@ class CombFunction():
             self.aspect_ratio = kwargs["aspect_ratio"]
         else:
             self.aspect_ratio = None
+
+    def create_plot_new(self):
+        self.execute("Save")
+        self.execute("Plot")

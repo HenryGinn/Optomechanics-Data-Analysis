@@ -3,6 +3,7 @@ import os
 
 from Drift import Drift
 
+from RawDataPeaks import RawDataPeaks
 from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
@@ -11,6 +12,7 @@ from PeakCount import PeakCount
 from PeakGaps import PeakGaps
 from PeakFits import PeakFits
 from EnvelopeVertices import EnvelopeVertices
+from ReverseFourierTransform import ReverseFourierTransform
 from PlotSpectra import PlotSpectra
 
 from Utils import get_sliced_list
@@ -61,6 +63,7 @@ class DataSet():
         self.drift_objects = get_sliced_list(self.drift_objects, self.drift_indexes)
 
     def set_feature_objects(self):
+        self.raw_data_peaks_obj = RawDataPeaks(self)
         self.align_spectra_obj = AlignSpectra(self)
         self.average_groups_obj = AverageGroups(self)
         self.noise_threshold_obj = NoiseThreshold(self)
@@ -69,7 +72,11 @@ class DataSet():
         self.peak_gaps_obj = PeakGaps(self)
         self.peak_fits_obj = PeakFits(self)
         self.envelope_vertices_obj = EnvelopeVertices(self)
+        self.reverse_fourier_transform_obj = ReverseFourierTransform(self)
         self.plot_spectra_obj = PlotSpectra(self)
+
+    def raw_data_peaks(self, command="Load", **kwargs):
+        self.raw_data_peaks_obj.execute(command, **kwargs)
 
     def align_spectra(self, command="Load", **kwargs):
         self.align_spectra_obj.execute(command, **kwargs)
@@ -94,6 +101,9 @@ class DataSet():
 
     def envelope_vertices(self, command="Plot", **kwargs):
         self.envelope_vertices_obj.execute(command, **kwargs)
+
+    def reverse_fourier_transform(self, command="Plot", **kwargs):
+        self.reverse_fourier_transform_obj.execute(command, **kwargs)
 
     def plot_spectra(self, **kwargs):
         self.plot_spectra_obj.plot(**kwargs)

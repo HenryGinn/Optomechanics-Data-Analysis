@@ -44,6 +44,9 @@ class AlignSpectra(CombFunction):
             group_obj.aligned_spectrum_path = path
 
 
+    def load_necessary_data_for_saving(self):
+        self.data_set_obj.raw_data_peaks("Load")
+
     def save_data_set_obj(self, data_set_obj):
         for drift_obj in data_set_obj.drift_objects:
             self.save_drift_obj(drift_obj)
@@ -66,18 +69,18 @@ class AlignSpectra(CombFunction):
     def process_spectrum_objects(self, group_obj):
         for spectrum_obj in group_obj.spectrum_objects:
             spectrum_obj.set_S21_and_frequency_from_file()
-            spectrum_obj.set_peak()
 
     def align_spectra(self, group_obj):
         self.set_peak_indexes(group_obj)
         self.set_max_and_min_peak_indexes(group_obj)
         self.offset_S21(group_obj)
         self.offset_frequency(group_obj)
-        group_obj.spectrum_obj.S21 = np.mean([spectrum_obj.S21_offset for spectrum_obj in group_obj.spectrum_objects], axis=0)
+        group_obj.spectrum_obj.S21 = np.mean([spectrum_obj.S21_offset
+                                              for spectrum_obj in group_obj.spectrum_objects], axis=0)
 
     def set_peak_indexes(self, group_obj):
         group_obj.peak_indexes = [spectrum_obj.peak_index
-                             for spectrum_obj in group_obj.spectrum_objects]
+                                  for spectrum_obj in group_obj.spectrum_objects]
 
     def set_max_and_min_peak_indexes(self, group_obj):
         group_obj.max_peak_index = max(group_obj.peak_indexes)
