@@ -64,6 +64,7 @@ class DataSet():
 
     def set_feature_objects(self):
         self.raw_data_peaks_obj = RawDataPeaks(self)
+        self.spectra_peak_obj = SpectraPeak(self)
         self.align_spectra_obj = AlignSpectra(self)
         self.average_groups_obj = AverageGroups(self)
         self.noise_threshold_obj = NoiseThreshold(self)
