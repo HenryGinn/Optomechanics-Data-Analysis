@@ -12,6 +12,8 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
+mesh = np.linspace(0, 0.0001, 1001)
+
 class ReverseFourierTransform(CombFunction):
 
     name = "Reverse Fourier Transform"
@@ -41,7 +43,8 @@ class ReverseFourierTransform(CombFunction):
         detuning_obj.reverse_fourier_transform_path = path
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.raw_data_peaks("Load")
+        self.data_set_obj.spectra_peaks("Load")
+        self.data_set_obj.peak_coordinates("Load")
 
     def save_data_set_obj(self, data_set_obj):
         for drift_obj in data_set_obj.drift_objects:
@@ -53,13 +56,19 @@ class ReverseFourierTransform(CombFunction):
             self.save_reverse_fourier_transform(detuning_obj)
 
     def set_reverse_fourier_transform(self, detuning_obj):
+        offset_frequency = self.get_offset_frequency(detuning_obj)
+        peak_frequencies = detuning_obj.spectrum_obj.peak_frequencies + offset_frequency
+        peak_S21s = detuning_obj.spectrum_obj.peak_S21s
+        time_mesh = mesh
+        time_mesh = np.outer(peak_frequencies, time_mesh)
+        detuning_obj.fourier_y = np.dot(peak_S21s, np.sin(time_mesh))
+
+    def get_offset_frequency(self, detuning_obj):
         offset_frequencies = [spectrum_obj.peak_frequency
                               for group_obj in detuning_obj.group_objects
                               for spectrum_obj in group_obj.spectrum_objects]
-        for i in detuning_obj.group_objects:
-            for j in i.spectrum_objects:
-                print(j.peak_frequency)
-        input()
+        offset_frequency = np.mean(offset_frequencies)
+        return offset_frequency
     
     def save_reverse_fourier_transform(self, detuning_obj):
         with open(detuning_obj.reverse_fourier_transform_path, "w") as file:
@@ -125,7 +134,7 @@ class ReverseFourierTransform(CombFunction):
 
     def get_line_obj(self, detuning_obj):
         label = detuning_obj.detuning
-        x_values = np.arange(len(detuning_obj.fourier_y))
+        x_values = mesh
         y_values = detuning_obj.fourier_y
         line_obj = Line(x_values, y_values, label=label)
         return line_obj

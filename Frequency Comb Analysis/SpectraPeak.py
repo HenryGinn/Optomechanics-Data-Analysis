@@ -94,8 +94,8 @@ class SpectraPeak(CombFunction):
 
     def load_group_obj(self, group_obj):
         file_contents = zip(*get_file_contents_from_path(group_obj.spectrum_peak_path))
-        for spectrum_index, peak_index, frequency, amplityde in file_contents:
-            spectrum_obj = group_obj.spectrum_objects[spectrum_index]
-            spectrum_obj.peak_index = peak_index
+        for spectrum_index, peak_index, frequency, amplitude in file_contents:
+            spectrum_obj = group_obj.spectrum_objects[int(spectrum_index)]
+            spectrum_obj.peak_index = int(peak_index)
             spectrum_obj.peak_frequency = frequency
-            spectrum_obj.peak_amplityde = amplitude
+            spectrum_obj.peak_amplitude = amplitude

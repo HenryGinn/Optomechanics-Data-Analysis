@@ -3,7 +3,7 @@ import os
 
 from Drift import Drift
 
-from RawDataPeaks import RawDataPeaks
+from SpectraPeak import SpectraPeak
 from AlignSpectra import AlignSpectra
 from AverageGroups import AverageGroups
 from NoiseThreshold import NoiseThreshold
@@ -63,7 +63,6 @@ class DataSet():
         self.drift_objects = get_sliced_list(self.drift_objects, self.drift_indexes)
 
     def set_feature_objects(self):
-        self.raw_data_peaks_obj = RawDataPeaks(self)
         self.spectra_peak_obj = SpectraPeak(self)
         self.align_spectra_obj = AlignSpectra(self)
         self.average_groups_obj = AverageGroups(self)
@@ -76,8 +75,8 @@ class DataSet():
         self.reverse_fourier_transform_obj = ReverseFourierTransform(self)
         self.plot_spectra_obj = PlotSpectra(self)
 
-    def raw_data_peaks(self, command="Load", **kwargs):
-        self.raw_data_peaks_obj.execute(command, **kwargs)
+    def spectra_peaks(self, command="Load", **kwargs):
+        self.spectra_peak_obj.execute(command, **kwargs)
 
     def align_spectra(self, command="Load", **kwargs):
         self.align_spectra_obj.execute(command, **kwargs)

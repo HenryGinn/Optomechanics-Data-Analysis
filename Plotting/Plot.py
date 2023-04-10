@@ -83,7 +83,7 @@ class Plot():
         plot_function = self.get_plot_function(ax, lines_obj)
         for line_obj in lines_obj.line_objects:
             self.plot_line(ax, line_obj, plot_function)
-        lines_obj.set_limits()
+        #lines_obj.set_limits()
         #self.prettify_axes(ax, lines_obj)
 
     def get_plot_function(self, ax, lines_obj):
@@ -163,8 +163,8 @@ class Plot():
 
     def set_figure_size(self):
         mng = plt.get_current_fig_manager()
-        #mng.resize(*mng.window.maxsize())
-        mng.window.fullscreen()
+        mng.resize(*mng.window.maxsize())
+        #mng.window.fullscreen()
 
     def adjust_layout(self):
         if self.layouts["Adjust"]:
