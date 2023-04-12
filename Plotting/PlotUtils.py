@@ -74,7 +74,7 @@ def get_power_of_1000(input_number):
     return power_of_1000
 
 def get_prefix(power_of_1000):
-    prefix_dict = {-5: "f", -4: "n", -3: "$\mu$", -2: "m", 0: "",
-                   1: "k", 2: "M", 3: "G", 4: "T", 5: "P"}
+    prefix_dict = {-5: "f", -4: "p", -3: "n", -2: "$\mu$", -1: "m",
+                   0: "", 1: "k", 2: "M", 3: "G", 4: "T", 5: "P"}
     prefix = prefix_dict[power_of_1000]
     return prefix

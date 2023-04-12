@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from Plotting.PlotShape import PlotShape
+from Plotting.PlotAxes import PlotAxes
 from Plotting.PlotUtils import update_figure_size
-from Plotting.PlotUtils import get_prefixed_numbers
 from Plotting.PlotUtils import adjust_subplots
 
 plt.rcParams['font.size'] = 12
@@ -55,39 +55,62 @@ class Plot():
     
     def create_figure(self):
         self.process_layout_kwargs()
+        self.make_initial_figure()
+        self.make_improved_figure()
+
+    def make_initial_figure(self):
+        self.create_initial_figure()
+        self.populate_initial_figure()
+        self.process_initial_figure()
+
+    def create_initial_figure(self):
         self.fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns,
                                            constrained_layout=self.layouts["Constrained"])
+        self.flatten_axes()
+        self.plot_axes_obj = PlotAxes(self)
+
+    def populate_initial_figure(self):
         self.plot_axes()
         self.add_plot_peripherals()
         self.modify_figure_sizes()
+
+    def process_initial_figure(self):
         plt.show()
-        self.plot_positions = [plt.getp(ax, "position") for ax in self.axes]
-        self.x_tick_labels = [plt.getp(ax, "xmajorticklabels") for ax in self.axes]
-        self.x_lims = [plt.getp(ax, "xlim") for ax in self.axes]
         plt.close()
+        self.set_plot_settings_from_initial_figure()
+
+    def set_plot_settings_from_initial_figure(self):
+        self.plot_positions = [plt.getp(ax, "position") for ax in self.axes]
+        self.set_tick_labels()
+        self.set_axis_limits()
+
+    def set_tick_labels(self):
+        self.x_tick_labels_figure = [plt.getp(ax, "xmajorticklabels") for ax in self.axes]
+        self.y_tick_labels_figure = [plt.getp(ax, "ymajorticklabels") for ax in self.axes]
+
+    def set_axis_limits(self):
+        self.figure_x_lims = [plt.getp(ax, "xlim") for ax in self.axes]
+        self.figure_y_lims = [plt.getp(ax, "ylim") for ax in self.axes]
+
+    def make_improved_figure(self):
+        self.create_plot_improved_axes()
+        self.populate_improved_figure()
+        self.process_improved_figure()
+
+    def create_plot_improved_axes(self):
         self.fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns)
+        self.flatten_axes()
+        self.plot_axes_obj = PlotAxes(self)
+
+    def populate_improved_figure(self):
         self.plot_axes()
+        self.set_figure_size()
         self.add_plot_peripherals()
-        self.modify_figure_sizes()
-        for ax, position in zip(self.axes, self.plot_positions):
-            plt.setp(ax, position=position)
-        for ax, x_tick_labels, x_lims in zip(self.axes, self.x_tick_labels, self.x_lims):
-            text_data = [(text_obj._x, text_obj._y, text_obj._text)
-                         for text_obj in x_tick_labels
-                         if text_obj._x > x_lims[0] and text_obj._x < x_lims[1]]
-            x, y, text = zip(*text_data)
-            text = [self.convert_tick_label_to_floats(string) for string in text]
-            tick_labels, prefix = get_prefixed_numbers(text)
-            ax.set_xticks(x, labels=tick_labels)
+
+    def process_improved_figure(self):
+        self.plot_axes_obj.improve_axes()
         self.process_plot()
         plt.close()
-
-    def convert_tick_label_to_floats(self, string):
-        if ord(string[0]) == 8722:
-            value = -float(string[1:])
-        else:
-            value = float(string)
-        return value
 
     def process_layout_kwargs(self):
         if "layout" in self.kwargs:
@@ -99,7 +122,6 @@ class Plot():
             self.layouts[layout] = False
     
     def plot_axes(self):
-        self.flatten_axes()
         for ax, lines_obj in zip(self.axes, self.lines_objects):
             self.plot_lines(ax, lines_obj)
             self.set_labels(ax, lines_obj)
@@ -125,21 +147,12 @@ class Plot():
 
     def set_labels(self, ax, lines_obj):
         self.set_title(ax, lines_obj)
-        self.set_x_label(ax, lines_obj)
-        self.set_y_label(ax, lines_obj)
+        self.plot_axes_obj.set_axes_labels(ax, lines_obj)
 
     def set_title(self, ax, lines_obj):
         if hasattr(lines_obj, "title"):
             ax.set_title(lines_obj.title)
-
-    def set_x_label(self, ax, lines_obj):
-        if hasattr(lines_obj, "x_label"):
-            ax.set_xlabel(lines_obj.x_label)
-
-    def set_y_label(self, ax, lines_obj):
-        if hasattr(lines_obj, "y_label"):
-            ax.set_ylabel(lines_obj.y_label)
-
+    
     def flatten_axes(self):
         if isinstance(self.axes, np.ndarray):
             self.axes = self.axes.flatten()
@@ -183,8 +196,19 @@ class Plot():
 
     def set_figure_size(self):
         mng = plt.get_current_fig_manager()
-        mng.resize(*mng.window.maxsize())
-        #mng.window.fullscreen()
+        self.maximise_figure_attempt_1(mng)
+
+    def maximise_figure_attempt_1(self, mng):
+        try:
+            mng.resize(*mng.window.maxsize())
+        except:
+            self.maximise_figure_attempt_1(mng)
+
+    def maximise_figure_attempt_2(self, mng):
+        try:
+            mng.window.fullscreen()
+        except:
+            print("Could not maximise figure window")
 
     def adjust_layout(self):
         if self.layouts["Adjust"]:
@@ -202,7 +226,8 @@ class Plot():
         file_name_data = self.get_file_name_data()
         self.path = f"{self.plots_obj.base_path}{file_name_data}"
         self.set_save_format()
-        self.fig.savefig(self.path, format=self.save_format, dpi=self.fig.dpi, bbox_inches='tight')
+        self.fig.savefig(self.path, format=self.save_format,
+                         dpi=self.fig.dpi, bbox_inches='tight')
 
     def get_file_name_data(self):
         file_name_data = ""

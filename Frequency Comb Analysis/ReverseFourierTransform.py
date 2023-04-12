@@ -140,9 +140,19 @@ class ReverseFourierTransform(CombFunction):
         return line_obj
 
     def set_labels(self, lines_obj):
-        lines_obj.x_label = None
-        lines_obj.y_label = None
+        self.set_x_labels(lines_obj)
+        self.set_y_labels(lines_obj)
         lines_obj.set_rainbow_lines(value=0.9)
+
+    def set_x_labels(self, lines_obj):
+        lines_obj.x_label = "x label"
+        lines_obj.x_units = ""
+        lines_obj.x_label_type = "Prefix"
+
+    def set_y_labels(self, lines_obj):
+        lines_obj.y_label = "y label"
+        lines_obj.y_units = ""
+        lines_obj.y_label_type = "Count"
 
     def create_plots(self, lines_objects, title, kwargs):
         plots_obj = Plots(lines_objects, kwargs)
