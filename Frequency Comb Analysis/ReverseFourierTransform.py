@@ -12,7 +12,7 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-mesh = np.linspace(0, 0.0001, 1001)
+mesh = np.linspace(0, 0.0001, 101)
 
 class ReverseFourierTransform(CombFunction):
 
@@ -95,7 +95,7 @@ class ReverseFourierTransform(CombFunction):
 
     def load_detuning_obj(self, detuning_obj):
         file_contents = get_file_contents_from_path(detuning_obj.reverse_fourier_transform_path)
-        detuning_obj.fourier_y = file_contents
+        detuning_obj.fourier_y = file_contents[0]
 
     def plot(self, **kwargs):
         self.process_args(**kwargs)

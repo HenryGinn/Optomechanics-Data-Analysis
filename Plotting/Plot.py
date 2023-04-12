@@ -6,7 +6,7 @@ import numpy as np
 
 from Plotting.PlotShape import PlotShape
 from Plotting.PlotUtils import update_figure_size
-from Plotting.PlotUtils import get_pretty_axis
+from Plotting.PlotUtils import get_prefixed_numbers
 from Plotting.PlotUtils import adjust_subplots
 
 plt.rcParams['font.size'] = 12
@@ -60,8 +60,34 @@ class Plot():
         self.plot_axes()
         self.add_plot_peripherals()
         self.modify_figure_sizes()
+        plt.show()
+        self.plot_positions = [plt.getp(ax, "position") for ax in self.axes]
+        self.x_tick_labels = [plt.getp(ax, "xmajorticklabels") for ax in self.axes]
+        self.x_lims = [plt.getp(ax, "xlim") for ax in self.axes]
+        plt.close()
+        self.fig, self.axes = plt.subplots(nrows=self.rows, ncols=self.columns)
+        self.plot_axes()
+        self.add_plot_peripherals()
+        self.modify_figure_sizes()
+        for ax, position in zip(self.axes, self.plot_positions):
+            plt.setp(ax, position=position)
+        for ax, x_tick_labels, x_lims in zip(self.axes, self.x_tick_labels, self.x_lims):
+            text_data = [(text_obj._x, text_obj._y, text_obj._text)
+                         for text_obj in x_tick_labels
+                         if text_obj._x > x_lims[0] and text_obj._x < x_lims[1]]
+            x, y, text = zip(*text_data)
+            text = [self.convert_tick_label_to_floats(string) for string in text]
+            tick_labels, prefix = get_prefixed_numbers(text)
+            ax.set_xticks(x, labels=tick_labels)
         self.process_plot()
         plt.close()
+
+    def convert_tick_label_to_floats(self, string):
+        if ord(string[0]) == 8722:
+            value = -float(string[1:])
+        else:
+            value = float(string)
+        return value
 
     def process_layout_kwargs(self):
         if "layout" in self.kwargs:
@@ -83,8 +109,6 @@ class Plot():
         plot_function = self.get_plot_function(ax, lines_obj)
         for line_obj in lines_obj.line_objects:
             self.plot_line(ax, line_obj, plot_function)
-        #lines_obj.set_limits()
-        #self.prettify_axes(ax, lines_obj)
 
     def get_plot_function(self, ax, lines_obj):
         plot_functions = {"plot": ax.plot,
@@ -153,10 +177,6 @@ class Plot():
             if lines_obj.legend:
                 ax.legend(loc=lines_obj.legend_loc)
 
-    def prettify_axes(self, ax, lines_obj):
-        self.prettify_x_axis(ax, lines_obj.x_limits)
-        self.prettify_y_axis(ax, lines_obj.y_limits)
-
     def modify_figure_sizes(self):
         self.set_figure_size()
         self.adjust_layout()
@@ -171,18 +191,6 @@ class Plot():
             plt.subplot_tool()
         elif self.layouts["Tight"]:
             plt.tight_layout()
-        elif not self.layouts["Constrained"]:
-            adjust_subplots()
-
-    def prettify_x_axis(self, ax, limits):
-        tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
-        ax.set_xticks(tick_positions, labels=tick_labels)
-        print(prefix)
-
-    def prettify_y_axis(self, ax, limits):
-        tick_positions, tick_labels, offset, prefix = get_pretty_axis(limits)
-        ax.set_yticks(tick_positions, labels=tick_labels)
-        print(prefix)
 
     def process_plot(self):
         if not ("show" in self.kwargs and not self.kwargs["show"]):

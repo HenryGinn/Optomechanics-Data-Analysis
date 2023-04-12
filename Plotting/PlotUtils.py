@@ -60,68 +60,13 @@ def adjust_subplots(bottom=0.1, top=0.9,
                               right=right, left=left,
                               wspace=wspace, hspace=hspace)
 
-
-def get_pretty_axis(limits):
-    limits = round_limits(limits)
-    limits, offset = get_axis_offset(limits)
-    tick_positions = np.array(limits)
-    tick_labels, prefix = get_prefixed_numbers(tick_positions)
-    return tick_positions, tick_labels, offset, prefix
-
-def round_limits(limits):
-    lower_limit, upper_limit = limits
-    lower_limit = floor(lower_limit, -1)
-    upper_limit = ceil(upper_limit, -1)
-    return (lower_limit, upper_limit)
-
-def floor(number, significance):
-    magnitude = get_magnitude(abs(number))
-    rounded = round(abs(number), -significance - magnitude)
-    if abs(number) - rounded < 0:
-        number = np.sign(number)*rounded - 10**(magnitude + significance)
-    return number
-
-def ceil(number, significance):
-    magnitude = get_magnitude(abs(number))
-    rounded = round(abs(number), -significance - magnitude)
-    if abs(number) - rounded > 0:
-        number = np.sign(number)*rounded + 10**(magnitude + significance)
-    return number
-
-def get_axis_offset(limits):
-    average = sum(limits) / 2
-    offset = 0
-    if average != 0:
-        difference_magnitude = get_magnitude(limits[1] - limits[0])
-        average_magnitude = get_magnitude(abs(average))
-        limits, offset = offset_limits(limits, difference_magnitude, average_magnitude)
-    return limits, offset
-
-def get_magnitude(input_number):
-    log = round(math.log(input_number, 10), 2)
-    magnitude = math.floor(log)
-    return magnitude
-
-def offset_limits(limits, difference_magnitude, average_magnitude):
-    offset = 0
-    if difference_magnitude < average_magnitude - 1:
-        offset = limits[0]
-        limits = [limits[0] - offset, limits[1] - offset]
-    return limits, offset
-
 def get_prefixed_numbers(numbers):
-    powers_of_1000 = [get_power_of_1000(abs(number)) for number in numbers]
+    powers_of_1000 = [get_power_of_1000(abs(number)) for number in numbers
+                      if number != 0]
     power_of_1000 = min(powers_of_1000)
     prefix = get_prefix(power_of_1000)
-    numbers = np.around(numbers / 1000**power_of_1000)
+    numbers = [int(number / 1000**power_of_1000) for number in numbers]
     return numbers, prefix
-
-def get_prefixed_number(input_number):
-    power_of_1000 = get_power_of_1000(input_number)
-    prefix = get_prefix(power_of_1000)
-    base_number = input_number / 1000**power_of_1000
-    prefixed_number = f"{round(base_number)}{prefix}"
-    return prefixed_number
 
 def get_power_of_1000(input_number):
     power_of_1000 = np.log(input_number) / np.log(1000)
