@@ -12,7 +12,7 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-mesh = np.linspace(0, 0.0001, 101)
+mesh = np.linspace(0, 0.0001, 30001)
 
 class ReverseFourierTransform(CombFunction):
 
@@ -100,7 +100,7 @@ class ReverseFourierTransform(CombFunction):
     def plot(self, **kwargs):
         self.process_args(**kwargs)
         lines_objects = self.get_lines_objects()
-        title = f"{self.data_set_obj} {self.name}"
+        title = f"{self.data_set_obj} {self.name}\n "
         self.create_plots(lines_objects, title, kwargs)
 
     def process_args(self, **kwargs):
@@ -137,6 +137,7 @@ class ReverseFourierTransform(CombFunction):
         x_values = mesh
         y_values = detuning_obj.fourier_y
         line_obj = Line(x_values, y_values, label=label)
+        line_obj.label_units = "Hz"
         return line_obj
 
     def set_labels(self, lines_obj):
@@ -145,12 +146,12 @@ class ReverseFourierTransform(CombFunction):
         lines_obj.set_rainbow_lines(value=0.9)
 
     def set_x_labels(self, lines_obj):
-        lines_obj.x_label = "x label"
-        lines_obj.x_units = ""
+        lines_obj.x_label = "Time"
+        lines_obj.x_units = "s"
         lines_obj.x_label_type = "Prefix"
 
     def set_y_labels(self, lines_obj):
-        lines_obj.y_label = "y label"
+        lines_obj.y_label = None
         lines_obj.y_units = ""
         lines_obj.y_label_type = "Count"
 

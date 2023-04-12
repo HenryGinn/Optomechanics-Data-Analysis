@@ -1,5 +1,7 @@
 class Line():
 
+    label_units = ""
+
     def __init__(self, x_values, y_values, label=None,
                  colour=None, marker=None, linestyle=None):
         self.set_values(x_values, y_values)
