@@ -3,6 +3,7 @@ import sys
 
 from Power import Power
 import PutTrialsInFolders
+from Features.SpectraRaw import SpectraRaw
 from Features.Spectra import Spectra
 from Utils import make_folder
 
@@ -120,7 +121,11 @@ class DataSet():
             power_obj.process_power()
 
     def set_feature_objects(self):
+        self.spectra_raw_obj = SpectraRaw(self)
         self.spectra_obj = Spectra(self)
+
+    def spectra_raw(self, command="Load", **kwargs):
+        self.spectra_raw_obj.execute(command, **kwargs)
 
     def spectra(self, command="Load", **kwargs):
         self.spectra_obj.execute(command, **kwargs)
