@@ -28,15 +28,30 @@ This part of the program handles spectra measured at a range of detunings and is
 - Create plots of $\Omega_m$ and $\Gamma_m$ against detuning
 - Align multiple spectra and average them together
 
+Known relevant data sets:
+- 15112022
+- 16112022_overnight
+- 17112022
+- 18112022
+- 19112022
+- 21112022
+- 22112022
+
 ## Transmission Analysis
 
 This part of the program looks at transmission curves and is controlled by "Transmission Analysis Interface". Below are a range of its features
 
 - Plot groups of transmission curves overlayed on top of each other with no processing, either before any processing or after they have been aligned. The number of lines on each subplot and the number of subplots can be specified.
 
+Known relevant data sets:
+- 14112022
+
 ## Frequency Comb Analysis
 
+This part of the program looks at data over a wider frequency range where you can see the other sidebands.
 
+Known relevant data sets:
+- 06122022_overnight
 
 ## To Do List
 
