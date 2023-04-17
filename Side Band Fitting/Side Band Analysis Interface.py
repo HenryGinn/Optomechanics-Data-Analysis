@@ -22,23 +22,8 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    data_set.process_folders()
-
-    data_set.process_transmission()
-    data_set.process_spectrum()
-
-    data_set.create_greek_objects()
-    data_set.process_greek(6)
-    #data_set.average_greek()
-    #data_set.plot_greek()
-
-    #data_set.find_largest_gamma()
-    #data_set.omega_power_drift(False)
-
-    #data_set.create_trial_plot_objects()
-    #data_set.create_trial_plots("Transmission peak")
-    #data_set.create_detuning_plots("Frequency of peak")
-
+    data_set.spectra("Load")
+    
 def process_all_data_sets():
     for data_set_data in data_sets:
         data_set = get_data_set(data_set_data)
@@ -55,7 +40,7 @@ data_sets = [("15112022", 1),
 
 data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
 
-#data_set_data = data_sets[1]
-#data_set = get_data_set(data_set_data)
-#process_data_set(data_set)
-process_all_data_sets()
+data_set_data = data_sets[0]
+data_set = get_data_set(data_set_data)
+process_data_set(data_set)
+#process_all_data_sets()

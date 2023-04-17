@@ -1,10 +1,10 @@
-import matplotlib.pyplot as plt
 import os
 import sys
+
 from Power import Power
 import PutTrialsInFolders
-from LargestGamma import LargestGamma
-from OmegaPowerDrift import OmegaPowerDrift
+from Features.Spectra import Spectra
+from Utils import make_folder
 
 class DataSet():
 
@@ -23,18 +23,32 @@ class DataSet():
         self.folder_structure_type = folder_structure_type
         self.set_data_set_path_names(data_set_path)
         self.process_power_structures()
+        self.setup_data_set()
         
     def set_data_set_path_names(self, data_set_path):
         script_path = sys.path[0]
         script_folder_path = os.path.dirname(script_path)
         self.parent_path = os.path.dirname(script_folder_path)
         self.set_data_set_path(data_set_path)
+        self.set_results_paths()
 
     def set_data_set_path(self, data_set_path):
         if data_set_path is None:
             self.data_set_path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
         else:
             self.data_set_path = os.path.join(data_set_path, self.folder_name)
+
+    def set_results_paths(self):
+        self.create_parent_results_folder()
+        self.create_data_set_results_folder()
+
+    def create_parent_results_folder(self):
+        self.parent_results_path = os.path.join(self.parent_path, "Side Band Results")
+        make_folder(self.parent_results_path, message=True)
+
+    def create_data_set_results_folder(self):
+        self.results_path = os.path.join(self.parent_results_path, self.folder_name)
+        make_folder(self.results_path, message=True)
 
     def process_power_structures(self):
         self.set_power_folder_path_data()
@@ -81,21 +95,6 @@ class DataSet():
         self.spectrum_folder_paths = [os.path.join(spectrum_folder_path, name)
                                       for name in self.power_folder_names]
 
-    def output_power_folder_names(self):
-        print("\nPower folder names")
-        for name in self.power_folder_names:
-            print(name)
-
-    def output_transmission_folder_paths(self):
-        print("\nTransmission folder paths")
-        for path in self.transmission_folder_paths:
-            print(path)
-
-    def output_spectrum_folder_paths(self):
-        print("\nSpectrum folder paths")
-        for path in self.spectrum_folder_paths:
-            print(path)
-
     def set_power_objects(self):
         power_data = zip(self.power_folder_names,
                          self.transmission_folder_paths,
@@ -107,15 +106,10 @@ class DataSet():
         self.power_list = [power_obj.power
                            for power_obj in self.power_objects]
 
-    def output_power_list(self):
-        print("\nPower list")
-        for power in self.power_list:
-            print(power)
-
-    def process_folders(self):
-        self.fix_folder_structure()
+    def setup_data_set(self):
+        #self.fix_folder_structure()
         self.process_folder_structure()
-        self.create_results_folders()
+        self.set_feature_objects()
 
     def fix_folder_structure(self):
         if self.folder_structure_type == 3:
@@ -124,109 +118,13 @@ class DataSet():
     def process_folder_structure(self):
         for power_obj in self.power_objects:
             power_obj.process_power()
-    
-    def create_results_folders(self):
-        self.create_data_set_results_folder()
-        self.create_S21_folders()
-        self.create_average_S21_folder()
-        self.create_greek_folder()
-        self.create_max_gamma_S21_folder()
 
-    def create_S21_folders(self):
-        self.create_spectrum_folder()
-        self.create_transmission_folder()
+    def set_feature_objects(self):
+        self.spectra_obj = Spectra(self)
 
-    def create_data_set_results_folder(self):
-        self.create_results_folder()
-        self.data_set_results_path = os.path.join(self.results_path, self.folder_name)
-        if os.path.isdir(self.data_set_results_path) == False:
-            os.mkdir(self.data_set_results_path)
-    
-    def create_results_folder(self):
-        self.results_path = os.path.join(self.parent_path, "Side Band Results")
-        if os.path.isdir(self.results_path) == False:
-            os.mkdir(self.results_path)
-            print(f"Creating results folder at {self.results_path}")
-
-    def create_spectrum_folder(self):
-        self.spectrum_path = os.path.join(self.data_set_results_path, "Spectrum Peaks")
-        if os.path.isdir(self.spectrum_path) == False:
-            os.mkdir(self.spectrum_path)
-            print(f"Creating spectrum peaks folder at {self.spectrum_path}")
-
-    def create_transmission_folder(self):
-        self.transmission_path = os.path.join(self.data_set_results_path, "Transmission Data")
-        if os.path.isdir(self.transmission_path) == False:
-            os.mkdir(self.transmission_path)
-            print(f"Creating transmission data folder at {self.transmission_path}")
-
-    def create_average_S21_folder(self):
-        self.average_S21_path = os.path.join(self.data_set_results_path, "Average S21")
-        if os.path.isdir(self.average_S21_path) == False:
-            os.mkdir(self.average_S21_path)
-            print(f"Creating average S21 data folder at {self.average_S21_path}")
-        self.create_average_S21_subfolders()
-
-    def create_average_S21_subfolders(self):
-        for power_obj in self.power_objects:
-            power_obj.create_average_S21_folder()
-
-    def create_greek_folder(self):
-        self.greek_path = os.path.join(self.data_set_results_path, "Omega and Gamma")
-        if os.path.isdir(self.greek_path) == False:
-            os.mkdir(self.greek_path)
-            print(f"Creating Omega and Gamma folder at {self.greek_path}")
-
-    def create_max_gamma_S21_folder(self):
-        self.max_gamma_S21_path = os.path.join(self.data_set_results_path, "Max Gamma S21")
-        if os.path.isdir(self.max_gamma_S21_path) == False:
-            os.mkdir(self.max_gamma_S21_path)
-            print(f"Creating Max Gamma S21 folder at {self.max_gamma_S21_path}")
-
-    def create_greek_objects(self):
-        for power_obj in self.power_objects:
-            power_obj.create_greek_objects()
-
-    def process_transmission(self):
-        for power_obj in self.power_objects:
-            print(f"Processing transmission: {power_obj.folder_name}")
-            power_obj.process_transmission()
-
-    def process_spectrum(self):
-        for power_obj in self.power_objects:
-            print(f"Processing spectrum: {power_obj.folder_name}")
-            power_obj.process_spectrum()
-
-    def process_greek(self, average_size=None):
-        for power_obj in self.power_objects:
-            print(f"Finding omega and gamma: {power_obj.folder_name}")
-            power_obj.process_greek(average_size)
-
-    def average_greek(self):
-        for power_obj in self.power_objects:
-            print(f"Averaging omega and gamma: {power_obj.folder_name}")
-            power_obj.average_greek()
-
-    def plot_greek(self, format_type="pdf"):
-        for power_obj in self.power_objects:
-            power_obj.plot_greek(format_type)
-
-    def find_largest_gamma(self):
-        largest_gamma = LargestGamma(self)
-        largest_gamma.find_largest_gamma()
-
-    def create_trial_plot_objects(self):
-        for power_obj in self.power_objects:
-            power_obj.create_trial_plot_objects()
-                
-    def create_trial_plots(self, plot_name):
-        for power_obj in self.power_objects:
-            power_obj.create_trial_plots(plot_name)
-
-    def create_detuning_plots(self, plot_name):
-        for power_obj in self.power_objects:
-            power_obj.create_detuning_plots(plot_name)
-    
+    def spectra(self, command="Load", **kwargs):
+        self.spectra_obj.execute(command, **kwargs)
+        
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 
                   f"Folder structure type: {self.folder_structure_type}\n" +

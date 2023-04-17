@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 
 def get_acceptable_indexes(data, tolerance=4):
@@ -71,3 +73,30 @@ def get_last_number_in_file_name(file_name):
     right = len(file_name) - 4
     last_number_in_file_name = file_name[left:right]
     return last_number_in_file_name
+
+def make_folder(path, message=False):
+    name = os.path.basename(path)
+    if not os.path.isdir(path):
+        if message:
+            print(f"Making '{name}' folder at {path}")
+        os.mkdir(path)
+
+def get_file_contents_from_path(path):
+    with open(path, "r") as file:
+        file.readline()
+        file_contents = get_file_contents_from_file(file, path)
+        file_contents = [np.array(column) for column in zip(*file_contents)]
+    return file_contents
+
+def get_file_contents_from_file(file, path):
+    try:
+        return [[get_number_from_string(value) for value in line.strip().split("\t")]
+                for line in file]
+    except:
+        raise Exception(f"An error occured when extracting data from {path}")
+
+def get_number_from_string(string, number_type=float):
+    try:
+        return number_type(string)
+    except TypeError:
+        raise TypeError(f"Cannot convert {string} to {number_type}")
