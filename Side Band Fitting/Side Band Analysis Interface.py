@@ -28,7 +28,7 @@ def process_data_set(data_set):
     data_set.process_spectrum()
 
     data_set.create_greek_objects()
-    data_set.process_greek()
+    data_set.process_greek(6)
     #data_set.average_greek()
     #data_set.plot_greek()
 
@@ -42,7 +42,7 @@ def process_data_set(data_set):
 def process_all_data_sets():
     for data_set_data in data_sets:
         data_set = get_data_set(data_set_data)
-        print(f"Processing {data_set.folder_name}\n")
+        print(f"\nProcessing {data_set.folder_name}")
         process_data_set(data_set)
 
 data_sets = [("15112022", 1),
@@ -53,9 +53,9 @@ data_sets = [("15112022", 1),
              ("21112022", 3),
              ("22112022", 3)]
 
-data_set_path = "D:\\Desktop\\RT_exp4"
+data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
 
-data_set_data = data_sets[2]
-data_set = get_data_set(data_set_data)
-process_data_set(data_set)
-#process_all_data_sets()
+#data_set_data = data_sets[1]
+#data_set = get_data_set(data_set_data)
+#process_data_set(data_set)
+process_all_data_sets()

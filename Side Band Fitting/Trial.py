@@ -118,6 +118,13 @@ class Trial():
             print(f"UNEXPECTED: Folder is empty: {folder_path}")
             return False
 
+    def create_average_S21_folder(self):
+        self.average_S21_path = os.path.join(self.power_obj.average_S21_path, f"Trial {self.trial_number}")
+        if os.path.isdir(self.average_S21_path) == False:
+            os.mkdir(self.average_S21_path)
+        for detuning_obj in self.detuning_objects:
+            detuning_obj.create_average_S21_folder()
+
     def get_counter(self, file_name):
         counter = get_number_from_file_name(file_name, "counter")
         return counter

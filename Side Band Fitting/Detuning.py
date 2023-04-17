@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import os
+
 from Spectrum import Spectrum
 from Transmission import Transmission
 from AverageDetuning import AverageDetuning
@@ -61,6 +63,11 @@ class Detuning():
     def remove_first_spectra(self):
         if len(self.spectrum_objects) > self.number_of_spectra_to_remove_from_start:
             self.spectrum_objects = self.spectrum_objects[self.number_of_spectra_to_remove_from_start:]
+
+    def create_average_S21_folder(self):
+        self.average_S21_path = os.path.join(self.trial.average_S21_path, str(self.detuning))
+        if os.path.isdir(self.average_S21_path) == False:
+            os.mkdir(self.average_S21_path)
 
     def get_transmission_peak(self):
         self.process_transmission()

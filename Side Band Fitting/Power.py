@@ -70,6 +70,13 @@ class Power():
                               for trial_number, (trial_transmission_path, trial_spectrum_path)
                               in enumerate(trial_paths_data)]
 
+    def create_average_S21_folder(self):
+        self.average_S21_path = os.path.join(self.data_set.average_S21_path, self.power_string)
+        if os.path.isdir(self.average_S21_path) == False:
+            os.mkdir(self.average_S21_path)
+        for trial_obj in self.trial_objects:
+            trial_obj.create_average_S21_folder()
+
     def process_transmission(self):
         for trial_obj in self.trial_objects:
             trial_obj.process_transmission()

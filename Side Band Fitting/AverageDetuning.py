@@ -1,5 +1,6 @@
 import numpy as np
 import math
+import os
 from AverageData import AverageData
 import Utils
 
@@ -9,16 +10,39 @@ class AverageDetuning():
         self.detuning = detuning_obj
     
     def set_S21_average_objects(self, average_size=None):
+        average_size_label = self.get_average_size_label(average_size)
         average_size = self.get_average_size(average_size,  len(self.detuning.spectrum_objects_valid))
         group_indexes_all = self.get_group_indexes(len(self.detuning.spectrum_indexes), average_size)
         self.S21_average_objects = [self.get_S21_average_obj(group_indexes)
                                     for group_indexes in group_indexes_all]
+        self.save_S21_average_data(average_size_label)
+
+    def get_average_size_label(self, average_size):
+        if average_size is None:
+            return "AllSpectraAveraged"
+        else:
+            return str(average_size)
 
     def get_S21_average_obj(self, group_indexes):
         spectrum_indexes = self.detuning.spectrum_indexes[group_indexes]
         S21_group = [self.detuning.spectrum_objects_valid[index] for index in group_indexes]
         S21_average_obj = AverageData(self.detuning, S21_group, spectrum_indexes)
         return S21_average_obj
+
+    def save_S21_average_data(self, average_size_label):
+        path = os.path.join(self.detuning.average_S21_path, average_size_label)
+        for index, S21_average_obj in enumerate(self.S21_average_objects):
+            self.save_S21_average_obj(path, index, S21_average_obj)
+
+    def save_S21_average_obj(self, path, index, S21_average_obj):
+        path_indexed = f"{path}_{index}.txt"
+        with open(path_indexed, "w") as file:
+            file.writelines("Frequency (Hz)\tS21\n")
+            self.save_S21_avergae_object_to_file(file, S21_average_obj)
+
+    def save_S21_avergae_object_to_file(self, file, S21_average_obj):
+        for frequency, S21 in zip(S21_average_obj.frequency, S21_average_obj.S21):
+            file.writelines(f"{frequency}\t{S21}\n")
 
     def get_average_size(self, average_size, total_count):
         if average_size is None:

@@ -35,7 +35,8 @@ class Data():
 
     def set_S21(self):
         voltage = self.get_voltage_from_file()
-        voltage = (10**(voltage/10))/1000
+        cable_attenuation = 2 * 2.3
+        voltage = (10**((voltage - cable_attenuation)/10))/1000
         self.S21 = voltage/self.power
 
     def get_voltage_from_file(self):

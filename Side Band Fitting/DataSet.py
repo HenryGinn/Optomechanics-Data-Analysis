@@ -128,6 +128,7 @@ class DataSet():
     def create_results_folders(self):
         self.create_data_set_results_folder()
         self.create_S21_folders()
+        self.create_average_S21_folder()
         self.create_greek_folder()
         self.create_max_gamma_S21_folder()
 
@@ -158,6 +159,17 @@ class DataSet():
         if os.path.isdir(self.transmission_path) == False:
             os.mkdir(self.transmission_path)
             print(f"Creating transmission data folder at {self.transmission_path}")
+
+    def create_average_S21_folder(self):
+        self.average_S21_path = os.path.join(self.data_set_results_path, "Average S21")
+        if os.path.isdir(self.average_S21_path) == False:
+            os.mkdir(self.average_S21_path)
+            print(f"Creating average S21 data folder at {self.average_S21_path}")
+        self.create_average_S21_subfolders()
+
+    def create_average_S21_subfolders(self):
+        for power_obj in self.power_objects:
+            power_obj.create_average_S21_folder()
 
     def create_greek_folder(self):
         self.greek_path = os.path.join(self.data_set_results_path, "Omega and Gamma")

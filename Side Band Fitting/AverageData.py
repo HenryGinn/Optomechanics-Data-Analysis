@@ -5,10 +5,6 @@ from DataFit import DataFit
 
 class AverageData(Data):
 
-    """
-    This class handles the average of data from several files
-    """
-
     def __init__(self, detuning_obj, data_objects, group_indexes):
         Data.__init__(self, detuning_obj)
         self.set_group_information(data_objects, group_indexes)
