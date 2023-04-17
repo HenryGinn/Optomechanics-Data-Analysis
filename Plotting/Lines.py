@@ -40,8 +40,9 @@ class Lines():
     def prefix_line_labels(self):
         labels = [line_obj.label for line_obj in self.line_objects
                   if line_obj.label is not None]
-        labels = self.add_prefixes_to_labels(labels)
-        self.update_line_labels(labels)
+        if len(labels) != 0:
+            labels = self.add_prefixes_to_labels(labels)
+            self.update_line_labels(labels)
 
     def add_prefixes_to_labels(self, labels):
         labels, prefix = get_prefixed_numbers(labels)

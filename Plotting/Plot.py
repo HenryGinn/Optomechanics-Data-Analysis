@@ -85,12 +85,16 @@ class Plot():
         self.set_axis_limits()
 
     def set_tick_labels(self):
-        self.x_tick_labels_figure = [plt.getp(ax, "xmajorticklabels") for ax in self.axes]
-        self.y_tick_labels_figure = [plt.getp(ax, "ymajorticklabels") for ax in self.axes]
+        self.x_tick_labels_figure = [plt.getp(ax, "xmajorticklabels")
+                                     for ax, _ in zip(self.axes, self.lines_objects)]
+        self.y_tick_labels_figure = [plt.getp(ax, "ymajorticklabels")
+                                     for ax, _ in zip(self.axes, self.lines_objects)]
 
     def set_axis_limits(self):
-        self.figure_x_lims = [plt.getp(ax, "xlim") for ax in self.axes]
-        self.figure_y_lims = [plt.getp(ax, "ylim") for ax in self.axes]
+        self.figure_x_lims = [plt.getp(ax, "xlim")
+                              for ax, _ in zip(self.axes, self.lines_objects)]
+        self.figure_y_lims = [plt.getp(ax, "ylim")
+                              for ax, _ in zip(self.axes, self.lines_objects)]
 
     def make_improved_figure(self):
         self.create_plot_improved_axes()
@@ -202,11 +206,23 @@ class Plot():
         try:
             mng.resize(*mng.window.maxsize())
         except:
-            self.maximise_figure_attempt_1(mng)
+            self.maximise_figure_attempt_2(mng)
 
     def maximise_figure_attempt_2(self, mng):
         try:
             mng.window.fullscreen()
+        except:
+            self.maximise_figure_attempt_3(mng)
+
+    def maximise_figure_attempt_3(self, mng):
+        try:
+            mng.window.state('zoomed')
+        except:
+            self.maximise_figure_attempt_4(mng)
+
+    def maximise_figure_attempt_4(self, mng):
+        try:
+            mng.full_screen_toggle()
         except:
             print("Could not maximise figure window")
 
@@ -224,7 +240,7 @@ class Plot():
 
     def save_plot(self):
         file_name_data = self.get_file_name_data()
-        self.path = f"{self.plots_obj.base_path}{file_name_data}"
+        self.path = f"{self.plots_obj.base_path}{file_name_data}.{self.save_format}"
         self.set_save_format()
         self.fig.savefig(self.path, format=self.save_format,
                          dpi=self.fig.dpi, bbox_inches='tight')

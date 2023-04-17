@@ -18,17 +18,23 @@ class DataSet():
     For data sets in the same format as 19112022, use folder_structure_type=2
     """
 
-    def __init__(self, folder_name, folder_structure_type):
+    def __init__(self, folder_name, folder_structure_type, data_set_path=None):
         self.folder_name = folder_name
         self.folder_structure_type = folder_structure_type
-        self.set_data_set_path_names()
+        self.set_data_set_path_names(data_set_path)
         self.process_power_structures()
         
-    def set_data_set_path_names(self):
+    def set_data_set_path_names(self, data_set_path):
         script_path = sys.path[0]
         script_folder_path = os.path.dirname(script_path)
         self.parent_path = os.path.dirname(script_folder_path)
-        self.data_set_path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
+        self.set_data_set_path(data_set_path)
+
+    def set_data_set_path(self, data_set_path):
+        if data_set_path is None:
+            self.data_set_path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
+        else:
+            self.data_set_path = os.path.join(data_set_path, self.folder_name)
 
     def process_power_structures(self):
         self.set_power_folder_path_data()
@@ -136,7 +142,7 @@ class DataSet():
             os.mkdir(self.data_set_results_path)
     
     def create_results_folder(self):
-        self.results_path = os.path.join(self.parent_path, "Results")
+        self.results_path = os.path.join(self.parent_path, "Side Band Results")
         if os.path.isdir(self.results_path) == False:
             os.mkdir(self.results_path)
             print(f"Creating results folder at {self.results_path}")

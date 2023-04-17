@@ -12,11 +12,10 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-mesh = np.linspace(0, 0.0001, 30001)
-
 class ReverseFourierTransform(CombFunction):
 
     name = "Reverse Fourier Transform"
+    resolution = 30000
 
     def __init__(self, data_set_obj):
         CombFunction.__init__(self, data_set_obj)
@@ -59,8 +58,8 @@ class ReverseFourierTransform(CombFunction):
         offset_frequency = self.get_offset_frequency(detuning_obj)
         peak_frequencies = detuning_obj.spectrum_obj.peak_frequencies + offset_frequency
         peak_S21s = detuning_obj.spectrum_obj.peak_S21s
-        time_mesh = mesh
-        time_mesh = np.outer(peak_frequencies, time_mesh)
+        detuning_obj.fourier_x = np.linspace(0, 0.0001, self.resolution + 1)
+        time_mesh = np.outer(peak_frequencies, detuning_obj.fourier_x)
         detuning_obj.fourier_y = np.dot(peak_S21s, np.sin(time_mesh))
 
     def get_offset_frequency(self, detuning_obj):
@@ -72,13 +71,14 @@ class ReverseFourierTransform(CombFunction):
     
     def save_reverse_fourier_transform(self, detuning_obj):
         with open(detuning_obj.reverse_fourier_transform_path, "w") as file:
-            file.writelines("Value\n")
+            file.writelines("Time (s)\tValue\n")
             self.save_reverse_fourier_transform_to_file(detuning_obj, file)
     
     def save_reverse_fourier_transform_to_file(self, detuning_obj, file):
+        x_values = detuning_obj.fourier_x
         y_values = detuning_obj.fourier_y
-        for y_value in y_values:
-            file.writelines(f"{y_value}\n")
+        for x_value, y_value in zip(x_values, y_values):
+            file.writelines(f"{x_value}\t{y_value}\n")
 
     def data_is_saved(self):
         return np.all([os.path.exists(detuning_obj.reverse_fourier_transform_path)
@@ -95,7 +95,8 @@ class ReverseFourierTransform(CombFunction):
 
     def load_detuning_obj(self, detuning_obj):
         file_contents = get_file_contents_from_path(detuning_obj.reverse_fourier_transform_path)
-        detuning_obj.fourier_y = file_contents[0]
+        detuning_obj.fourier_x = file_contents[0]
+        detuning_obj.fourier_y = file_contents[1]
 
     def plot(self, **kwargs):
         self.process_args(**kwargs)
@@ -104,8 +105,23 @@ class ReverseFourierTransform(CombFunction):
         self.create_plots(lines_objects, title, kwargs)
 
     def process_args(self, **kwargs):
+        self.process_resolution(**kwargs)
         self.process_subplots(**kwargs)
         self.process_aspect_ratio(**kwargs)
+
+    def process_resolution(self, **kwargs):
+        if "resolution" in kwargs:
+            self.resolution = kwargs["resolution"]
+        self.ensure_resolution_matches()
+
+    def ensure_resolution_matches(self):
+        if not self.resolution_matches():
+            self.execute("Save")
+
+    def resolution_matches(self):
+        return np.all([len(detuning_obj.fourier_x) == self.resolution + 1
+                       for drift_obj in self.data_set_obj.drift_objects
+                       for detuning_obj in drift_obj.detuning_objects])
 
     def process_subplots(self, **kwargs):
         if "subplots" in kwargs:
@@ -134,7 +150,7 @@ class ReverseFourierTransform(CombFunction):
 
     def get_line_obj(self, detuning_obj):
         label = detuning_obj.detuning
-        x_values = mesh
+        x_values = detuning_obj.fourier_x
         y_values = detuning_obj.fourier_y
         line_obj = Line(x_values, y_values, label=label)
         line_obj.label_units = "Hz"

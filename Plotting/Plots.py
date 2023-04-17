@@ -69,7 +69,7 @@ class Plots():
         plot_folder_name = self.get_plot_folder_name()
         self.results_path = os.path.join(self.parent_results_path, "Plots")
         make_folder(self.results_path)
-        self.base_path = os.path.join(self.results_path, self.title)
+        self.base_path = os.path.join(self.results_path, self.title.strip())
 
     def get_plot_folder_name(self):
         if len(self.lines_object_groups) == 1:

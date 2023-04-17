@@ -45,7 +45,7 @@ class AlignSpectra(CombFunction):
 
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.raw_data_peaks("Load")
+        self.data_set_obj.spectra_peaks("Load")
 
     def save_data_set_obj(self, data_set_obj):
         for drift_obj in data_set_obj.drift_objects:

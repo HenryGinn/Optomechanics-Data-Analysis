@@ -20,12 +20,14 @@ from Utils import make_folder
 
 class DataSet():
 
-    def __init__(self, folder_name, script_path=None, drifts=None, detunings=None):
+    def __init__(self, folder_name,
+                 script_path=None, data_set_path=None,
+                 drifts=None, detunings=None):
         self.folder_name = folder_name
         self.set_script_path(script_path)
         self.drift_indexes = drifts
         self.detuning_indexes = detunings
-        self.setup_data_set()
+        self.setup_data_set(data_set_path)
 
     def set_script_path(self, script_path):
         if script_path is None:
@@ -33,16 +35,22 @@ class DataSet():
         else:
             self.script_path = script_path
 
-    def setup_data_set(self):
-        self.set_paths()
+    def setup_data_set(self, data_set_path):
+        self.set_paths(data_set_path)
         self.make_results_folders()
         self.set_drift_objects()
         self.set_feature_objects()
 
-    def set_paths(self):
+    def set_paths(self, data_set_path):
         repo_path = os.path.dirname(self.script_path)
         self.parent_path = os.path.dirname(repo_path)
-        self.path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
+        self.set_data_set_path(data_set_path)
+
+    def set_data_set_path(self, data_set_path):
+        if data_set_path is None:
+            self.path = os.path.join(self.parent_path, "Data Sets", self.folder_name)
+        else:
+            self.path = os.path.join(data_set_path, self.folder_name)
     
     def make_results_folders(self):
         self.make_parent_results_folder()
