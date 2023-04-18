@@ -7,9 +7,9 @@ from Spectrum import Spectrum
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-class SpectraRaw(Feature):
+class Transmissions(Feature):
 
-    name = "Spectra Raw"
+    name = "Transmissions"
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -31,8 +31,4 @@ class SpectraRaw(Feature):
 
     def load_trial_obj(self, trial_obj):
         for detuning_obj in trial_obj.detuning_objects:
-            self.load_detuning_obj(detuning_obj)
-
-    def load_detuning_obj(self, detuning_obj):
-        for spectrum_obj in detuning_obj.spectrum_objects:
-            spectrum_obj.load_S21()
+            detuning_obj.transmission_obj.load_S21()

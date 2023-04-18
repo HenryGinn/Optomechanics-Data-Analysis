@@ -7,7 +7,7 @@ from Spectrum import Spectrum
 from Transmission import Transmission
 from AverageDetuning import AverageDetuning
 from Utils import get_number_from_file_name
-from Utils import get_acceptable_indexes
+from Utils import get_acceptable_indices
 
 class Detuning():
 
@@ -21,16 +21,17 @@ class Detuning():
     output_rejected_spectra = False
     flag_bad_offsets = False
     
-    def __init__(self, trial, detuning, timestamp, transmission_path, spectrum_paths):
-        self.initialise_attributes(trial, detuning, timestamp,
+    def __init__(self, trial_obj, detuning, timestamp, transmission_path, spectrum_paths):
+        self.initialise_attributes(trial_obj, detuning, timestamp,
                                    transmission_path, spectrum_paths)
         self.valid = True
         self.set_frequency()
         self.create_spectrum_objects()
+        self.transmission_obj = Transmission(self, self.transmission_path)
 
-    def initialise_attributes(self, trial, detuning, timestamp,
+    def initialise_attributes(self, trial_obj, detuning, timestamp,
                               transmission_path, spectrum_paths):
-        self.trial = trial
+        self.trial_obj = trial_obj
         self.detuning = detuning
         self.timestamp = timestamp
         self.transmission_path = transmission_path
@@ -78,7 +79,6 @@ class Detuning():
             return None, None
 
     def process_transmission(self):
-        self.transmission = Transmission(self, self.transmission_path)
         self.transmission.process_S21()
 
     def extract_transmission_from_file_detuning(self, centre_index, centre_frequency, cavity_frequency):
@@ -89,10 +89,10 @@ class Detuning():
 
     def get_spectrum_peaks(self):
         self.process_spectrum()
-        self.set_valid_spectrum_indexes()
+        self.set_valid_spectrum_indices()
         self.filter_bad_offsets()
-        spectrum_centre_indexes, spectrum_centre_frequencies = self.get_centre_information()
-        return spectrum_centre_indexes, spectrum_centre_frequencies, self.valid_spectrum_indexes
+        spectrum_centre_indices, spectrum_centre_frequencies = self.get_centre_information()
+        return spectrum_centre_indices, spectrum_centre_frequencies, self.valid_spectrum_indices
 
     def process_spectrum(self):
         for index, spectrum_obj in enumerate(self.spectrum_objects):
@@ -100,35 +100,35 @@ class Detuning():
             if ((index % 10 == 0) or (index == len(self.spectrum_objects) - 1)) and self.review_all_S21_simultaneously:
                 plt.show()
 
-    def set_valid_spectrum_indexes(self):
-        self.valid_spectrum_indexes = [spectrum_obj.S21_has_valid_peak
+    def set_valid_spectrum_indices(self):
+        self.valid_spectrum_indices = [spectrum_obj.S21_has_valid_peak
                                        for spectrum_obj in self.spectrum_objects]
-        self.valid_spectrum_indexes = np.array(self.valid_spectrum_indexes)
-        self.valid_spectrum_indexes = np.nonzero(self.valid_spectrum_indexes)[0]
+        self.valid_spectrum_indices = np.array(self.valid_spectrum_indices)
+        self.valid_spectrum_indices = np.nonzero(self.valid_spectrum_indices)[0]
 
     def filter_bad_offsets(self):
-        spectrum_centres = self.get_spectrum_centre_indexes()
-        acceptable_indexes = get_acceptable_indexes(spectrum_centres, 5)
-        self.output_rejected_spectrum_data(acceptable_indexes)
-        self.valid_spectrum_indexes = self.valid_spectrum_indexes[acceptable_indexes]
-        self.update_valid_peaks(self.valid_spectrum_indexes)
+        spectrum_centres = self.get_spectrum_centre_indices()
+        acceptable_indices = get_acceptable_indices(spectrum_centres, 5)
+        self.output_rejected_spectrum_data(acceptable_indices)
+        self.valid_spectrum_indices = self.valid_spectrum_indices[acceptable_indices]
+        self.update_valid_peaks(self.valid_spectrum_indices)
 
-    def output_rejected_spectrum_data(self, acceptable_indexes):
+    def output_rejected_spectrum_data(self, acceptable_indices):
         if self.output_rejected_spectra:
             print(f"Detuing: {self.detuning}, "
                   f"total spectra: {len(self.spectrum_objects)}, "
-                  f"bad peak: {len(self.spectrum_objects) - len(self.valid_spectrum_indexes)}, "
-                  f"bad offset: {len(self.valid_spectrum_indexes) - len(acceptable_indexes)}, "
-                  f"remaining: {len(acceptable_indexes)}")
+                  f"bad peak: {len(self.spectrum_objects) - len(self.valid_spectrum_indices)}, "
+                  f"bad offset: {len(self.valid_spectrum_indices) - len(acceptable_indices)}, "
+                  f"remaining: {len(acceptable_indices)}")
 
-    def update_valid_peaks(self, acceptable_indexes):
-        for index in self.valid_spectrum_indexes:
-            if index not in acceptable_indexes:
+    def update_valid_peaks(self, acceptable_indices):
+        for index in self.valid_spectrum_indices:
+            if index not in acceptable_indices:
                 self.spectrum_objects[index].S21_has_valid_peak = False
 
     def extract_spectrum_from_file_detuning(self, spectrum_file_contents):
-        properties = [(centre_indexes, centre_frequencies, indexes) for
-                      detuning, centre_indexes, centre_frequencies, indexes in spectrum_file_contents
+        properties = [(centre_indices, centre_frequencies, indices) for
+                      detuning, centre_indices, centre_frequencies, indices in spectrum_file_contents
                       if detuning == self.detuning]
         self.set_spectra_properties_from_file(properties)
 
@@ -139,16 +139,16 @@ class Detuning():
             self.valid = False
 
     def set_spectra_properties_from_file_valid(self, variables):
-        centre_indexes, centre_frequencies, indexes = zip(*variables)
-        self.spectrum_centre_indexes = np.array(centre_indexes)
+        centre_indices, centre_frequencies, indices = zip(*variables)
+        self.spectrum_centre_indices = np.array(centre_indices)
         self.spectrum_centre_frequencies = np.array(centre_frequencies)
-        self.spectrum_indexes = np.array(indexes).astype("int")
+        self.spectrum_indices = np.array(indices).astype("int")
         self.set_spectrum_objects_valid()
 
     def set_spectrum_objects_valid(self):
         self.spectrum_objects_valid = [spectrum_obj
                                        for index, spectrum_obj in enumerate(self.spectrum_objects)
-                                       if index in self.spectrum_indexes]
+                                       if index in self.spectrum_indices]
         self.update_spectrum_valid_peaks()
         self.set_spectrum_objects_centre_data()
         self.set_spectrum_objects_S21()
@@ -162,7 +162,7 @@ class Detuning():
 
     def set_spectrum_objects_centre_data(self):
         spectrum_centre_zip = zip(self.spectrum_objects_valid,
-                                  self.spectrum_centre_indexes,
+                                  self.spectrum_centre_indices,
                                   self.spectrum_centre_frequencies)
         for spectrum_obj, centre_index, centre_frequency in spectrum_centre_zip:
             spectrum_obj.S21_centre_index = int(centre_index)
@@ -173,16 +173,16 @@ class Detuning():
             spectrum_obj.set_S21()
 
     def get_centre_information(self):
-        spectrum_centre_indexes = self.get_spectrum_centre_indexes()
+        spectrum_centre_indices = self.get_spectrum_centre_indices()
         spectrum_centre_frequencies = self.get_spectrum_centre_frequencies()
-        return spectrum_centre_indexes, spectrum_centre_frequencies
+        return spectrum_centre_indices, spectrum_centre_frequencies
 
-    def get_spectrum_centre_indexes(self):
-        spectrum_centre_indexes = [spectrum_obj.get_S21_centre_index()
+    def get_spectrum_centre_indices(self):
+        spectrum_centre_indices = [spectrum_obj.get_S21_centre_index()
                                    for spectrum_obj in self.spectrum_objects
                                    if spectrum_obj.S21_has_valid_peak]
-        spectrum_centre_indexes = np.array(spectrum_centre_indexes)
-        return spectrum_centre_indexes
+        spectrum_centre_indices = np.array(spectrum_centre_indices)
+        return spectrum_centre_indices
 
     def get_spectrum_centre_frequencies(self):
         spectrum_centre_frequencies = [spectrum_obj.get_S21_centre_frequency()

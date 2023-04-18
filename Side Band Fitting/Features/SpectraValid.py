@@ -7,7 +7,7 @@ from Spectrum import Spectrum
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
-class Spectra(Feature):
+class SpectraValid(Feature):
 
     name = "Spectra Valid"
     peak_ratio_threshold = 11.5
@@ -59,8 +59,22 @@ class Spectra(Feature):
             self.save_detuning_obj(detuning_obj)
 
     def set_detuning_obj(self, detuning_obj):
+        spectra_count = len(detuning_obj.spectrum_objects)
+        if spectra_count < 10:
+            self.set_detuning_process_all(detuning_obj)
+        else:
+            self.set_detuning_skip_first_few(detuning_obj)
+
+    def set_detuning_process_all(self, detuning_obj):
         for spectrum_obj in detuning_obj.spectrum_objects:
             self.set_spectrum_peak_validity(spectrum_obj)
+
+    def set_detuning_skip_first_few(self, detuning_obj):
+        for index, spectrum_obj in enumerate(detuning_obj.spectrum_objects):
+            if index >= 6:
+                self.set_spectrum_peak_validity(spectrum_obj)
+            else:
+                spectrum_obj.has_valid_peak = False
 
     def set_spectrum_peak_validity(self, spectrum_obj):
         peak = np.max(spectrum_obj.S21)

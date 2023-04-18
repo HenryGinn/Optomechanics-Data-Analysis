@@ -2,10 +2,7 @@ import os
 import sys
 import shutil
 
-def put_trials_in_folders(folder_name):
-    script_path = sys.path[0]
-    parent_path = os.path.dirname(os.path.dirname(script_path))
-    data_set_path = os.path.join(parent_path, "Data Sets", folder_name)
+def put_trials_in_folders(data_set_path):
     process_folder(data_set_path, "Spectrum")
     process_folder(data_set_path, "Transmission")
 

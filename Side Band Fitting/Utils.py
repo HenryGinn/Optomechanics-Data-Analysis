@@ -1,19 +1,20 @@
 import os
+import math
 
 import numpy as np
 
-def get_acceptable_indexes(data, tolerance=4):
+def get_acceptable_indices(data, tolerance=4):
     if data.size < 3:
-        acceptable_indexes = np.arange(len(data))
+        acceptable_indices = np.arange(len(data))
     else:
-        acceptable_indexes = get_acceptable_indexes_non_trivial(data, tolerance)
-    return acceptable_indexes
+        acceptable_indices = get_acceptable_indices_non_trivial(data, tolerance)
+    return acceptable_indices
 
-def get_acceptable_indexes_non_trivial(data, tolerance):
+def get_acceptable_indices_non_trivial(data, tolerance):
     deviations = np.abs(data - np.median(data))
     modified_deviation = np.average(deviations**(1/4))**4
-    accepted_indexes = np.abs(deviations) < tolerance * modified_deviation
-    return accepted_indexes
+    accepted_indices = np.abs(deviations) < tolerance * modified_deviation
+    return accepted_indices
 
 def get_file_contents(path):
     with open(path, "r") as file:
@@ -100,3 +101,34 @@ def get_number_from_string(string, number_type=float):
         return number_type(string)
     except TypeError:
         raise TypeError(f"Cannot convert {string} to {number_type}")
+
+def get_group_indices(length, group_size):
+    group_size, group_count = get_group_data(length, group_size)
+    end_point_indices = get_end_point_indices(length, group_size, group_count)
+    group_indices = [np.arange(end_point_indices[group_number],
+                               end_point_indices[group_number + 1]).astype('int')
+                     for group_number in range(group_count)]
+    return group_indices
+
+def get_group_data(length, group_size):
+    group_size = set_group_size_non_none(length, group_size)
+    group_size = get_modified_group_size(length, group_size)
+    group_count = math.floor(length / group_size)
+    return group_size, group_count
+
+def set_group_size_non_none(length, group_size):
+    if group_size is None:
+        group_size = length
+    return group_size
+
+def get_modified_group_size(list_size, average_size):
+    if list_size < average_size:
+        average_size = list_size
+    return average_size
+
+def get_end_point_indices(length, group_size, group_count):
+    real_group_size = length / group_count
+    real_group_end_points = np.arange(0, group_count + 1) * real_group_size
+    real_group_end_points = np.round(real_group_end_points, 5)
+    end_point_indices = np.ceil(real_group_end_points)
+    return end_point_indices

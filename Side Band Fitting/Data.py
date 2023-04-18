@@ -4,6 +4,7 @@ import scipy as sc
 import math
 import matplotlib.pyplot as plt
 from DataFit import DataFit
+from Utils import get_file_contents_from_path
 
 class Data():
 
@@ -15,8 +16,6 @@ class Data():
     """
 
     semi_width = 150
-    large_peak_threshold = 10**-8
-    peak_ratio_threshold = 11.5
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
     suppress_centre_computation_warnings = True
@@ -24,36 +23,22 @@ class Data():
     def __init__(self, detuning_obj):
         self.detuning_obj = detuning_obj
         self.detuning = detuning_obj.detuning
-        self.power = self.detuning_obj.trial.power
+        self.power = self.detuning_obj.trial_obj.power
         self.timestamp = self.detuning_obj.timestamp
 
     def process_S21(self):
-        self.set_S21()
-        self.set_S21_has_valid_peak()
         if self.S21_has_valid_peak:
             self.set_S21_centre_index()
 
-    def set_S21(self):
-        voltage = self.get_voltage_from_file()
+    def load_S21(self):
+        file_contents = get_file_contents_from_path(self.file_path)
+        voltage, self.frequency = file_contents
+        self.set_S21_from_voltage(voltage)
+
+    def set_S21_from_voltage(self, voltage):
         cable_attenuation = 2 * 2.3
         voltage = (10**((voltage - cable_attenuation)/10))/1000
-        self.S21 = voltage/self.power
-
-    def get_voltage_from_file(self):
-        with open(self.file_path, "r") as file:
-            file.readline()
-            voltage = [self.get_voltage_from_file_line(line)
-                       for line in file]
-        return np.array(voltage)
-
-    def get_voltage_from_file_line(self, line):
-        line_components = line.strip().split("\t")
-        try:
-            voltage = float(line_components[0])
-            return voltage
-        except:
-            raise Exception((f"Could not read voltage from file line '{line}'"
-                             f"while attempting to process spectrum:\n{self}"))
+        self.S21 = voltage / self.power
 
     def set_S21_centre_index(self):
         if self.if_large_peak():
@@ -203,8 +188,8 @@ class Data():
             plt.plot(index, self.get_uncentred_heuristic(index, region_points), 'r*')
 
     def add_review_centre_heuristic_labels(self):
-        power_folder = self.detuning_obj.trial.power_obj.folder_name
-        trial = self.detuning_obj.trial.trial_number
+        power_folder = self.detuning_obj.trial_obj.power_obj.folder_name
+        trial = self.detuning_obj.trial_obj.trial_number
         plt.xlabel("Index")
         plt.ylabel("Centre heuristic value")
         plt.title((f"Computation of centre of data for\n"
@@ -239,8 +224,8 @@ class Data():
         #plt.show()
     
     def add_review_centre_results_labels(self):
-        power_folder = self.detuning_obj.trial.power_obj.folder_name
-        trial = self.detuning_obj.trial.trial_number
+        power_folder = self.detuning_obj.trial_obj.power_obj.folder_name
+        trial = self.detuning_obj.trial_obj.trial_number
         plt.xlabel("Frequency (Hz)")
         plt.ylabel("S21")
         plt.title((f"Computation of centre of data for\n"

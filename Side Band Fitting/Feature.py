@@ -15,13 +15,17 @@ class Feature():
 
     def execute(self, command, **kwargs):
         function = self.commands[command]
+        self.process_kwargs(**kwargs)
         function(**kwargs)
+
+    def process_kwargs(self, **kwargs):
+        pass
     
     def set_folder_path(self):
         self.folder_path = os.path.join(self.data_set_obj.results_path, self.name)
         make_folder(self.folder_path, message=True)
 
-    def save_data(self):
+    def save_data(self, **kwargs):
         self.set_paths()
         self.load_necessary_data_for_saving()
         print(f"Saving '{self.name}' data")
@@ -31,14 +35,17 @@ class Feature():
     def load_necessary_data_for_saving(self):
         pass
 
-    def load_data(self):
+    def load_data(self, **kwargs):
         self.set_paths()
+        self.process_load_data(**kwargs)
+        self.loaded = True
+
+    def process_load_data(self, **kwargs):
         if not self.data_is_saved():
-            self.execute("Save")
+            self.execute("Save", **kwargs)
         elif not self.loaded:
             print(f"Loading '{self.name}' data")
             self.do_load_data()
-        self.loaded = True
     
     def ensure_data_is_loaded(self):
         if not self.loaded:
@@ -46,13 +53,12 @@ class Feature():
 
     def create_plot(self, **kwargs):
         if hasattr(self, "create_plots"):
-            self.execute("Load")
-            self.plot(**kwargs)
+            self.execute("Load", **kwargs)
+            self.plot()
         else:
             print("Sorry, this feature does not have a 'plot' method implemented")
 
-    def plot(self, **kwargs):
-        self.process_args(**kwargs)
+    def plot(self):
         lines_objects = self.get_lines_objects()
         title = f"{self.data_set_obj} {self.name}"
         self.create_plots(lines_objects, title, kwargs)

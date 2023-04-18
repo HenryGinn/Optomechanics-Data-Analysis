@@ -22,7 +22,10 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    data_set.spectra("Load")
+    #data_set.spectra_valid("Load")
+    #data_set.transmission("Load")
+    data_set.greek()
+    data_set.greek(average=6)
     
 def process_all_data_sets():
     for data_set_data in data_sets:
@@ -40,7 +43,7 @@ data_sets = [("15112022", 1),
 
 data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
 
-data_set_data = data_sets[0]
-data_set = get_data_set(data_set_data)
-process_data_set(data_set)
-#process_all_data_sets()
+#data_set_data = data_sets[0]
+#data_set = get_data_set(data_set_data)
+#process_data_set(data_set)
+process_all_data_sets()

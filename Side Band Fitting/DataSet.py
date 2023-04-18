@@ -4,7 +4,11 @@ import sys
 from Power import Power
 import PutTrialsInFolders
 from Features.SpectraRaw import SpectraRaw
-from Features.Spectra import Spectra
+from Features.SpectraValid import SpectraValid
+from Features.SpectraPeak import SpectraPeak
+from Features.AverageSpectra import AverageSpectra
+from Features.Transmissions import Transmissions
+from Features.Greek import Greek
 from Utils import make_folder
 
 class DataSet():
@@ -108,13 +112,13 @@ class DataSet():
                            for power_obj in self.power_objects]
 
     def setup_data_set(self):
-        #self.fix_folder_structure()
+        self.fix_folder_structure()
         self.process_folder_structure()
         self.set_feature_objects()
 
     def fix_folder_structure(self):
         if self.folder_structure_type == 3:
-            PutTrialsInFolders.put_trials_in_folders(self.folder_name)
+            PutTrialsInFolders.put_trials_in_folders(self.data_set_path)
 
     def process_folder_structure(self):
         for power_obj in self.power_objects:
@@ -122,13 +126,29 @@ class DataSet():
 
     def set_feature_objects(self):
         self.spectra_raw_obj = SpectraRaw(self)
-        self.spectra_obj = Spectra(self)
+        self.spectra_valid_obj = SpectraValid(self)
+        self.spectra_peak_obj = SpectraPeak(self)
+        self.average_spectra_obj = AverageSpectra(self)
+        self.transmission_obj = Transmissions(self)
+        self.greek_obj = Greek(self)
 
     def spectra_raw(self, command="Load", **kwargs):
         self.spectra_raw_obj.execute(command, **kwargs)
 
-    def spectra(self, command="Load", **kwargs):
-        self.spectra_obj.execute(command, **kwargs)
+    def spectra_valid(self, command="Load", **kwargs):
+        self.spectra_valid_obj.execute(command, **kwargs)
+
+    def spectra_peak(self, command="Load", **kwargs):
+        self.spectra_peak_obj.execute(command, **kwargs)
+
+    def average_spectra(self, command="Load", **kwargs):
+        self.average_spectra_obj.execute(command, **kwargs)
+
+    def transmission(self, command="Load", **kwargs):
+        self.transmission_obj.execute(command, **kwargs)
+
+    def greek(self, command="Load", **kwargs):
+        self.greek_obj.execute(command, **kwargs)
         
     def __str__(self):
         string = (f"Folder name: {self.folder_name}\n" + 
