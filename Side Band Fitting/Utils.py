@@ -23,12 +23,12 @@ def get_file_contents(path):
                          for line in file]
     return file_contents
 
-def get_number_from_file_name(file_name, number_name):
-    underscore_locations = get_underscore_locations(file_name, len(number_name))
-    left_index = get_number_left_index(underscore_locations, file_name, number_name)
+def get_data_from_file_name(file_name, data_name):
+    underscore_locations = get_underscore_locations(file_name, len(data_name))
+    left_index = get_number_left_index(underscore_locations, file_name, data_name)
     right_index = get_number_right_index(left_index, file_name)
-    number = get_number(file_name, left_index, right_index)
-    return number
+    data = file_name[left_index:right_index]
+    return data
 
 def get_underscore_locations(file_name, limit=0):
     underscore_locations = [index for index, character in enumerate(file_name)
@@ -55,18 +55,17 @@ def is_index_valid(index, file_name):
     is_valid = is_number and is_not_at_end_of_file
     return is_valid
 
-def get_number(file_name, left_index, right_index):
-    try:
-        number = float(file_name[left_index:right_index])
-        return number
-    except:
-        could_not_convert_number_to_float_exception()
+def get_number_from_file_name(file_name, number_name):
+    number = get_data_from_file_name(file_name, number_name)
+    number = get_number(number)
+    return number
 
-def could_not_convert_number_to_float_exception():
-    raise Exception((f"Could not convert number to float\n"
-                     f"File name: {file_name}\n"
-                     f"left_index: {left_index}, right index: {right_index}"
-                     f"{file_name[left_index:right_index]}\n"))
+def get_number(number):
+    try:
+        number = float(number)
+        return number
+    except ValueError:
+        raise ValueError(f"Could not convert {number} to float")
 
 def get_last_number_in_file_name(file_name):
     underscore_locations = get_underscore_locations(file_name)

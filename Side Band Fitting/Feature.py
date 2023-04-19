@@ -46,6 +46,9 @@ class Feature():
         elif not self.loaded:
             print(f"Loading '{self.name}' data")
             self.do_load_data()
+
+    def data_is_saved(self):
+        return True
     
     def ensure_data_is_loaded(self):
         if not self.loaded:
@@ -54,14 +57,13 @@ class Feature():
     def create_plot(self, **kwargs):
         if hasattr(self, "create_plots"):
             self.execute("Load", **kwargs)
-            self.plot()
+            self.plot(**kwargs)
         else:
             print("Sorry, this feature does not have a 'plot' method implemented")
 
-    def plot(self):
-        lines_objects = self.get_lines_objects()
+    def plot(self, **kwargs):
         title = f"{self.data_set_obj} {self.name}"
-        self.create_plots(lines_objects, title, kwargs)
+        self.create_plots(title, **kwargs)
 
     def process_args(self, **kwargs):
         self.process_subplots(**kwargs)
@@ -78,7 +80,3 @@ class Feature():
             self.aspect_ratio = kwargs["aspect_ratio"]
         else:
             self.aspect_ratio = None
-
-    def create_plot_new(self):
-        self.execute("Save")
-        self.execute("Plot")

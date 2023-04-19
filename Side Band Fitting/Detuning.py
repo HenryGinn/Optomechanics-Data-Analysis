@@ -192,10 +192,5 @@ class Detuning():
         return spectrum_centre_frequencies
 
     def __str__(self):
-        string = (f"Detuning: {self.detuning}\n"
-                  f"Timestamp: {self.timestamp}\n"
-                  f"Power: {self.trial.power_obj.power_string}\n"
-                  f"Transmission path: {self.transmission_path}\n"
-                  f"Spectrum paths count: {len(self.spectrum_paths)}\n"
-                  f"Valid: {self.valid}\n")
+        string = (f"{self.trial_obj}, Detuning {self.detuning}")
         return string

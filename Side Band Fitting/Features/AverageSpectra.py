@@ -8,6 +8,7 @@ from Utils import make_folder
 from Utils import get_group_indices
 from Utils import get_file_contents_from_path
 from Utils import get_number_from_file_name
+from Utils import get_data_from_file_name
 
 class AverageSpectra(Feature):
 
@@ -112,6 +113,7 @@ class AverageSpectra(Feature):
         spectrum_objects = np.array(detuning_obj.spectrum_objects)[spectrum_indices]
         file_path = os.path.join(detuning_obj.average_spectra_path, f"Group_{index}")
         average_spectrum_obj = Spectrum(detuning_obj, file_path)
+        average_spectrum_obj.spectrum_indices = spectrum_indices
         average_spectrum_obj.S21 = self.get_average_S21(average_spectrum_obj, spectrum_objects)
         return average_spectrum_obj
 
@@ -129,14 +131,14 @@ class AverageSpectra(Feature):
         self.update_average_spectrum_obj_file_path(average_spectrum_obj)
 
     def set_peak_index_data(self, average_spectrum_obj, spectrum_objects):
-        average_spectrum_obj.peak_indexes = [spectrum_obj.peak_index for spectrum_obj in spectrum_objects]
+        average_spectrum_obj.peak_indexes = [spectrum_obj.S21_centre_index for spectrum_obj in spectrum_objects]
         average_spectrum_obj.min_peak_index = min(average_spectrum_obj.peak_indexes)
         average_spectrum_obj.max_peak_index = max(average_spectrum_obj.peak_indexes)
 
     def set_S21_offset(self, average_spectrum_obj, spectrum_obj):
         spectrum_obj.load_S21()
-        left_index = spectrum_obj.peak_index - average_spectrum_obj.min_peak_index
-        right_index = len(spectrum_obj.S21) - (average_spectrum_obj.max_peak_index - spectrum_obj.peak_index)
+        left_index = spectrum_obj.S21_centre_index - average_spectrum_obj.min_peak_index
+        right_index = len(spectrum_obj.S21) - (average_spectrum_obj.max_peak_index - spectrum_obj.S21_centre_index)
         spectrum_obj.S21_offset = spectrum_obj.S21[left_index:right_index]
 
     def set_frequency(self, average_spectrum_obj):
@@ -149,7 +151,8 @@ class AverageSpectra(Feature):
     def update_average_spectrum_obj_file_path(self, average_spectrum_obj):
         old_file_path = average_spectrum_obj.file_path
         frequency_shift = average_spectrum_obj.frequency_shift
-        file_path = f"{old_file_path}_FrequencyShift_{frequency_shift}.txt"
+        indices = "-".join([str(index) for index in average_spectrum_obj.spectrum_indices])
+        file_path = f"{old_file_path}_FrequencyShift_{frequency_shift}_Indices_{indices}.txt"
         average_spectrum_obj.file_path = file_path
 
     def save_trial_obj(self, trial_obj):
@@ -201,8 +204,19 @@ class AverageSpectra(Feature):
         spectrum_obj.S21 = S21
         spectrum_obj.frequency = frequency
         self.set_frequency_shift_from_file_path(spectrum_obj, file_path)
+        self.set_indices_from_file_path(spectrum_obj, file_path)
+        self.set_group_index_from_file_path(spectrum_obj, file_path)
         return spectrum_obj
 
     def set_frequency_shift_from_file_path(self, spectrum_obj, file_path):
         frequency_shift = get_number_from_file_name(file_path, "FrequencyShift")
         spectrum_obj.frequency_shift = frequency_shift
+
+    def set_indices_from_file_path(self, spectrum_obj, file_path):
+        indices_string = get_data_from_file_name(file_path, "Indices")
+        indices = [int(index) for index in indices_string.split("-")]
+        spectrum_obj.spectrum_indices = indices
+
+    def set_group_index_from_file_path(self, spectrum_obj, file_path):
+        group_index = get_number_from_file_name(file_path, "Group")
+        spectrum_obj.group_index = int(group_index)

@@ -24,8 +24,8 @@ def get_data_set(data_set_data):
 def process_data_set(data_set):
     #data_set.spectra_valid("Load")
     #data_set.transmission("Load")
-    data_set.spectra_peak("Save")
-    data_set.average_spectra("Save", average=6)
+    #data_set.average_spectra("Load", average=6)
+    data_set.plot_spectra(average=6, subplots=None)
     #data_set.greek()
     #data_set.greek(average=6)
     

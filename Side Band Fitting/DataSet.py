@@ -1,12 +1,15 @@
 import os
 import sys
 
+sys.path.append("..")
+
 from Power import Power
 import PutTrialsInFolders
 from Features.SpectraRaw import SpectraRaw
 from Features.SpectraValid import SpectraValid
 from Features.SpectraPeak import SpectraPeak
 from Features.AverageSpectra import AverageSpectra
+from Features.PlotSpectra import PlotSpectra
 from Features.Transmissions import Transmissions
 from Features.Greek import Greek
 from Utils import make_folder
@@ -129,6 +132,7 @@ class DataSet():
         self.spectra_valid_obj = SpectraValid(self)
         self.spectra_peak_obj = SpectraPeak(self)
         self.average_spectra_obj = AverageSpectra(self)
+        self.plot_spectra_obj = PlotSpectra(self)
         self.transmission_obj = Transmissions(self)
         self.greek_obj = Greek(self)
 
@@ -144,6 +148,9 @@ class DataSet():
     def average_spectra(self, command="Load", **kwargs):
         self.average_spectra_obj.execute(command, **kwargs)
 
+    def plot_spectra(self, command="Plot", **kwargs):
+        self.plot_spectra_obj.execute(command, **kwargs)
+
     def transmission(self, command="Load", **kwargs):
         self.transmission_obj.execute(command, **kwargs)
 
@@ -151,9 +158,5 @@ class DataSet():
         self.greek_obj.execute(command, **kwargs)
         
     def __str__(self):
-        string = (f"Folder name: {self.folder_name}\n" + 
-                  f"Folder structure type: {self.folder_structure_type}\n" +
-                  f"Data set path: {self.data_set_path}\n"
-                  f"Repository folder: {self.repository_path}\n" +
-                  f"Parent folder: {self.parent_path}\n")
+        string = f"{self.folder_name}"
         return string
