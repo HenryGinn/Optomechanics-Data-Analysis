@@ -16,8 +16,8 @@ class Data():
     """
 
     semi_width = 150
-    review_centre_heuristic_plot = False
-    review_centre_results_plot = False
+    review_centre_heuristic_plot = True
+    review_centre_results_plot = True
     suppress_centre_computation_warnings = True
     
     def __init__(self, detuning_obj):
@@ -36,9 +36,8 @@ class Data():
         self.set_S21_from_voltage(voltage)
 
     def set_S21_from_voltage(self, voltage):
-        cable_attenuation = 2 * 2.3
-        voltage = (10**((voltage - cable_attenuation)/10))/1000
-        self.S21 = voltage / self.power
+        cable_attenuation = 0
+        self.S21 = (10**((voltage + cable_attenuation)/10))/1000
 
     def set_S21_centre_index(self):
         if self.if_large_peak():
@@ -49,7 +48,8 @@ class Data():
     def if_large_peak(self):
         peak_is_large = (np.max(self.S21) > self.large_peak_threshold)
         data_not_transmission = (type(self) != "<class 'Transmission.Transmission'>")
-        return (peak_is_large and data_not_transmission)
+        #return (peak_is_large and data_not_transmission)
+        return False
 
     def set_S21_centre_index_large(self):
         self.peak_index = np.argmax(self.S21)
@@ -62,7 +62,8 @@ class Data():
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         heuristic_intercept_x, heuristic_intercept_y = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
         self.S21_centre_index = round(heuristic_intercept_x)
-        self.set_S21_centre_frequency()
+        self.S21_centre_frequency = self.frequency[self.S21_centre_index]
+        self.peak_S21 = self.S21[self.S21_centre_index]
         self.review_centre()
 
     def get_candidate_and_region_indexes(self):

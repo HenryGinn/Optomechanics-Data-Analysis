@@ -4,6 +4,7 @@ import numpy as np
 
 from Feature import Feature
 from Spectrum import Spectrum
+from DataFit import DataFit
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 
@@ -61,7 +62,17 @@ class Greek(Feature):
             self.set_detuning_obj(detuning_obj)
 
     def set_detuning_obj(self, detuning_obj):
-        pass
+        for spectrum_obj in detuning_obj.average_spectrum_objects:
+            self.set_spectrum_obj(spectrum_obj)
+
+    def set_spectrum_obj(self, spectrum_obj):
+        data_fit_obj = DataFit(spectrum_obj)
+        spectrum_obj.fit_function = data_fit_obj.evaluate_lorentzian
+        spectrum_obj.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
+        spectrum_obj.fitting_parameters = data_fit_obj.get_automatic_fit(spectrum_obj.initial_fitting_parameters)
+        spectrum_obj.gamma = data_fit_obj.get_gamma_from_fit()
+        spectrum_obj.set_amplitude_from_fit()
+        spectrum_obj.set_omega_from_fit()
 
     def save_trial_obj(self, trial_obj):
         for detuning_obj in trial_obj.detuning_objects:

@@ -63,11 +63,14 @@ class SpectraPeak(Feature):
             if spectrum_obj.has_valid_peak:
                 self.set_spectrum_peak(spectrum_obj)
 
-    def set_spectrum_peak(self, spectrum_obj):
+    def set_spectrum_peak_old(self, spectrum_obj):
         peak_index = np.argmax(spectrum_obj.S21)
         spectrum_obj.peak_index = peak_index
         spectrum_obj.peak_S21 = spectrum_obj.S21[peak_index]
         spectrum_obj.peak_frequency = spectrum_obj.S21[peak_index]
+
+    def set_spectrum_peak(self, spectrum_obj):
+        spectrum_obj.set_S21_centre_index_small()
         
     def save_detuning_obj(self, detuning_obj):
         with open(detuning_obj.spectra_peak_path, "w") as file:
@@ -107,6 +110,6 @@ class SpectraPeak(Feature):
         file_contents = get_file_contents_from_path(detuning_obj.spectra_peak_path)
         for index, peak_index, S21, frequency in zip(*file_contents):
             spectrum_obj = detuning_obj.spectrum_objects[int(index)]
-            spectrum_obj.peak_index = int(peak_index)
+            spectrum_obj.S21_centre_index = int(peak_index)
             spectrum_obj.peak_S21 = S21
-            spectrum_obj.peak_frequency = int(frequency)
+            spectrum_obj.S21_centre_frequency = int(frequency)

@@ -10,9 +10,10 @@ plt.rcParams['axes.formatter.limits'] = [-5,5]
 class DataFit():
 
     reject_bad_fits = False
-    review_bad_fits = False
+    review_bad_fits = True
     suppress_off_centre_peak_warnings = True
-    bad_fit_threshold = 20
+    alpha = 3
+    bad_fit_threshold = 2
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
@@ -33,7 +34,7 @@ class DataFit():
     def get_initial_fitting_parameters(self):
         noise = self.get_noise()
         resonant = self.get_resonant()
-        F, gamma = self.get_F_and_gamma()
+        F, gamma = self.get_F_and_gamma(noise)
         initial_fitting_parameters = [F, gamma, noise, resonant]
         return initial_fitting_parameters
 
@@ -47,23 +48,24 @@ class DataFit():
         resonant = self.data.frequency[resonant_index]
         return resonant
 
-    def get_F_and_gamma(self):
-        width, mid_line_height, approximate_peak = self.get_lorentzian_width_parameters()
-        gamma = width * math.sqrt(mid_line_height / (approximate_peak - mid_line_height))
-        F = gamma**2 * approximate_peak * 2/3
+    def get_F_and_gamma(self, noise):
+        width, approximate_peak = self.get_lorentzian_width_parameters(noise)
+        gamma = width / (2 * math.sqrt(self.alpha - 1))
+        F = gamma**2 * approximate_peak
         return F, gamma
 
-    def get_lorentzian_width_parameters(self):
-        approximate_peak, mid_line_height = self.get_lorentzian_height_parameters()
+    def get_lorentzian_width_parameters(self, noise):
+        approximate_peak, mid_line_height = self.get_lorentzian_height_parameters(noise)
         frequency_resolution = self.data.frequency[1] - self.data.frequency[0]
-        peak_points = [self.data.S21 > mid_line_height]
+        peak_points = [self.data.S21 - noise > mid_line_height]
         width = 2 * (np.count_nonzero(peak_points) + 1) * frequency_resolution
-        return width, mid_line_height, approximate_peak
+        print(approximate_peak, width)
+        return width, approximate_peak
 
-    def get_lorentzian_height_parameters(self):
-        points_around_peak = self.data.S21[self.data.S21 >= np.max(self.data.S21)*2/3]
-        approximate_peak = np.mean(points_around_peak)
-        mid_line_height = approximate_peak * 1/2
+    def get_lorentzian_height_parameters(self, noise):
+        points_around_peak = self.data.S21[self.data.S21 >= 3*np.median(self.data.S21)]
+        approximate_peak = np.percentile(points_around_peak, 90) - noise
+        mid_line_height = approximate_peak / self.alpha
         return approximate_peak, mid_line_height
 
     def get_automatic_fit(self, initial_fitting_parameters):
@@ -149,8 +151,7 @@ class DataFit():
     def is_plot_badly_fitted(self):
         fit_heuristic = self.get_fit_heuristic()
         if fit_heuristic > self.bad_fit_threshold:
-            if self.reject_bad_fits == False:
-                print(f"Fit heuristic: {fit_heuristic}")
+            print(f"Fit heuristic: {fit_heuristic}")
             return True
         return False
 
@@ -291,8 +292,8 @@ class DataFit():
         plt.ylabel('Amplitude')
 
     def add_title(self):
-        power = self.data.detuning_obj.trial.power_obj.power_string
-        trial = self.data.detuning_obj.trial.trial_number
+        power = self.data.detuning_obj.trial_obj.power_obj.power_string
+        trial = self.data.detuning_obj.trial_obj.trial_number
         detuning = self.data.detuning
         plt.title(f"S21 vs Frequency for {power} dBm,\nTrial {trial}, Detuning {detuning} Hz")
 
