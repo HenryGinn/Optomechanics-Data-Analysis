@@ -22,7 +22,7 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    data_set.greek_method_2("Plot")
+    data_set.average_greek()
     
 def process_all_data_sets():
     for data_set_data in data_sets:

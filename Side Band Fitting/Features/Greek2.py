@@ -99,6 +99,7 @@ class Greek2(Feature):
         spectrum_obj.gamma = spectrum_obj.fitting_parameters[1]
         spectrum_obj.set_amplitude_from_fit()
         spectrum_obj.set_omega_from_fit()
+        spectrum_obj.omega = np.abs(spectrum_obj.omega)
 
     def save_detuning_obj(self, detuning_obj):
         with open(detuning_obj.greek_path, "w") as file:

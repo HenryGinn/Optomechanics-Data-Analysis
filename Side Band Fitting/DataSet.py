@@ -13,6 +13,7 @@ from Features.PlotSpectra import PlotSpectra
 from Features.Transmissions import Transmissions
 from Features.Greek import Greek
 from Features.Greek2 import Greek2
+from Features.AverageGreek import AverageGreek
 from Utils import make_folder
 
 class DataSet():
@@ -137,6 +138,7 @@ class DataSet():
         self.transmission_obj = Transmissions(self)
         self.greek_obj = Greek(self)
         self.greek_2_obj = Greek2(self)
+        self.average_greek_obj = AverageGreek(self)
 
     def spectra_raw(self, command="Load", **kwargs):
         self.spectra_raw_obj.execute(command, **kwargs)
@@ -159,8 +161,11 @@ class DataSet():
     def greek(self, command="Load", **kwargs):
         self.greek_obj.execute(command, **kwargs)
 
-    def greek_method_2(self, command="Plot", **kwargs):
+    def greek_2(self, command="Plot", **kwargs):
         self.greek_2_obj.execute(command, **kwargs)
+
+    def average_greek(self, command="Plot", **kwargs):
+        self.average_greek_obj.execute(command, **kwargs)
         
     def __str__(self):
         string = f"{self.folder_name}"
