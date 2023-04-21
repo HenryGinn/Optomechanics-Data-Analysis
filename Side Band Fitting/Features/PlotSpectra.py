@@ -8,6 +8,7 @@ from Plotting.Line import Line
 class PlotSpectra(Feature):
 
     name = "Plot Spectra"
+    y_threshold = 6*10**-15
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -68,7 +69,9 @@ class PlotSpectra(Feature):
         spectrum_obj.load_S21()
         x_values = spectrum_obj.frequency
         y_values = spectrum_obj.S21
-        line_obj = Line(x_values, y_values)
+        x_values = x_values[y_values > self.y_threshold]
+        y_values = y_values[y_values > self.y_threshold]
+        line_obj = Line(x_values, y_values, marker=".", linewidth=0)
         return line_obj
 
     def process_lines_obj(self, lines_obj, average_spectrum_obj):
@@ -78,6 +81,8 @@ class PlotSpectra(Feature):
     def add_average_line(self, lines_obj, average_spectrum_obj):
         x_values = average_spectrum_obj.frequency + average_spectrum_obj.frequency_shift
         y_values = average_spectrum_obj.S21
+        x_values = x_values[y_values > self.y_threshold]
+        y_values = y_values[y_values > self.y_threshold]
         line_obj = Line(x_values, y_values,
-                        colour="k", linewidth=2)
+                        colour="k", linewidth=3, marker=".")
         lines_obj.line_objects.append(line_obj)
