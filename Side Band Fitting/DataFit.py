@@ -9,11 +9,11 @@ plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 class DataFit():
 
-    reject_bad_fits = False
+    reject_bad_fits = True
     review_bad_fits = True
     suppress_off_centre_peak_warnings = True
     alpha = 3
-    bad_fit_threshold = 2
+    bad_fit_threshold = 200
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
@@ -59,11 +59,11 @@ class DataFit():
         frequency_resolution = self.data.frequency[1] - self.data.frequency[0]
         peak_points = [self.data.S21 - noise > mid_line_height]
         width = 2 * (np.count_nonzero(peak_points) + 1) * frequency_resolution
-        print(approximate_peak, width)
         return width, approximate_peak
 
     def get_lorentzian_height_parameters(self, noise):
-        points_around_peak = self.data.S21[self.data.S21 >= 3*np.median(self.data.S21)]
+        peak_threshold = min(np.max(self.data.S21), 3*np.median(self.data.S21))
+        points_around_peak = self.data.S21[self.data.S21 >= peak_threshold]
         approximate_peak = np.percentile(points_around_peak, 90) - noise
         mid_line_height = approximate_peak / self.alpha
         return approximate_peak, mid_line_height
@@ -140,13 +140,11 @@ class DataFit():
         function_values = np.polyval(polynomial_parameters, self.data.fit_frequencies)
         return function_values
 
-    def get_gamma_from_fit(self):
+    def process_fit(self):
         if self.is_plot_badly_fitted():
             fit_rejected = self.fit_plot_manually_filter()
             if fit_rejected:
-                return None
-        gamma = abs(self.data.fitting_parameters[1])
-        return gamma
+                self.data.fitting_parameters = None
 
     def is_plot_badly_fitted(self):
         fit_heuristic = self.get_fit_heuristic()
@@ -198,11 +196,8 @@ class DataFit():
     def update_fitting_parameter(self, parameter_index):
         parameter_index = int(parameter_index)
         prompt = f"\nWhat is the new value of '{self.parameter_names[parameter_index]}': "
-        try:
-            new_parameter_value = float(input(prompt))
-            self.data.fitting_parameters[parameter_index] = new_parameter_value
-        except:
-            print("Sorry, that didn't work")
+        new_parameter_value = float(input(prompt))
+        self.data.fitting_parameters[parameter_index] = new_parameter_value
         return True, None
 
     def reset_fitting_parameters(self):

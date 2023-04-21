@@ -24,6 +24,7 @@ class Plot():
 
     title = "My Plot"
     save_format = "pdf"
+    prefixed = False
     layouts = {"Constrained": True,
                "Tight": False,
                "Adjust": False}
@@ -52,9 +53,15 @@ class Plot():
         if "aspect_ratio" in self.kwargs:
             if self.kwargs["aspect_ratio"] is not None:
                 self.aspect_ratio = self.kwargs["aspect_ratio"]
-    
+
     def create_figure(self):
-        self.process_layout_kwargs()
+        self.process_figure_kwargs()
+        if self.prefixed:
+            self.create_prefixed_figure()
+        else:
+            self.make_initial_figure()
+    
+    def create_prefixed_figure(self):
         self.make_initial_figure()
         self.make_improved_figure()
 
@@ -116,10 +123,18 @@ class Plot():
         self.process_plot()
         plt.close()
 
+    def process_figure_kwargs(self):
+        self.process_layout_kwargs()
+        self.process_prefix_kwargs()
+
     def process_layout_kwargs(self):
         if "layout" in self.kwargs:
             self.set_all_layouts_to_false()
             self.layouts[self.kwargs["layout"]] = True
+
+    def process_prefix_kwargs(self):
+        if "prefixed" in self.kwargs:
+            self.prefixed = self.kwargs["prefixed"]
 
     def set_all_layouts_to_false(self):
         for layout in self.layouts:

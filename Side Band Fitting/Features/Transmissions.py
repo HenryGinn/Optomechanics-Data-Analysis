@@ -32,3 +32,6 @@ class Transmissions(Feature):
     def load_trial_obj(self, trial_obj):
         for detuning_obj in trial_obj.detuning_objects:
             detuning_obj.transmission_obj.load_S21()
+
+    def create_plots(self, title):
+        pass

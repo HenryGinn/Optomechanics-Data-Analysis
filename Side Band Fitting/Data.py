@@ -15,6 +15,7 @@ class Data():
     Spectrum and Transmission are subclasses of this.
     """
 
+    frequency_shift = 0
     semi_width = 150
     review_centre_heuristic_plot = False
     review_centre_results_plot = False
@@ -55,14 +56,14 @@ class Data():
         self.max_index = np.argmax(self.S21)
         self.set_peak_frequency()
 
-    def set_peak_index_small(self):
+    def set_S21_centre_index_small(self):
         self.peak_index = np.argmax(self.S21)
         candidate_indexes, region_points = self.get_candidate_and_region_indexes()
         uncentred_heuristics = self.get_uncentred_heuristics(candidate_indexes, region_points)
         heuristic_intercept_x, heuristic_intercept_y = self.process_uncentred_heuristics(candidate_indexes, uncentred_heuristics)
-        self.peak_index = round(heuristic_intercept_x)
-        self.peak_frequency = self.frequency[self.peak_index]
-        self.peak_S21 = self.S21[self.peak_index]
+        self.S21_centre_index = round(heuristic_intercept_x)
+        self.peak_frequency = self.frequency[self.S21_centre_index]
+        self.peak_S21 = self.S21[self.S21_centre_index]
         self.review_centre()
 
     def get_candidate_and_region_indexes(self):

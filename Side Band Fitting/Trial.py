@@ -93,7 +93,7 @@ class Trial():
 
     def process_detuning_objects(self):
         self.detuning_objects = sorted(self.detuning_objects,
-                                       key = lambda detuning_obj: detuning_obj.detuning)[20:21]
+                                       key = lambda detuning_obj: detuning_obj.detuning)
 
     def get_detuning_and_timestamp_from_folder(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)

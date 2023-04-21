@@ -131,3 +131,10 @@ def get_end_point_indices(length, group_size, group_count):
     real_group_end_points = np.round(real_group_end_points, 5)
     end_point_indices = np.ceil(real_group_end_points)
     return end_point_indices
+
+def get_moving_average(data, window_size=5):
+    window = np.ones(window_size)
+    numerator = np.convolve(data, window, "same")
+    denominator = np.convolve(np.ones(len(data)), window, "same")
+    moving_average = numerator / denominator
+    return moving_average

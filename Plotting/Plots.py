@@ -21,7 +21,7 @@ class Plots():
     universal_legend = False
     title = "My Plot"
 
-    def __init__(self, lines_objects, kwargs):
+    def __init__(self, lines_objects, **kwargs):
         self.process_lines_objects(lines_objects)
         self.kwargs = kwargs
         self.process_kwargs()

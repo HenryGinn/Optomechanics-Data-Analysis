@@ -57,13 +57,9 @@ class Feature():
     def create_plot(self, **kwargs):
         if hasattr(self, "create_plots"):
             self.execute("Load", **kwargs)
-            self.plot(**kwargs)
+            self.create_plots(**kwargs)
         else:
-            print("Sorry, this feature does not have a 'plot' method implemented")
-
-    def plot(self, **kwargs):
-        title = f"{self.data_set_obj} {self.name}"
-        self.create_plots(title, **kwargs)
+            print("Sorry, this feature does not have a 'create_plots' method implemented")
 
     def process_args(self, **kwargs):
         self.process_subplots(**kwargs)
