@@ -3,10 +3,8 @@ import sys
 import shutil
 
 def fix_names():
-    script_path = sys.path[0]
-    parent_path = os.path.dirname(os.path.dirname(script_path))
-    data_set_path_spectrum = os.path.join(parent_path, "Data Sets", "19112022", "Spectrum", "29")
-    data_set_path_transmission = os.path.join(parent_path, "Data Sets", "19112022", "Transmission", "29")
+    data_set_path_spectrum = os.path.join(data_set_path, "19112022", "Spectrum", "29")
+    data_set_path_transmission = os.path.join(data_set_path, "19112022", "Transmission", "29")
     fix_trial_folders(data_set_path_spectrum)
     fix_trial_folders(data_set_path_transmission)
 
@@ -28,8 +26,9 @@ def update_path(trial_folder_path, trial_folder_name):
     new_trial_folder_path = os.path.join(trial_folder_path, new_trial_folder_name)
     os.rename(original_trial_folder_path, new_trial_folder_path)
 
-input(("Warning: you must have run 'Add underscores to folder names "
-       "for trials in 19112022' before running the program\n"
+input(("Warning: you must have run 'PutTrialsInFolders' before running the program\n"
        "Press enter to continue running the program if you have done this\n"))
+
+data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
 
 fix_names()

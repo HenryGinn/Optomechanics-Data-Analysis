@@ -2,8 +2,6 @@ import numpy as np
 import os
 from Trial import Trial
 from GreekTrial import GreekTrial
-from GreekFigure import GreekFigure
-from TrialPlot import TrialPlot
 
 class Power():
 
@@ -16,8 +14,8 @@ class Power():
     15112022 and 16112022_overnight are of type A and 19112022 is of type B
     """
     
-    def __init__(self, data_set, power_folder, transmission_path, spectrum_path):
-        self.data_set = data_set
+    def __init__(self, data_set_obj, power_folder, transmission_path, spectrum_path):
+        self.data_set_obj = data_set_obj
         self.folder_name = power_folder
         self.transmission_path = transmission_path
         self.spectrum_path = spectrum_path
@@ -43,7 +41,7 @@ class Power():
         set_trial_path_functions = {1: self.set_trial_paths_A,
                                     2: self.set_trial_paths_A,
                                     3: self.set_trial_paths_B}
-        set_trial_path_functions[self.data_set.folder_structure_type]()
+        set_trial_path_functions[self.data_set_obj.folder_structure_type]()
 
     def set_trial_paths_A(self):
         self.trial_transmission_paths = [self.transmission_path]
@@ -71,7 +69,7 @@ class Power():
                               in enumerate(trial_paths_data)]
 
     def create_average_S21_folder(self):
-        self.average_S21_path = os.path.join(self.data_set.average_S21_path, self.power_string)
+        self.average_S21_path = os.path.join(self.data_set_obj.average_S21_path, self.power_string)
         if os.path.isdir(self.average_S21_path) == False:
             os.mkdir(self.average_S21_path)
         for trial_obj in self.trial_objects:
@@ -144,9 +142,5 @@ class Power():
             print(trial)
 
     def __str__(self):
-        string = (f"Data set: {self.data_set.folder_name}\n"
-                  f"Folder name: {self.folder_name}\n"
-                  f"Transmission path: {self.transmission_path}\n"
-                  f"Spectrum path: {self.spectrum_path}\n"
-                  f"Power: {self.power}\n")
+        string = (f"{self.data_set_obj}, Power {self.power_string}")
         return string

@@ -147,6 +147,7 @@ class Plot():
                       color=line_obj.colour,
                       marker=line_obj.marker,
                       linestyle=line_obj.linestyle,
+                      linewidth=line_obj.linewidth,
                       label=line_obj.label)
 
     def set_labels(self, ax, lines_obj):

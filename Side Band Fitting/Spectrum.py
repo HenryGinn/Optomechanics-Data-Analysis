@@ -1,4 +1,5 @@
 import numpy as np
+
 from Data import Data
 
 class Spectrum(Data):

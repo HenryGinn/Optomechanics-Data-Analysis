@@ -25,13 +25,13 @@ class Trial():
     def set_parent_information(self, power_obj):
         self.power_obj = power_obj
         self.power = power_obj.power
-        self.data_set = power_obj.data_set
+        self.data_set_obj = power_obj.data_set_obj
 
     def set_detuning_objects(self):
         set_detuning_objects_functions = {1: self.set_detuning_objects_a,
                                           2: self.set_detuning_objects_b,
                                           3: self.set_detuning_objects_b}
-        set_detuning_objects_functions[self.data_set.folder_structure_type]()
+        set_detuning_objects_functions[self.data_set_obj.folder_structure_type]()
         self.process_detuning_objects()
     
     def set_detuning_objects_a(self):
@@ -93,7 +93,7 @@ class Trial():
 
     def process_detuning_objects(self):
         self.detuning_objects = sorted(self.detuning_objects,
-                                       key = lambda detuning_obj: detuning_obj.detuning)
+                                       key = lambda detuning_obj: detuning_obj.detuning)[20:21]
 
     def get_detuning_and_timestamp_from_folder(self, folder_name):
         folder_path = os.path.join(self.spectrum_path, folder_name)
@@ -137,8 +137,8 @@ class Trial():
                 file = self.write_spectrum_peaks_to_file(file, detuning_obj)
 
     def set_spectrum_file_path(self):
-        spectrum_folder_path = self.data_set.spectrum_path
-        file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        spectrum_folder_path = self.data_set_obj.spectrum_path
+        file_name = f"{self.data_set_obj.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
         self.spectrum_file_path = os.path.join(spectrum_folder_path, file_name)
 
     def write_spectrum_peaks_to_file(self, file, detuning_obj):
@@ -168,8 +168,8 @@ class Trial():
                 file = self.write_transmission_data_to_file(file, detuning_obj)
 
     def set_transmission_file_path(self):
-        transmission_folder_path = self.data_set.transmission_path
-        file_name = f"{self.data_set.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
+        transmission_folder_path = self.data_set_obj.transmission_path
+        file_name = f"{self.data_set_obj.folder_name}_{self.power_obj.folder_name}_{self.trial_number}.txt"
         self.transmission_file_path = os.path.join(transmission_folder_path, file_name)
 
     def write_transmission_data_to_file(self, file, detuning_obj):
@@ -246,8 +246,5 @@ class Trial():
             print(detuning_obj)
 
     def __str__(self):
-        string = (f"Power: {self.power_obj.power_string}\n"
-                  f"Transmission path: {self.transmission_path}\n"
-                  f"Spectrum path: {self.spectrum_path}\n"
-                  f"Trial number: {self.trial_number}\n")
+        string = (f"{self.power_obj}, Trial {self.trial_number}")
         return string
