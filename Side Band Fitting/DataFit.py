@@ -9,11 +9,11 @@ plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 class DataFit():
 
-    reject_bad_fits = True
+    reject_bad_fits = False
     review_bad_fits = True
     suppress_off_centre_peak_warnings = True
     alpha = 3
-    bad_fit_threshold = 200
+    bad_fit_threshold = 0.1
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
@@ -44,8 +44,8 @@ class DataFit():
         return noise
 
     def get_resonant(self):
-        resonant_index = np.argmax(self.data.S21)
-        resonant = self.data.frequency[resonant_index]
+        self.data.resonant_index = np.argmax(self.data.S21)
+        resonant = self.data.frequency[self.data.resonant_index]
         return resonant
 
     def get_F_and_gamma(self, noise):
@@ -70,9 +70,11 @@ class DataFit():
 
     def get_automatic_fit(self, initial_fitting_parameters):
         self.set_fit_data()
+        print(f"Before: {initial_fitting_parameters}")
         fitting_parameters = sc.leastsq(self.get_residuals,
                                         initial_fitting_parameters,
                                         args=self.data.fit_function)[0]
+        print(f"After: {fitting_parameters}")
         return fitting_parameters
 
     def set_fit_data(self):
@@ -90,7 +92,7 @@ class DataFit():
         self.data.fit_S21 = self.data.S21[left:right]
 
     def get_left_index(self):
-        left = self.data.peak_index - self.data.fit_width
+        left = self.data.resonant_index - self.data.fit_width
         if left < 0:
             left = self.get_bad_left_index()
         return left
@@ -103,7 +105,7 @@ class DataFit():
         return left
 
     def get_right_index(self):
-        right = self.data.peak_index + self.data.fit_width
+        right = self.data.resonant_index + self.data.fit_width
         if right >= len(self.data.frequency):
             right = self.get_bad_right_index()
         return right
@@ -120,7 +122,7 @@ class DataFit():
             print(f"Warning: S21 had very off centre peak\n{self.data}")
 
     def check_if_peak_outside_range(self):
-        if self.data.peak_index in [0, len(self.data.frequency) - 1]:
+        if self.data.resonant_index in [0, len(self.data.frequency) - 1]:
             self.data.peak_not_off_centre = False
 
     def review_bad_fit(self):

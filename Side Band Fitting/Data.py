@@ -129,7 +129,6 @@ class Data():
         self.peak_frequency = self.frequency[self.peak_index]
 
     def set_peak_frequency_lorentzian_fit(self, width=10):
-        self.remove_S21_discontinuities()
         data_fit_obj = DataFit(self)
         self.fit_function = data_fit_obj.evaluate_lorentzian
         initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()

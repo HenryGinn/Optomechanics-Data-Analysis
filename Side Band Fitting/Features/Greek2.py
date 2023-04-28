@@ -75,6 +75,7 @@ class Greek2(Feature):
 
     def do_set_spectrum_obj(self, spectrum_obj):
         spectrum_obj.load_S21()
+        print(spectrum_obj.file_path)
         spectrum_obj.S21 = get_moving_average(spectrum_obj.S21, 30)
         self.fit_curve(spectrum_obj)
         self.set_from_fit(spectrum_obj)
@@ -85,6 +86,7 @@ class Greek2(Feature):
         spectrum_obj.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
         spectrum_obj.fitting_parameters = data_fit_obj.get_automatic_fit(spectrum_obj.initial_fitting_parameters)
         data_fit_obj.process_fit()
+        data_fit_obj.plot_S21(fitting=True)
 
     def set_from_fit(self, spectrum_obj):
         if spectrum_obj.fitting_parameters is not None:

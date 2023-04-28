@@ -75,7 +75,7 @@ class AverageGreek(Feature):
     def get_values_from_detuning_obj(self, detuning_obj):
         values = [(spectrum_obj.gamma, spectrum_obj.omega, spectrum_obj.amplitude)
                   for spectrum_obj in detuning_obj.spectrum_objects
-                  if spectrum_obj.gamma is not None]
+                  if hasattr(spectrum_obj, "gamma") and spectrum_obj.gamma is not None]
         return list(zip(*values))
 
     def save_trial_obj(self, trial_obj):

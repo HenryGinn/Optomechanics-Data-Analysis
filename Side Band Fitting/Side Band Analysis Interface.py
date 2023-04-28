@@ -22,8 +22,8 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
-    #data_set.average_greek()
+    #data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
+    data_set.greek_2("Save")
     
 def process_all_data_sets():
     for data_set_data in data_sets:

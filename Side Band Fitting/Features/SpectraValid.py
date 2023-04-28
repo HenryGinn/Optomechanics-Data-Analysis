@@ -11,6 +11,7 @@ class SpectraValid(Feature):
 
     name = "Spectra Valid"
     peak_ratio_threshold = 11.5
+    reject_first_n = 0
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -71,7 +72,7 @@ class SpectraValid(Feature):
 
     def set_detuning_skip_first_few(self, detuning_obj):
         for index, spectrum_obj in enumerate(detuning_obj.spectrum_objects):
-            if index >= 6:
+            if index >= self.reject_first_n:
                 self.set_spectrum_peak_validity(spectrum_obj)
             else:
                 spectrum_obj.has_valid_peak = False
