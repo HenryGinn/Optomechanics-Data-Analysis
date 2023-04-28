@@ -10,7 +10,7 @@ from Features.SpectraValid import SpectraValid
 from Features.SpectraPeak import SpectraPeak
 from Features.AverageSpectra import AverageSpectra
 from Features.PlotSpectra import PlotSpectra
-from Features.Transmissions import Transmissions
+from Features.TransmissionFit import TransmissionFit
 from Features.Greek import Greek
 from Features.Greek2 import Greek2
 from Features.AverageGreek import AverageGreek
@@ -135,7 +135,7 @@ class DataSet():
         self.spectra_peak_obj = SpectraPeak(self)
         self.average_spectra_obj = AverageSpectra(self)
         self.plot_spectra_obj = PlotSpectra(self)
-        self.transmission_obj = Transmissions(self)
+        self.transmission_fit_obj = TransmissionFit(self)
         self.greek_obj = Greek(self)
         self.greek_2_obj = Greek2(self)
         self.average_greek_obj = AverageGreek(self)
@@ -155,8 +155,8 @@ class DataSet():
     def plot_spectra(self, command="Plot", **kwargs):
         self.plot_spectra_obj.execute(command, **kwargs)
 
-    def transmission(self, command="Load", **kwargs):
-        self.transmission_obj.execute(command, **kwargs)
+    def transmission_fit(self, command="Load", **kwargs):
+        self.transmission_fit_obj.execute(command, **kwargs)
 
     def greek(self, command="Load", **kwargs):
         self.greek_obj.execute(command, **kwargs)

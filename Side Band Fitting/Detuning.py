@@ -79,12 +79,11 @@ class Detuning():
             return None, None
 
     def process_transmission(self):
-        self.transmission.process_S21()
+        self.transmission_obj.process_S21()
 
     def extract_transmission_from_file_detuning(self, centre_index, centre_frequency, cavity_frequency):
-        self.transmission = Transmission(self, self.transmission_path)
-        self.transmission.S21_centre_index = centre_index
-        self.transmission.S21_centre_frequency = centre_frequency
+        self.transmission_obj.S21_centre_index = centre_index
+        self.transmission_obj.S21_centre_frequency = centre_frequency
         self.cavity_frequency = cavity_frequency
 
     def get_spectrum_peaks(self):

@@ -22,7 +22,8 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    data_set.average_greek()
+    data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
+    #data_set.average_greek()
     
 def process_all_data_sets():
     for data_set_data in data_sets:
@@ -39,7 +40,7 @@ data_sets = [("15112022", 1),
              ("22112022", 3)]
 
 data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
-data_set_path=None
+#data_set_path=None
 
 data_set_data = data_sets[1]
 data_set = get_data_set(data_set_data)
