@@ -75,54 +75,6 @@ class DataFit():
                                         args=self.data.fit_function)[0]
         return fitting_parameters
 
-    def set_fit_data(self):
-        if hasattr(self.data, 'fit_width'):
-            self.do_set_fit_data()
-        else:
-            self.data.fit_frequencies = self.data.frequency
-            self.data.fit_S21 = self.data.S21
-
-    def do_set_fit_data(self):
-        self.data.peak_not_off_centre = True
-        left = self.get_left_index()
-        right = self.get_right_index()
-        self.data.fit_frequencies = self.data.frequency[left:right]
-        self.data.fit_S21 = self.data.S21[left:right]
-
-    def get_left_index(self):
-        left = np.argmax(self.data.S21) - self.data.fit_width
-        if left < 0:
-            left = self.get_bad_left_index()
-        return left
-
-    def get_bad_left_index(self):
-        self.off_centre_peak_warning()
-        self.check_if_peak_outside_range()
-        self.review_bad_fit()
-        left = 0
-        return left
-
-    def get_right_index(self):
-        right = np.argmax(self.data.S21) + self.data.fit_width
-        if right >= len(self.data.frequency):
-            right = self.get_bad_right_index()
-        return right
-
-    def get_bad_right_index(self):
-        self.off_centre_peak_warning()
-        self.check_if_peak_outside_range()
-        self.review_bad_fit()
-        right = len(self.data.frequency) - 1
-        return right
-
-    def off_centre_peak_warning(self):
-        if self.suppress_off_centre_peak_warnings is False:
-            print(f"Warning: S21 had very off centre peak\n{self.data}")
-
-    def check_if_peak_outside_range(self):
-        if self.data.resonant_index in [0, len(self.data.frequency) - 1]:
-            self.data.peak_not_off_centre = False
-
     def review_bad_fit(self):
         if self.review_bad_fits:
             self.plot_S21()
