@@ -75,18 +75,30 @@ class Greek2(Feature):
 
     def do_set_spectrum_obj(self, spectrum_obj):
         spectrum_obj.load_S21()
-        print(spectrum_obj.file_path)
         spectrum_obj.S21 = get_moving_average(spectrum_obj.S21, 30)
         self.fit_curve(spectrum_obj)
         self.set_from_fit(spectrum_obj)
 
     def fit_curve(self, spectrum_obj):
+        self.shift_spectrum_obj_left(spectrum_obj)
+        data_fit_obj = self.set_fitting_automatic_fitting_parameters(spectrum_obj)
+        self.shift_spectrum_obj_right(spectrum_obj)
+        data_fit_obj.process_fit()
+
+    def shift_spectrum_obj_left(self, spectrum_obj):
+        spectrum_obj.frequency_shift = np.max(spectrum_obj.frequency)
+        spectrum_obj.frequency -= spectrum_obj.frequency_shift
+
+    def set_fitting_automatic_fitting_parameters(self, spectrum_obj):
         data_fit_obj = DataFit(spectrum_obj)
         spectrum_obj.fit_function = data_fit_obj.evaluate_lorentzian
         spectrum_obj.initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
         spectrum_obj.fitting_parameters = data_fit_obj.get_automatic_fit(spectrum_obj.initial_fitting_parameters)
-        data_fit_obj.process_fit()
-        data_fit_obj.plot_S21(fitting=True)
+        return data_fit_obj
+
+    def shift_spectrum_obj_right(self, spectrum_obj):
+        spectrum_obj.frequency += spectrum_obj.frequency_shift
+        spectrum_obj.fitting_parameters[3] += spectrum_obj.frequency_shift
 
     def set_from_fit(self, spectrum_obj):
         if spectrum_obj.fitting_parameters is not None:

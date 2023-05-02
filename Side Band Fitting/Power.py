@@ -1,7 +1,6 @@
 import numpy as np
 import os
 from Trial import Trial
-from GreekTrial import GreekTrial
 
 class Power():
 

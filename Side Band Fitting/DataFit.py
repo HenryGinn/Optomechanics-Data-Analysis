@@ -13,7 +13,7 @@ class DataFit():
     review_bad_fits = True
     suppress_off_centre_peak_warnings = True
     alpha = 3
-    bad_fit_threshold = 0.1
+    bad_fit_threshold = 0.3*10
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
@@ -70,11 +70,9 @@ class DataFit():
 
     def get_automatic_fit(self, initial_fitting_parameters):
         self.set_fit_data()
-        print(f"Before: {initial_fitting_parameters}")
         fitting_parameters = sc.leastsq(self.get_residuals,
                                         initial_fitting_parameters,
                                         args=self.data.fit_function)[0]
-        print(f"After: {fitting_parameters}")
         return fitting_parameters
 
     def set_fit_data(self):
@@ -156,8 +154,8 @@ class DataFit():
         return False
 
     def get_fit_heuristic(self):
-        fit_ratio = abs(self.data.fitting_parameters[:1]/np.array(self.data.initial_fitting_parameters[:1]))
-        fit_heuristic = sum(fit_ratio + 1/fit_ratio)
+        fit_ratio = abs(self.data.fitting_parameters[:2]/np.array(self.data.initial_fitting_parameters[:2]))
+        fit_heuristic = sum(fit_ratio + 1/fit_ratio) - 4
         return fit_heuristic
 
     def fit_plot_manually_filter(self):

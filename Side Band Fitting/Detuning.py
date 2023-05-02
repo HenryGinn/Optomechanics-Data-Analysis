@@ -5,7 +5,6 @@ import os
 
 from Spectrum import Spectrum
 from Transmission import Transmission
-from AverageDetuning import AverageDetuning
 from Utils import get_number_from_file_name
 from Utils import get_acceptable_indices
 
