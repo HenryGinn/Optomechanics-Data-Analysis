@@ -11,6 +11,7 @@ from Features.SpectraPeak import SpectraPeak
 from Features.AverageSpectra import AverageSpectra
 from Features.PlotSpectra import PlotSpectra
 from Features.TransmissionFit import TransmissionFit
+from Features.SpectraFit import SpectraFit
 from Features.Greek import Greek
 from Features.Greek2 import Greek2
 from Features.AverageGreek import AverageGreek
@@ -110,7 +111,7 @@ class DataSet():
                          self.transmission_folder_paths,
                          self.spectrum_folder_paths)
         self.power_objects = [Power(self, power_folder, transmission_path, spectrum_path)
-                              for power_folder, transmission_path, spectrum_path in power_data][:1]
+                              for power_folder, transmission_path, spectrum_path in power_data]
 
     def set_power_list(self):
         self.power_list = [power_obj.power
@@ -136,6 +137,7 @@ class DataSet():
         self.average_spectra_obj = AverageSpectra(self)
         self.plot_spectra_obj = PlotSpectra(self)
         self.transmission_fit_obj = TransmissionFit(self)
+        self.spectra_fit_obj = SpectraFit(self)
         self.greek_obj = Greek(self)
         self.greek_2_obj = Greek2(self)
         self.average_greek_obj = AverageGreek(self)
@@ -157,6 +159,9 @@ class DataSet():
 
     def transmission_fit(self, command="Load", **kwargs):
         self.transmission_fit_obj.execute(command, **kwargs)
+
+    def spectra_fit(self, command="Load", **kwargs):
+        self.spectra_fit_obj.execute(command, **kwargs)
 
     def greek(self, command="Load", **kwargs):
         self.greek_obj.execute(command, **kwargs)

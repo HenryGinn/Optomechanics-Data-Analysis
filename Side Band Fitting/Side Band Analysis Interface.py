@@ -23,7 +23,8 @@ def get_data_set(data_set_data):
 
 def process_data_set(data_set):
     #data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
-    data_set.greek_2("Save")
+    data_set.spectra_fit("Plot", subplots=12)
+    #data_set.greek_2("Save")
     
 def process_all_data_sets():
     for data_set_data in data_sets:

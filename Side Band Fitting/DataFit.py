@@ -9,8 +9,8 @@ plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 class DataFit():
 
-    reject_bad_fits = False
-    review_bad_fits = True
+    reject_bad_fits = True
+    review_bad_fits = False
     suppress_off_centre_peak_warnings = True
     alpha = 3
     bad_fit_threshold = 0.3*10
@@ -90,7 +90,7 @@ class DataFit():
         self.data.fit_S21 = self.data.S21[left:right]
 
     def get_left_index(self):
-        left = self.data.resonant_index - self.data.fit_width
+        left = np.argmax(self.data.S21) - self.data.fit_width
         if left < 0:
             left = self.get_bad_left_index()
         return left
@@ -103,7 +103,7 @@ class DataFit():
         return left
 
     def get_right_index(self):
-        right = self.data.resonant_index + self.data.fit_width
+        right = np.argmax(self.data.S21) + self.data.fit_width
         if right >= len(self.data.frequency):
             right = self.get_bad_right_index()
         return right
@@ -131,15 +131,6 @@ class DataFit():
         residuals = fitting_function(fitting_parameters) - self.data.fit_S21
         return residuals
 
-    def evaluate_lorentzian(self, lorentzian_parameters):
-        F, gamma, noise, w = lorentzian_parameters
-        function_values = (F/(gamma**2 + 4*(self.data.fit_frequencies - w)**2)) + noise
-        return function_values
-
-    def evaluate_polynomial(self, polynomial_parameters):
-        function_values = np.polyval(polynomial_parameters, self.data.fit_frequencies)
-        return function_values
-
     def process_fit(self):
         if self.is_plot_badly_fitted():
             fit_rejected = self.fit_plot_manually_filter()
@@ -160,8 +151,8 @@ class DataFit():
 
     def fit_plot_manually_filter(self):
         if self.reject_bad_fits:
-            print("Rejecting fit")
-            return None
+            print(f"Rejecting fit for {self.data}")
+            return True
         else:
             return self.fit_plot_manually()
 
@@ -171,6 +162,7 @@ class DataFit():
             self.output_fitting_parameters()
             self.plot_S21(fitting = True)
             continue_looping, fit_rejected = self.fit_plot_manually_iteration()
+        return True
 
     def fit_plot_manually_iteration(self):
         fitting_input_choice = self.get_fitting_input_choice()
@@ -282,8 +274,7 @@ class DataFit():
 
     def add_plot_labels(self):
         self.add_title()
-        self.set_x_ticks_and_labels()
-        plt.xlabel(f'Frequency ({self.prefix})')
+        plt.xlabel(f'Frequency (Hz)')
         plt.ylabel('Amplitude')
 
     def add_title(self):
@@ -291,11 +282,3 @@ class DataFit():
         trial = self.data.detuning_obj.trial_obj.trial_number
         detuning = self.data.detuning
         plt.title(f"S21 vs Frequency for {power} dBm,\nTrial {trial}, Detuning {detuning} Hz")
-
-    def set_x_ticks_and_labels(self):
-        x_ticks = plt.xticks()[0]
-        max_x_tick = max(abs(x_ticks))
-        prefix_power = math.floor(math.log(max_x_tick, 1000))
-        self.prefix = {-1: "mHz", 0: "Hz", 1: "kHz", 2: "MHz", 3: "GHz", 4: "THz"}[prefix_power]
-        x_labels = [f'{value:.3f}' for value in plt.xticks()[0]/1000**prefix_power]
-        plt.xticks(x_ticks, x_labels)

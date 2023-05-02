@@ -130,7 +130,7 @@ class Data():
 
     def set_peak_frequency_lorentzian_fit(self, width=10):
         data_fit_obj = DataFit(self)
-        self.fit_function = data_fit_obj.evaluate_lorentzian
+        self.fit_function = self.evaluate_lorentzian
         initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
         self.fit_width = width
         self.fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
@@ -139,7 +139,7 @@ class Data():
     def set_peak_frequency_polynomial_fit(self, degree=2, width=10):
         self.remove_S21_discontinuities()
         data_fit_obj = DataFit(self)
-        self.fit_function = data_fit_obj.evaluate_polynomial
+        self.fit_function = self.evaluate_polynomial
         initial_fitting_parameters = np.zeros(degree + 1)
         self.fit_width = width
         self.fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
@@ -221,7 +221,6 @@ class Data():
         plt.plot(self.frequency[self.peak_index], self.S21[self.peak_index], '*k')
         plt.plot([self.peak_frequency] * 100, frequency_range, 'r')
         self.add_review_centre_results_labels()
-        #plt.show()
     
     def add_review_centre_results_labels(self):
         power_folder = self.detuning_obj.trial_obj.power_obj.folder_name
@@ -254,6 +253,16 @@ class Data():
     def plot_S21(self, fitting=False):
         plot_obj = DataFit(self)
         plot_obj.plot_S21(fitting)
+
+    def evaluate_lorentzian(self, lorentzian_parameters):
+        F, gamma, noise, w = lorentzian_parameters
+        function_values = (F/(gamma**2 + 4*(self.fit_frequencies - w)**2)) + noise
+        return function_values
+
+    def evaluate_polynomial(self, polynomial_parameters):
+        function_values = np.polyval(polynomial_parameters, self.fit_frequencies)
+        return function_values
+
 
     def __str__(self):
         string = (f"Detuning: {self.detuning}\n"

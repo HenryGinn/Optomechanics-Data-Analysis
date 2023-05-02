@@ -10,8 +10,10 @@ class Spectrum(Data):
     
     def __init__(self, detuning_obj, spectrum_path):
         Data.__init__(self, detuning_obj)
+        self.fit_function = self.evaluate_lorentzian
         self.file_path = spectrum_path
         self.frequency = self.detuning_obj.frequency
+        self.index = detuning_obj.spectrum_paths.index(spectrum_path)
 
     def set_S21_has_valid_peak(self):
         peak = np.max(self.S21)
@@ -21,3 +23,7 @@ class Spectrum(Data):
 
     def set_S21_centre_frequency(self):
         self.set_S21_centre_frequency_peak()
+
+    def __str__(self):
+        string = f"{self.detuning_obj}, Spectrum {self.index}"
+        return string
