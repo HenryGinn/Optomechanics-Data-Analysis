@@ -54,9 +54,13 @@ class Feature():
         if not self.loaded:
             self.execute("Load")
 
+    def load_necessary_data_for_plotting(self):
+        pass
+
     def create_plot(self, **kwargs):
         if hasattr(self, "create_plots"):
             self.execute("Load", **kwargs)
+            self.load_necessary_data_for_plotting()
             self.create_plots(**kwargs)
         else:
             print("Sorry, this feature does not have a 'create_plots' method implemented")

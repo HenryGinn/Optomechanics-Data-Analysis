@@ -12,8 +12,9 @@ from Features.AverageSpectra import AverageSpectra
 from Features.PlotSpectra import PlotSpectra
 from Features.TransmissionFit import TransmissionFit
 from Features.SpectraFit import SpectraFit
+from Features.FitHeuristic import FitHeuristic
+from Features.SpectraFitFiltered import SpectraFitFiltered
 from Features.Greek import Greek
-from Features.Greek2 import Greek2
 from Features.AverageGreek import AverageGreek
 from Utils import make_folder
 
@@ -138,8 +139,9 @@ class DataSet():
         self.plot_spectra_obj = PlotSpectra(self)
         self.transmission_fit_obj = TransmissionFit(self)
         self.spectra_fit_obj = SpectraFit(self)
+        self.fit_heuristic_obj = FitHeuristic(self)
+        self.spectra_fit_filtered_obj = SpectraFitFiltered(self)
         self.greek_obj = Greek(self)
-        self.greek_2_obj = Greek2(self)
         self.average_greek_obj = AverageGreek(self)
 
     def spectra_raw(self, command="Load", **kwargs):
@@ -163,11 +165,14 @@ class DataSet():
     def spectra_fit(self, command="Load", **kwargs):
         self.spectra_fit_obj.execute(command, **kwargs)
 
-    def greek(self, command="Load", **kwargs):
-        self.greek_obj.execute(command, **kwargs)
+    def fit_heuristic(self, command="Plot", **kwargs):
+        self.fit_heuristic_obj.execute(command, **kwargs)
 
-    def greek_2(self, command="Plot", **kwargs):
-        self.greek_2_obj.execute(command, **kwargs)
+    def spectra_fit_filtered(self, command="Load", **kwargs):
+        self.spectra_fit_filtered_obj.execute(command, **kwargs)
+
+    def greek(self, command="Plot", **kwargs):
+        self.greek_obj.execute(command, **kwargs)
 
     def average_greek(self, command="Plot", **kwargs):
         self.average_greek_obj.execute(command, **kwargs)

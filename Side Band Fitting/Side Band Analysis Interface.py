@@ -24,7 +24,10 @@ def get_data_set(data_set_data):
 def process_data_set(data_set):
     #data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
     #data_set.spectra_fit("Plot", subplots=12)
-    data_set.greek_2("Plot")
+    #data_set.fit_heuristic("Plot", subplots=12)
+    #data_set.spectra_fit_filtered("Plot", subplots=None)
+    #data_set.greek("Plot")
+    data_set.average_greek("Plot")
     
 def process_all_data_sets():
     for data_set_data in data_sets:
@@ -40,8 +43,8 @@ data_sets = [("15112022", 1),
              ("21112022", 3),
              ("22112022", 3)]
 
-data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
-#data_set_path=None
+#data_set_path = "D:\\Documents\\Experiments\\RT_exp4"
+data_set_path=None
 
 data_set_data = data_sets[1]
 data_set = get_data_set(data_set_data)

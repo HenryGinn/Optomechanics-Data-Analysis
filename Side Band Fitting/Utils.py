@@ -138,3 +138,8 @@ def get_moving_average(data, window_size=5):
     denominator = np.convolve(np.ones(len(data)), window, "same")
     moving_average = numerator / denominator
     return moving_average
+
+def evaluate_lorentzian(x_values, lorentzian_parameters):
+    F, gamma, noise, w = lorentzian_parameters
+    function_values = (F/(gamma**2 + 4*(x_values - w)**2)) + noise
+    return function_values

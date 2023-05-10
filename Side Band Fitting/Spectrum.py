@@ -10,7 +10,6 @@ class Spectrum(Data):
     
     def __init__(self, detuning_obj, spectrum_path):
         Data.__init__(self, detuning_obj)
-        self.fit_function = self.evaluate_lorentzian
         self.file_path = spectrum_path
         self.frequency = self.detuning_obj.frequency
         self.index = detuning_obj.spectrum_paths.index(spectrum_path)

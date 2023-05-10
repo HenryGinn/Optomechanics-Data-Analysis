@@ -82,7 +82,7 @@ class Trial():
         folder_names = sorted(os.listdir(self.spectrum_path))
         self.detuning_objects = [self.get_detuning_object_b(folder_name)
                                  for folder_name in folder_names
-                                 if self.detuning_folder_non_empty(folder_name)][20:21]
+                                 if self.detuning_folder_non_empty(folder_name)]#[20:21]
 
     def get_detuning_object_b(self, folder_name):
         detuning, timestamp = self.get_detuning_and_timestamp_from_folder(folder_name)

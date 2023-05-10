@@ -4,7 +4,6 @@ import numpy as np
 
 from Feature import Feature
 from Spectrum import Spectrum
-from DataFit import DataFit
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
@@ -40,7 +39,7 @@ class AverageGreek(Feature):
         trial_obj.average_greek_path = path
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.greek_2("Load")
+        self.data_set_obj.greek("Load")
 
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:

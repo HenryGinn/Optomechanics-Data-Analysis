@@ -4,12 +4,12 @@ import numpy as np
 
 from Feature import Feature
 from Spectrum import Spectrum
-from DataFit import DataFit
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
+from Features.GetFittingParameters import get_fitting_parameters
 
 class TransmissionFit(Feature):
 
@@ -53,8 +53,9 @@ class TransmissionFit(Feature):
             self.set_detuning_obj(detuning_obj)
 
     def set_detuning_obj(self, detuning_obj):
-        detuning_obj.transmission_obj.load_S21()
-        self.set_fitting_parameters(detuning_obj.transmission_obj)
+        transmission_obj = detuning_obj.transmission_obj
+        transmission_obj.load_S21()
+        transmission_obj.fitting_parameters = get_fitting_parameters(transmission_obj)
 
     def save_trial_obj(self, trial_obj):
         with open(trial_obj.transmission_fit_path, "w") as file:
@@ -65,13 +66,6 @@ class TransmissionFit(Feature):
         for detuning_obj in trial_obj.detuning_objects:
             detuning = detuning_obj.detuning
             file.writelines(f"{detuning}\n")
-
-    def set_fitting_parameters(self, transmission_obj):
-        data_fit_obj = DataFit(transmission_obj)
-        transmission_obj.fit_function = data_fit_obj.evaluate_lorentzian
-        initial_fitting_parameters = data_fit_obj.get_initial_fitting_parameters()
-        transmission_obj.fit_width = 10
-        transmission_obj.fitting_parameters = data_fit_obj.get_automatic_fit(initial_fitting_parameters)
 
     def data_is_saved(self):
         return np.all([os.path.exists(trial_obj.transmission_fit_path)
