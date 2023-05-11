@@ -40,6 +40,7 @@ class AverageGreek(Feature):
 
     def load_necessary_data_for_saving(self):
         self.data_set_obj.greek("Load")
+        self.data_set_obj.fit_properties_filter("Load")
 
     def refresh_data(self):
         self.data_set_obj.greek("Refresh")
@@ -77,7 +78,7 @@ class AverageGreek(Feature):
     def get_values_from_detuning_obj(self, detuning_obj):
         values = [(spectrum_obj.gamma, spectrum_obj.omega, spectrum_obj.amplitude)
                   for spectrum_obj in detuning_obj.spectrum_objects
-                  if hasattr(spectrum_obj, "gamma") and spectrum_obj.gamma is not None]
+                  if hasattr(spectrum_obj, "gamma") and spectrum_obj.gamma is not None and spectrum_obj.gamma_z_score < 2]
         return list(zip(*values))
 
     def save_trial_obj(self, trial_obj):

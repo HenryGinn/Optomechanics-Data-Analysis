@@ -10,11 +10,13 @@ from Plotting.Lines import Lines
 from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
+from Utils import evaluate_lorentzian
+from Utils import get_moving_average
 
 class SpectraFitFiltered(Feature):
 
     name = "Spectra Fit Filtered"
-    fit_heuristic_threshold = 2
+    fit_heuristic_threshold = 20
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -174,6 +176,7 @@ class SpectraFitFiltered(Feature):
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]
         y_values = spectrum_obj.S21[spectrum_obj.plotting_indices]
+        y_values = get_moving_average(y_values, 20)
         line_obj = Line(x_values, y_values,
                         linewidth="0", marker=".")
         return line_obj
