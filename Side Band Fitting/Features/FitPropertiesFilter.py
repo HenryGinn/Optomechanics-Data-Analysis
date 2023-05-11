@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+import scipy as sc
 
 from Feature import Feature
 from Spectrum import Spectrum
@@ -10,11 +11,13 @@ from Plotting.Lines import Lines
 from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
+from Utils import evaluate_lorentzian
+from Utils import get_moving_average
 
-class SpectraFitFiltered(Feature):
+class FitPropertiesFilter(Feature):
 
-    name = "Spectra Fit Filtered"
-    fit_heuristic_threshold = 2
+    name = "Fit Properties Filter"
+    z_score_threshold = 2
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -28,7 +31,7 @@ class SpectraFitFiltered(Feature):
 
     def set_power_path(self, power_obj):
         path = os.path.join(self.folder_path, power_obj.power_string)
-        power_obj.spectra_fit_filtered_path = path
+        power_obj.fit_properties_filter_path = path
         make_folder(path)
 
     def set_trial_paths(self, power_obj):
@@ -37,8 +40,8 @@ class SpectraFitFiltered(Feature):
             self.set_detuning_paths(trial_obj)
 
     def set_trial_path(self, trial_obj):
-        path = os.path.join(trial_obj.power_obj.spectra_fit_filtered_path, f"Trial {trial_obj.trial_number}")
-        trial_obj.spectra_fit_filtered_path = path
+        path = os.path.join(trial_obj.power_obj.fit_properties_filter_path, f"Trial {trial_obj.trial_number}")
+        trial_obj.fit_properties_filter_path = path
         make_folder(path)
 
     def set_detuning_paths(self, trial_obj):
@@ -46,16 +49,16 @@ class SpectraFitFiltered(Feature):
             self.set_detuning_path(detuning_obj)
 
     def set_detuning_path(self, detuning_obj):
-        path = os.path.join(detuning_obj.trial_obj.spectra_fit_filtered_path, f"{detuning_obj.detuning} Hz.txt")
-        detuning_obj.spectra_fit_filtered_path = path
+        path = os.path.join(detuning_obj.trial_obj.fit_properties_filter_path, f"{detuning_obj.detuning} Hz.txt")
+        detuning_obj.fit_properties_filter_path = path
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.spectra_fit("Load")
-        self.data_set_obj.fit_heuristic("Load")
+        self.data_set_obj.spectra_fit_filtered("Load")
+        self.data_set_obj.greek("Load")
 
     def refresh_data(self):
-        self.data_set_obj.spectra_fit("Refresh")
-        self.data_set_obj.fit_heuristic("Refresh")
+        self.data_set_obj.spectra_fit_filtered("Refresh")
+        self.data_set_obj.greek("Refresh")
 
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
@@ -76,23 +79,54 @@ class SpectraFitFiltered(Feature):
             self.set_spectrum_obj(spectrum_obj)
 
     def set_fit_heuristic_distribution(self, detuning_obj):
-        fit_heuristics = [spectrum_obj.fit_heuristic if hasattr(spectrum_obj, "fit_heuristic") else None
+        gamma, omega, amplitude = self.get_fit_properties(detuning_obj)
+        self.gamma_mean, self.gamma_std = self.get_distribution_parameters(gamma)
+        self.omega_mean, self.omega_std = self.get_distribution_parameters(omega)
+        self.amplitude_mean, self.amplitude_std = self.get_distribution_parameters(amplitude)
+        print(detuning_obj, round(self.gamma_mean, 1), round(self.gamma_std, 2))
+
+    def get_fit_properties(self, detuning_obj):
+        fit_properties = [(spectrum_obj.gamma, spectrum_obj.omega, spectrum_obj.amplitude)
                           for spectrum_obj in detuning_obj.spectrum_objects]
-        detuning_obj.fit_heuristic_mean = np.mean(fit_heuristics)
-        detuning_obj.fit_heuristic_standard_deviation = np.std(fit_heuristics)
+        fit_properties_not_none = [properties for properties in fit_properties
+                                   if None not in properties]
+        return zip(*fit_properties_not_none)
+
+    def get_distribution_parameters(self, data):
+        mean = np.median(data)
+        standard_deviation = sc.stats.median_abs_deviation(data)
+        return mean, standard_deviation
 
     def set_spectrum_obj(self, spectrum_obj):
-        mu = spectrum_obj.detuning_obj.fit_heuristic_mean
-        sigma = spectrum_obj.detuning_obj.fit_heuristic_standard_deviation
-        if spectrum_obj.has_valid_peak:
-            fit_sigma = (spectrum_obj.fit_heuristic - mu) / sigma
-            spectrum_obj.valid_fit  = (fit_sigma < self.fit_heuristic_threshold or fit_sigma < 0)
+        self.set_gamma_filter(spectrum_obj)
+        self.set_omega_filter(spectrum_obj)
+        self.set_amplitude_filter(spectrum_obj)
+
+    def set_gamma_filter(self, spectrum_obj):
+        if spectrum_obj.valid_fit and spectrum_obj.gamma is not None:
+            spectrum_obj.gamma_z_score = abs(spectrum_obj.gamma - self.gamma_mean) / self.gamma_std
         else:
-            spectrum_obj.valid_fit = False
+            spectrum_obj.gamma_z_score = 1000
+
+    def set_omega_filter(self, spectrum_obj):
+        if spectrum_obj.valid_fit and spectrum_obj.omega is not None:
+            spectrum_obj.omega_z_score = abs(spectrum_obj.omega - self.omega_mean) / self.omega_std
+            #spectrum_obj.valid_omega  = (omega_z_score < self.z_score_threshold or omega_z_score < 0)
+        else:
+            spectrum_obj.omega_z_score = 1000
+            spectrum_obj.valid_omega = False
+
+    def set_amplitude_filter(self, spectrum_obj):
+        if spectrum_obj.valid_fit and spectrum_obj.amplitude is not None:
+            spectrum_obj.amplitude_z_score = abs(spectrum_obj.amplitude - self.amplitude_mean) / self.amplitude_std
+            #spectrum_obj.valid_amplitude  = (amplitude_z_score < self.z_score_threshold or amplitude_z_score < 0)
+        else:
+            spectrum_obj.valid_amplitude = False
+            spectrum_obj.amplitude_z_score = 1000
 
     def save_detuning_obj(self, detuning_obj):
-        with open(detuning_obj.spectra_fit_filtered_path, "w") as file:
-            file.writelines("Spectrum Index\tValid Fit\n")
+        with open(detuning_obj.fit_properties_filter_path, "w") as file:
+            file.writelines("Spectrum Index\tValid Gamma\tValid Omega\tValid Amplitude\n")
             self.save_detuning_obj_to_file(detuning_obj, file)
 
     def save_detuning_obj_to_file(self, detuning_obj, file):
@@ -101,11 +135,16 @@ class SpectraFitFiltered(Feature):
                 self.save_spectrum_obj_to_file(spectrum_obj, index, file)
 
     def save_spectrum_obj_to_file(self, spectrum_obj, index, file):
-        valid_fit = int(spectrum_obj.valid_fit)
-        file.writelines(f"{index}\t{valid_fit}\n")
+        #valid_gamma = int(spectrum_obj.valid_gamma)
+        #valid_omega = int(spectrum_obj.valid_omega)
+        #valid_amplitude = int(spectrum_obj.valid_amplitude)
+        valid_gamma = spectrum_obj.gamma_z_score
+        valid_omega = spectrum_obj.omega_z_score
+        valid_amplitude = spectrum_obj.amplitude_z_score
+        file.writelines(f"{index}\t{valid_gamma}\t{valid_omega}\t{valid_amplitude}\n")
 
     def data_is_saved(self):
-        return np.all([os.path.exists(detuning_obj.spectra_fit_filtered_path)
+        return np.all([os.path.exists(detuning_obj.fit_properties_filter_path)
                        for power_obj in self.data_set_obj.power_objects
                        for trial_obj in power_obj.trial_objects
                        for detuning_obj in trial_obj.detuning_objects])
@@ -123,31 +162,44 @@ class SpectraFitFiltered(Feature):
             self.load_detuning_obj(detuning_obj)
 
     def load_detuning_obj(self, detuning_obj):
-        file_contents = get_file_contents_from_path(detuning_obj.spectra_fit_filtered_path)
+        file_contents = get_file_contents_from_path(detuning_obj.fit_properties_filter_path)
         if len(file_contents) > 0:
-            indices, valid_fits = file_contents
+            indices, valid_gammas, valid_omegas, valid_amplitudes = file_contents
             for index, spectrum_obj in enumerate(detuning_obj.spectrum_objects):
                 if index in indices:
                     list_index = list(indices).index(index)
-                    spectrum_obj.has_valid_peak = True
-                    spectrum_obj.valid_fit = bool(valid_fits[list_index])
+                    spectrum_obj.gamma_z_score = valid_gammas[list_index]
+                    spectrum_obj.omega_z_score = valid_omegas[list_index]
+                    spectrum_obj.amplitude_z_score = valid_amplitudes[list_index]
                 else:
-                    spectrum_obj.has_valid_peak = False
-                    spectrum_obj.valid_fit = False
+                    spectrum_obj.gamma_z_score = 1000
+                    spectrum_obj.omega_z_score = 1000
+                    spectrum_obj.amplitude_z_score = 1000
     
     def load_necessary_data_for_plotting(self):
         self.data_set_obj.spectra_fit("Load")
 
     def create_plots(self, **kwargs):
+        self.set_colour_lookup()
         for power_obj in self.data_set_obj.power_objects:
             for trial_obj in power_obj.trial_objects:
                 for detuning_obj in trial_obj.detuning_objects:
                     self.create_detuning_plot(detuning_obj, **kwargs)
 
+    def set_colour_lookup(self):
+        self.colour_lookup = {(False, False, False): "black",
+                              (False, False, True): "black",
+                              (False, True, False): "lime",
+                              (False, True, True): "red",
+                              (True, False, False): "lime",
+                              (True, False, True): "yellow",
+                              (True, True, False): "lime",
+                              (True, True, True): "lime"}
+
     def create_detuning_plot(self, detuning_obj, **kwargs):
         lines_objects = self.get_lines_objects(detuning_obj)
         plots_obj = Plots(lines_objects, **kwargs)
-        plots_obj.parent_results_path, _ = os.path.split(detuning_obj.spectra_fit_filtered_path)
+        plots_obj.parent_results_path, _ = os.path.split(detuning_obj.fit_properties_filter_path)
         plots_obj.title = str(detuning_obj)
         plots_obj.plot()
 
@@ -174,6 +226,7 @@ class SpectraFitFiltered(Feature):
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]
         y_values = spectrum_obj.S21[spectrum_obj.plotting_indices]
+        y_values = get_moving_average(y_values, 20)
         line_obj = Line(x_values, y_values,
                         linewidth="0", marker=".")
         return line_obj
@@ -191,7 +244,8 @@ class SpectraFitFiltered(Feature):
         return line_obj
 
     def get_fit_line_colour(self, spectrum_obj):
-        if spectrum_obj.valid_fit:
-            return "blue"
-        else:
-            return "red"
+        valid_property_key = (spectrum_obj.gamma_z_score < self.z_score_threshold,
+                              spectrum_obj.omega_z_score < self.z_score_threshold,
+                              True)
+                              #spectrum_obj.valid_amplitude)
+        return self.colour_lookup[valid_property_key]

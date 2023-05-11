@@ -77,6 +77,10 @@ class AverageSpectra(Feature):
         self.data_set_obj.spectra_valid("Load")
         self.data_set_obj.spectra_peak("Load")
 
+    def refresh_data(self):
+        self.data_set_obj.spectra_valid("Refresh")
+        self.data_set_obj.spectra_peak("Refresh")
+
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)

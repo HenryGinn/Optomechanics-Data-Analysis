@@ -45,6 +45,10 @@ class SpectraPeak(Feature):
         self.data_set_obj.spectra_raw("Load")
         self.data_set_obj.spectra_valid("Load")
 
+    def refresh_data(self):
+        self.data_set_obj.spectra_raw("Refresh")
+        self.data_set_obj.spectra_valid("Refresh")
+
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)

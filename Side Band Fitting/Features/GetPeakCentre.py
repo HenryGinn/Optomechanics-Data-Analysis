@@ -52,6 +52,9 @@ class SpectrumCentre(Feature):
     def load_necessary_data_for_saving(self):
         self.data_set_obj.spectra_valid("Load")
 
+    def refresh(self):
+        self.data_set_obj.spectra_valid("Refresh")
+
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)

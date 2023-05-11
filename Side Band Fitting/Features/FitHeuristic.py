@@ -51,6 +51,9 @@ class FitHeuristic(Feature):
     def load_necessary_data_for_saving(self):
         self.data_set_obj.spectra_fit("Load")
 
+    def refresh_data(self):
+        self.data_set_obj.spectra_fit("Refresh")
+
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)
@@ -77,7 +80,7 @@ class FitHeuristic(Feature):
     def do_set_spectrum_obj(self, spectrum_obj):
         differences = self.get_differences(spectrum_obj)
         standard_deviation = np.std(differences)
-        spectrum_obj.fit_heuristic = np.mean((differences/standard_deviation)**2)
+        spectrum_obj.fit_heuristic = np.mean((differences)**2)
 
     def get_differences(self, spectrum_obj):
         spectrum_obj.load_S21()

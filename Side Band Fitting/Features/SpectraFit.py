@@ -11,10 +11,12 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 from Utils import evaluate_lorentzian
+from Utils import get_moving_average
 
 class SpectraFit(Feature):
 
     name = "Spectra Fit"
+    width = 150
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -51,6 +53,9 @@ class SpectraFit(Feature):
 
     def load_necessary_data_for_saving(self):
         self.data_set_obj.spectra_valid("Load")
+
+    def refresh_data(self):
+        self.data_set_obj.spectra_valid("Refresh")
 
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
@@ -131,10 +136,15 @@ class SpectraFit(Feature):
                 spectrum_obj.fitting_parameters = None
 
     def create_plots(self, **kwargs):
+        self.process_kwargs(**kwargs)
         for power_obj in self.data_set_obj.power_objects:
             for trial_obj in power_obj.trial_objects:
                 for detuning_obj in trial_obj.detuning_objects:
                     self.create_detuning_plot(detuning_obj, **kwargs)
+
+    def process_kwargs(self, **kwargs):
+        if "width" in kwargs:
+            self.width = kwargs["width"]
 
     def create_detuning_plot(self, detuning_obj, **kwargs):
         lines_objects = self.get_lines_objects(detuning_obj)
@@ -158,14 +168,18 @@ class SpectraFit(Feature):
 
     def set_spectrum_plotting_data(self, spectrum_obj):
         spectrum_obj.load_S21()
-        peak_index = np.argmax(spectrum_obj.S21)
-        left_index = peak_index - 150
-        right_index = peak_index + 150
-        spectrum_obj.plotting_indices = slice(left_index, right_index)
+        if self.width is not None:
+            peak_index = np.argmax(spectrum_obj.S21)
+            left_index = peak_index - self.width
+            right_index = peak_index + self.width
+            spectrum_obj.plotting_indices = slice(left_index, right_index)
+        else:
+            spectrum_obj.plotting_indices = slice(None)
     
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]
         y_values = spectrum_obj.S21[spectrum_obj.plotting_indices]
+        y_values = get_moving_average(y_values, 20)
         line_obj = Line(x_values, y_values,
                         linewidth="0", marker=".")
         return line_obj

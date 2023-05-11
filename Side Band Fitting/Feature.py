@@ -10,8 +10,10 @@ class Feature():
 
     def set_commands(self):
         self.commands = {"Save": self.save_data,
+                         "Refresh": self.refresh_data,
                          "Load": self.load_data,
-                         "Plot": self.create_plot}
+                         "Plot": self.create_plot,
+                         "Plot Refresh": self.create_plot_refresh}
 
     def execute(self, command, **kwargs):
         function = self.commands[command]
@@ -33,6 +35,9 @@ class Feature():
         self.loaded = True
 
     def load_necessary_data_for_saving(self):
+        pass
+
+    def refresh_data(self, **kwargs):
         pass
 
     def load_data(self, **kwargs):
@@ -80,3 +85,7 @@ class Feature():
             self.aspect_ratio = kwargs["aspect_ratio"]
         else:
             self.aspect_ratio = None
+
+    def create_plot_refresh(self, **kwargs):
+        self.execute("Refresh")
+        self.execute("Plot")

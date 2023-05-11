@@ -48,10 +48,6 @@ class SpectraValid(Feature):
             detuning_obj.spectra_valid_path = os.path.join(trial_obj.spectra_valid_path,
                                                      f"{detuning_obj.detuning} Hz.txt")
 
-    def load_necessary_data_for_saving(self):
-        #self.data_set_obj.spectra_raw("Load")
-        pass
-
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)

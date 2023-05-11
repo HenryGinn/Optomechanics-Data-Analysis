@@ -52,6 +52,10 @@ class Greek(Feature):
         self.data_set_obj.spectra_fit("Load")
         self.data_set_obj.spectra_fit_filtered("Load")
 
+    def refresh(self):
+        self.data_set_obj.spectra_fit("Refresh")
+        self.data_set_obj.spectra_fit_filtered("Refresh")
+
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
             self.save_power_obj(power_obj)
