@@ -15,7 +15,7 @@ class Lines():
         self.line_objects = line_objects
         self.count = len(line_objects)
         self.process_plot_options(plot_type, legend, legend_loc)
-        self.prefix_line_labels()
+        #self.prefix_line_labels()
 
     def process_plot_options(self, plot_type, legend, legend_loc):
         self.plot_type = plot_type

@@ -15,7 +15,7 @@ from Utils import evaluate_lorentzian
 class SpectraFitFiltered(Feature):
 
     name = "Spectra Fit Filtered"
-    fit_heuristic_threshold = 10**-31
+    fit_heuristic_threshold = np.inf#10**31
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)

@@ -75,11 +75,17 @@ class FitHeuristic(Feature):
             spectrum_obj.fit_heuristic = None
 
     def do_set_spectrum_obj(self, spectrum_obj):
+        differences = self.get_differences(spectrum_obj)
+        standard_deviation = np.std(differences)
+        spectrum_obj.fit_heuristic = np.mean((differences/standard_deviation)**2)
+
+    def get_differences(self, spectrum_obj):
         spectrum_obj.load_S21()
         data = spectrum_obj.S21
         fit_values = evaluate_lorentzian(spectrum_obj.frequency,
                                          spectrum_obj.fitting_parameters)
-        spectrum_obj.fit_heuristic = np.mean((data - fit_values)**2)
+        differences = data - fit_values
+        return differences
 
     def save_detuning_obj(self, detuning_obj):
         with open(detuning_obj.fit_heuristic_path, "w") as file:

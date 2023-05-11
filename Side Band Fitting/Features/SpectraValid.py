@@ -4,14 +4,19 @@ import numpy as np
 
 from Feature import Feature
 from Spectrum import Spectrum
+from Plotting.Plots import Plots
+from Plotting.Lines import Lines
+from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
+from Utils import get_moving_average
 
 class SpectraValid(Feature):
 
     name = "Spectra Valid"
-    peak_ratio_threshold = 11.5
+    peak_ratio_threshold = 2.5#11.5
     reject_first_n = 0
+    window = 5
 
     def __init__(self, data_set_obj):
         Feature.__init__(self, data_set_obj)
@@ -44,7 +49,8 @@ class SpectraValid(Feature):
                                                      f"{detuning_obj.detuning} Hz.txt")
 
     def load_necessary_data_for_saving(self):
-        self.data_set_obj.spectra_raw("Load")
+        #self.data_set_obj.spectra_raw("Load")
+        pass
 
     def save_data_set_obj(self, data_set_obj):
         for power_obj in data_set_obj.power_objects:
@@ -78,10 +84,14 @@ class SpectraValid(Feature):
                 spectrum_obj.has_valid_peak = False
 
     def set_spectrum_peak_validity(self, spectrum_obj):
-        peak = np.max(spectrum_obj.S21)
-        noise = np.median(spectrum_obj.S21)
-        peak_ratio = peak / noise
-        spectrum_obj.has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
+        #spectrum_obj.load_S21()
+        #S21 = get_moving_average(spectrum_obj.S21, self.window)
+        #S21 = spectrum_obj.S21
+        #peak = np.max(S21)
+        #noise = np.median(S21)
+        #peak_ratio = peak / noise
+        #spectrum_obj.has_valid_peak = (peak_ratio > self.peak_ratio_threshold)
+        spectrum_obj.has_valid_peak = True
 
     def save_detuning_obj(self, detuning_obj):
         with open(detuning_obj.spectra_valid_path, "w") as file:
@@ -114,3 +124,36 @@ class SpectraValid(Feature):
         _, valid_array = get_file_contents_from_path(detuning_obj.spectra_valid_path)
         for spectrum_obj, valid in zip(detuning_obj.spectrum_objects, valid_array):
             spectrum_obj.has_valid_peak = bool(valid)
+
+    def create_plots(self, **kwargs):
+        for power_obj in self.data_set_obj.power_objects:
+            for trial_obj in power_obj.trial_objects:
+                for detuning_obj in trial_obj.detuning_objects:
+                    self.create_detuning_plots(detuning_obj, **kwargs)
+
+    def create_detuning_plots(self, detuning_obj, **kwargs):
+        lines_objects = [self.get_lines_obj(spectrum_obj)
+                         for spectrum_obj in detuning_obj.spectrum_objects]
+        plots_obj = Plots(lines_objects, **kwargs)
+        plots_obj.parent_results_path, _ = os.path.split(detuning_obj.spectra_valid_path)
+        plots_obj.title = str(detuning_obj)
+        plots_obj.plot()
+
+    def get_lines_obj(self, spectrum_obj):
+        line_objects = [self.get_line_obj(spectrum_obj)]
+        lines_obj = Lines(line_objects)
+        return lines_obj
+
+    def get_line_obj(self, spectrum_obj):
+        spectrum_obj.load_S21()
+        x_values = spectrum_obj.frequency
+        y_values = get_moving_average(spectrum_obj.S21, self.window)
+        colour = self.get_colour(spectrum_obj)
+        line_obj = Line(x_values, y_values, colour=colour)
+        return line_obj
+
+    def get_colour(self, spectrum_obj):
+        if spectrum_obj.has_valid_peak:
+            return "b"
+        else:
+            return "r"
