@@ -21,18 +21,18 @@ class FittingParameters():
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
-        self.S21 = get_moving_average(data_obj.S21, 30)
+        self.S21 = get_moving_average(data_obj.S21, 20)
         self.frequency = data_obj.frequency
 
     def set_fitting_parameters(self):
         self.shift_frequency_left()
+        #initial_fitting_parameters = self.get_initial_fitting_parameters()
         initial_fitting_parameters = self.get_initial_fitting_parameters()
         self.fitting_parameters = self.get_automatic_fitting_parameters(initial_fitting_parameters)
         self.shift_frequency_right()
-        return self.fitting_parameters
 
     def shift_frequency_left(self):
-        self.frequency_shift = np.max(self.frequency)
+        self.frequency_shift = self.frequency[np.argmax(self.S21)]
         self.frequency -= self.frequency_shift
 
     def shift_frequency_right(self):
@@ -45,6 +45,15 @@ class FittingParameters():
         F, gamma = self.get_F_and_gamma(noise)
         initial_fitting_parameters = [F, gamma, noise, resonant]
         return initial_fitting_parameters
+
+    def get_initial_fitting_parameters2(self):
+        max_value = max(self.S21)
+        max_index = np.where(self.S21 == max_value)
+        lw = abs(self.S21 - (max(self.S21) * (3/4)))
+        index1 = np.where(lw == min(lw))
+        app_lw = float(10*abs(self.frequency[max_index[0]] - self.frequency[index1[0]]))
+        p0 = [max_value*(app_lw)**2, app_lw, np.mean(self.S21[-100:]), float(self.frequency[max_index[0]+1])]
+        return p0
 
     def get_noise(self):
         end_index = int(len(self.S21)/5)
@@ -84,7 +93,7 @@ class FittingParameters():
     def get_residuals(self, fitting_parameters):
         x_values = self.frequency
         function_values = evaluate_lorentzian(x_values, fitting_parameters)
-        residuals = function_values - x_values
+        residuals = function_values - self.S21
         return residuals
 
 

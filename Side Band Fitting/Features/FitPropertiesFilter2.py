@@ -83,7 +83,6 @@ class FitPropertiesFilter2(Feature):
         self.gamma_mean, self.gamma_std = self.get_distribution_parameters(gamma)
         self.omega_mean, self.omega_std = self.get_distribution_parameters(omega)
         self.amplitude_mean, self.amplitude_std = self.get_distribution_parameters(amplitude)
-        print(detuning_obj, round(self.gamma_mean, 1), round(self.gamma_std, 2))
 
     def set_spectrum_valid_first_pass(self, detuning_obj):
         for spectrum_obj in detuning_obj.spectrum_objects:
@@ -117,14 +116,12 @@ class FitPropertiesFilter2(Feature):
     def set_omega_filter(self, spectrum_obj):
         if spectrum_obj.first_pass:
             spectrum_obj.omega_z_score2 = abs(spectrum_obj.omega - self.omega_mean) / self.omega_std
-            #spectrum_obj.valid_omega2  = (omega_z_score < self.z_score_threshold or omega_z_score < 0)
         else:
             spectrum_obj.omega_z_score2 = 1000
 
     def set_amplitude_filter(self, spectrum_obj):
         if spectrum_obj.first_pass:
             spectrum_obj.amplitude_z_score2 = abs(spectrum_obj.amplitude - self.amplitude_mean) / self.amplitude_std
-            #spectrum_obj.valid_amplitude  = (amplitude_z_score < self.z_score_threshold or amplitude_z_score < 0)
         else:
             spectrum_obj.amplitude_z_score2 = 1000
 
@@ -139,9 +136,6 @@ class FitPropertiesFilter2(Feature):
                 self.save_spectrum_obj_to_file(spectrum_obj, index, file)
 
     def save_spectrum_obj_to_file(self, spectrum_obj, index, file):
-        #valid_gamma = int(spectrum_obj.valid_gamma)
-        #valid_omega = int(spectrum_obj.valid_omega)
-        #valid_amplitude = int(spectrum_obj.valid_amplitude)
         valid_gamma = spectrum_obj.gamma_z_score
         valid_omega = spectrum_obj.omega_z_score
         valid_amplitude = spectrum_obj.amplitude_z_score
@@ -191,14 +185,10 @@ class FitPropertiesFilter2(Feature):
                     self.create_detuning_plot(detuning_obj, **kwargs)
 
     def set_colour_lookup(self):
-        self.colour_lookup = {(False, False, False): "black",
-                              (False, False, True): "black",
-                              (False, True, False): "lime",
-                              (False, True, True): "red",
-                              (True, False, False): "lime",
-                              (True, False, True): "yellow",
-                              (True, True, False): "lime",
-                              (True, True, True): "lime"}
+        self.colour_lookup = {(False, False): "black",
+                              (False, True): "red",
+                              (True, False): "yellow",
+                              (True, True): "lime"}
 
     def create_detuning_plot(self, detuning_obj, **kwargs):
         lines_objects = self.get_lines_objects(detuning_obj)
@@ -248,6 +238,5 @@ class FitPropertiesFilter2(Feature):
 
     def get_fit_line_colour(self, spectrum_obj):
         valid_property_key = (spectrum_obj.gamma_z_score2 < self.z_score_threshold,
-                              spectrum_obj.omega_z_score2 < self.z_score_threshold,
-                              True)
+                              spectrum_obj.omega_z_score2 < self.z_score_threshold)
         return self.colour_lookup[valid_property_key]

@@ -142,4 +142,5 @@ def get_moving_average(data, window_size=5):
 def evaluate_lorentzian(x_values, lorentzian_parameters):
     F, gamma, noise, w = lorentzian_parameters
     function_values = (F/(gamma**2 + 4*(x_values - w)**2)) + noise
+    #function_values = (F/(gamma**2 + 16*np.pi**2*(x_values - w)**2)) + noise
     return function_values
