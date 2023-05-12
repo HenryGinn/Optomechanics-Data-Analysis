@@ -7,9 +7,10 @@ from Spectrum import Spectrum
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
+from Features.GetFittingParameters import get_fitting_parameters
 from Utils import make_folder
 from Utils import get_file_contents_from_path
-from Features.GetFittingParameters import get_fitting_parameters
+from Utils import evaluate_lorentzian
 
 class TransmissionFit(Feature):
 
@@ -59,13 +60,14 @@ class TransmissionFit(Feature):
 
     def save_trial_obj(self, trial_obj):
         with open(trial_obj.transmission_fit_path, "w") as file:
-            file.writelines("Detuning (Hz)\n")
+            file.writelines("Detuning (Hz)\tF\tGamma\tNoise\tResonant\n")
             self.save_trial_obj_to_file(trial_obj, file)
 
     def save_trial_obj_to_file(self, trial_obj, file):
         for detuning_obj in trial_obj.detuning_objects:
             detuning = detuning_obj.detuning
-            file.writelines(f"{detuning}\n")
+            F, gamma, noise, resonant = detuning_obj.transmission_obj.fitting_parameters
+            file.writelines(f"{detuning}\t{F}\t{gamma}\t{noise}\t{resonant}\n")
 
     def data_is_saved(self):
         return np.all([os.path.exists(trial_obj.transmission_fit_path)
@@ -85,14 +87,9 @@ class TransmissionFit(Feature):
             detuning_obj.transmission_obj.load_S21()
 
     def create_plots(self, **kwargs):
-        self.execute("Save")
-        self.process_plotting_kwargs(kwargs)
         for power_obj in self.data_set_obj.power_objects:
             for trial_obj in power_obj.trial_objects:
                 self.create_plots_trial(trial_obj, **kwargs)
-
-    def process_plotting_kwargs(self, kwargs):
-        pass
 
     def create_plots_trial(self, trial_obj, **kwargs):
         lines_objects = self.get_lines_objects(trial_obj)
@@ -107,18 +104,22 @@ class TransmissionFit(Feature):
         return lines_objects
 
     def get_lines_obj(self, detuning_obj):
-        line_objects = [self.get_line_obj_transmission(detuning_obj)]
-                        #self.get_line_obj_fit(detuning_obj)]
+        transmission_obj = detuning_obj.transmission_obj
+        line_objects = [self.get_line_obj_transmission(transmission_obj)]
+        self.add_line_obj_fit(transmission_obj, line_objects)
         lines_obj = Lines(line_objects)
         lines_obj.title = f"{detuning_obj.detuning} Hz"
         return lines_obj
 
-    def get_line_obj_transmission(self, detuning_obj):
-        transmission_obj = detuning_obj.transmission_obj
+    def get_line_obj_transmission(self, transmission_obj):
         x_values = transmission_obj.frequency
         y_values = transmission_obj.S21
         line_obj = Line(x_values, y_values)
         return line_obj
 
-    def get_line_obj_fit(self, detuning_obj):
-        pass
+    def add_line_obj_fit(self, transmission_obj, line_objects):
+        if transmission_obj.fitting_parameters is not None:
+            x_values = transmission_obj.frequency
+            y_values = evaluate_lorentzian(x_values, transmission_obj.fitting_parameters)
+            line_obj = Line(x_values, y_values, colour="grey", linestyle="--")
+            line_objects.append(line_obj)

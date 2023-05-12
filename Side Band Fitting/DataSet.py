@@ -5,12 +5,11 @@ sys.path.append("..")
 
 from Power import Power
 import PutTrialsInFolders
-from Features.SpectraRaw import SpectraRaw
+from Features.TransmissionFit import TransmissionFit
 from Features.SpectraValid import SpectraValid
 from Features.SpectraPeak import SpectraPeak
 from Features.AverageSpectra import AverageSpectra
 from Features.PlotSpectra import PlotSpectra
-from Features.TransmissionFit import TransmissionFit
 from Features.SpectraFit import SpectraFit
 from Features.FitHeuristic import FitHeuristic
 from Features.SpectraFitFiltered import SpectraFitFiltered
@@ -134,7 +133,6 @@ class DataSet():
             power_obj.process_power()
 
     def set_feature_objects(self):
-        self.spectra_raw_obj = SpectraRaw(self)
         self.spectra_valid_obj = SpectraValid(self)
         self.spectra_peak_obj = SpectraPeak(self)
         self.average_spectra_obj = AverageSpectra(self)
@@ -147,9 +145,6 @@ class DataSet():
         self.fit_properties_filter_obj = FitPropertiesFilter(self)
         self.fit_properties_filter2_obj = FitPropertiesFilter2(self)
         self.average_greek_obj = AverageGreek(self)
-
-    def spectra_raw(self, command="Load", **kwargs):
-        self.spectra_raw_obj.execute(command, **kwargs)
 
     def spectra_valid(self, command="Load", **kwargs):
         self.spectra_valid_obj.execute(command, **kwargs)

@@ -24,7 +24,8 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    #data_set.transmission_fit("Plot", subplots=20, aspect_ratio=1.7)
+    data_set.transmission_fit("Save")
+    data_set.transmission_fit("Plot", subplots=None, aspect_ratio=1.7)
     #data_set.spectra_valid("Save")
     #data_set.spectra_valid("Plot", subplots=None)
     #data_set.spectra_fit("Save")
@@ -40,8 +41,8 @@ def process_data_set(data_set):
     #data_set.fit_properties_filter("Plot")
     #data_set.fit_properties_filter("Save")
     #data_set.fit_properties_filter("Plot")
-    data_set.average_greek("Save")
-    data_set.average_greek("Plot")
+    #data_set.average_greek("Save")
+    #data_set.average_greek("Plot")
     
 def process_all_data_sets():
     for data_set_data in data_sets:

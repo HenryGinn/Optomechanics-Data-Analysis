@@ -66,9 +66,9 @@ class AverageGreek(Feature):
             self.set_detuning_obj_trivial(detuning_obj)
 
     def set_detuning_obj_non_trivial(self, detuning_obj, values):
-        detuning_obj.gamma = np.median(values[0])
-        detuning_obj.omega = np.abs(np.median(values[1]))
-        detuning_obj.amplitude = np.median(values[2])
+        detuning_obj.gamma = np.mean(values[0])
+        detuning_obj.omega = np.abs(np.mean(values[1]))
+        detuning_obj.amplitude = np.mean(values[2])
 
     def set_detuning_obj_trivial(self, detuning_obj):
         detuning_obj.gamma = None
@@ -78,7 +78,9 @@ class AverageGreek(Feature):
     def get_values_from_detuning_obj(self, detuning_obj):
         values = [(spectrum_obj.gamma, spectrum_obj.omega, spectrum_obj.amplitude)
                   for spectrum_obj in detuning_obj.spectrum_objects
-                  if hasattr(spectrum_obj, "gamma") and spectrum_obj.gamma is not None and spectrum_obj.gamma_z_score < 2]
+                  if hasattr(spectrum_obj, "gamma") and spectrum_obj.gamma is not None
+                  and spectrum_obj.gamma_z_score < 2
+                  and spectrum_obj.valid_fit]
         return list(zip(*values))
 
     def save_trial_obj(self, trial_obj):
