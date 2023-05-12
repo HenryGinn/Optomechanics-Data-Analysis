@@ -67,8 +67,5 @@ class Data():
         self.omega = centre_frequency - self.detuning_obj.cavity_frequency - self.detuning_obj.detuning
     
     def __str__(self):
-        string = (f"Detuning: {self.detuning}\n"
-                  f"Power: {self.power}\n"
-                  f"Timestamp: {self.timestamp}\n"
-                  f"File path: {self.file_path}\n")
+        string = (f"{self.detuning_obj}, {self.file_path}")
         return string

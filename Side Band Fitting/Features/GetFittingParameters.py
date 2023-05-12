@@ -2,14 +2,9 @@ import math
 
 import numpy as np
 import scipy.optimize as sc
-import matplotlib.pyplot as plt
 
 from Utils import get_moving_average
 from Utils import evaluate_lorentzian
-
-plt.rcParams['font.size'] = 12
-plt.rcParams['axes.linewidth'] = 0.5
-plt.rcParams['axes.formatter.limits'] = [-5,5]
 
 class FittingParameters():
 
@@ -97,7 +92,7 @@ class FittingParameters():
         return residuals
 
 
-def get_fitting_parameters(data_obj):
-    fitting_parameters_obj = FittingParameters(data_obj)
+def get_fitting_parameters(spectrum_obj):
+    fitting_parameters_obj = FittingParameters(spectrum_obj)
     fitting_parameters_obj.set_fitting_parameters()
     return fitting_parameters_obj.fitting_parameters

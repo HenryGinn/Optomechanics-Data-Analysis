@@ -80,6 +80,7 @@ class SpectraFitFiltered(Feature):
     def set_fit_heuristic_distribution(self, detuning_obj):
         fit_heuristics = [spectrum_obj.fit_heuristic if hasattr(spectrum_obj, "fit_heuristic") else None
                           for spectrum_obj in detuning_obj.spectrum_objects]
+        fit_heuristics = [fit_heuristic for fit_heuristic in fit_heuristics if fit_heuristic is not None]
         detuning_obj.fit_heuristic_mean = np.mean(fit_heuristics)
         detuning_obj.fit_heuristic_standard_deviation = np.std(fit_heuristics)
 

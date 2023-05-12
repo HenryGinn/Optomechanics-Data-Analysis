@@ -7,7 +7,7 @@ from Spectrum import Spectrum
 from Plotting.Plots import Plots
 from Plotting.Lines import Lines
 from Plotting.Line import Line
-from Features.GetFittingParameters import get_fitting_parameters
+from Features.TransmissionFittingParameters import get_transmission_fitting_parameters
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 from Utils import evaluate_lorentzian
@@ -46,6 +46,8 @@ class TransmissionFit(Feature):
 
     def save_power_obj(self, power_obj):
         for trial_obj in power_obj.trial_objects:
+            print("")
+            print(power_obj.power_string)
             self.set_trial_obj(trial_obj)
             self.save_trial_obj(trial_obj)
 
@@ -56,7 +58,7 @@ class TransmissionFit(Feature):
     def set_detuning_obj(self, detuning_obj):
         transmission_obj = detuning_obj.transmission_obj
         transmission_obj.load_S21()
-        transmission_obj.fitting_parameters = get_fitting_parameters(transmission_obj)
+        transmission_obj.fitting_parameters = get_transmission_fitting_parameters(transmission_obj)
 
     def save_trial_obj(self, trial_obj):
         with open(trial_obj.transmission_fit_path, "w") as file:
@@ -84,7 +86,8 @@ class TransmissionFit(Feature):
 
     def load_trial_obj(self, trial_obj):
         for detuning_obj in trial_obj.detuning_objects:
-            detuning_obj.transmission_obj.load_S21()
+            pass
+            
 
     def create_plots(self, **kwargs):
         for power_obj in self.data_set_obj.power_objects:

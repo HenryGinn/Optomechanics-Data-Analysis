@@ -15,7 +15,7 @@ class Detuning():
     Processing of spectra happens here.
     """
 
-    number_of_spectra_to_remove_from_start = 0
+    number_of_spectra_to_remove_from_start = 5
     review_all_S21_simultaneously = False
     output_rejected_spectra = False
     flag_bad_offsets = False
