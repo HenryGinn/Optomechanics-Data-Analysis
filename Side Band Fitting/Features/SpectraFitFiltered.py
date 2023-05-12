@@ -99,11 +99,12 @@ class SpectraFitFiltered(Feature):
             self.save_detuning_obj_to_file(detuning_obj, file)
 
     def save_detuning_obj_to_file(self, detuning_obj, file):
-        for index, spectrum_obj in enumerate(detuning_obj.spectrum_objects):
+        for spectrum_obj in detuning_obj.spectrum_objects:
             if spectrum_obj.has_valid_peak:
-                self.save_spectrum_obj_to_file(spectrum_obj, index, file)
+                self.save_spectrum_obj_to_file(spectrum_obj, file)
 
-    def save_spectrum_obj_to_file(self, spectrum_obj, index, file):
+    def save_spectrum_obj_to_file(self, spectrum_obj, file):
+        index = spectrum_obj.index
         valid_fit = int(spectrum_obj.valid_fit)
         file.writelines(f"{index}\t{valid_fit}\n")
 
@@ -177,7 +178,7 @@ class SpectraFitFiltered(Feature):
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]
         y_values = spectrum_obj.S21[spectrum_obj.plotting_indices]
-        y_values = get_moving_average(y_values, 20)
+        y_values = get_moving_average(y_values, spectrum_obj.moving_average_size)
         line_obj = Line(x_values, y_values,
                         linewidth="0", marker=".")
         return line_obj

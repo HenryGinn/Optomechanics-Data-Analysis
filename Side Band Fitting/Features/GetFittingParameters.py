@@ -16,15 +16,16 @@ class FittingParameters():
     parameter_names = ["F", "Gamma", "Noise", "w"]
 
     def __init__(self, data_obj):
-        self.S21 = get_moving_average(data_obj.S21, 20)
+        self.data_obj = data_obj
+        self.S21 = get_moving_average(data_obj.S21, data_obj.moving_average_size)
         self.frequency = data_obj.frequency
 
     def set_fitting_parameters(self):
         self.shift_frequency_left()
-        #initial_fitting_parameters = self.get_initial_fitting_parameters()
         initial_fitting_parameters = self.get_initial_fitting_parameters()
         self.fitting_parameters = self.get_automatic_fitting_parameters(initial_fitting_parameters)
         self.shift_frequency_right()
+        #print(self.fitting_parameters, self.data_obj.detuning)
 
     def shift_frequency_left(self):
         self.frequency_shift = self.frequency[np.argmax(self.S21)]

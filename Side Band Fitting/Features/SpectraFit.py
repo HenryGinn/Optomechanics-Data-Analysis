@@ -179,7 +179,7 @@ class SpectraFit(Feature):
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]
         y_values = spectrum_obj.S21[spectrum_obj.plotting_indices]
-        y_values = get_moving_average(y_values, 20)
+        y_values = get_moving_average(y_values, spectrum_obj.moving_average_size)
         line_obj = Line(x_values, y_values,
                         linewidth="0", marker=".")
         return line_obj

@@ -59,6 +59,7 @@ class TransmissionFit(Feature):
         transmission_obj = detuning_obj.transmission_obj
         transmission_obj.load_S21()
         transmission_obj.fitting_parameters = get_transmission_fitting_parameters(transmission_obj)
+        #transmission_obj.detuning_obj.cavity_frequency = transmission_obj.fitting_parameters[3]
 
     def save_trial_obj(self, trial_obj):
         with open(trial_obj.transmission_fit_path, "w") as file:

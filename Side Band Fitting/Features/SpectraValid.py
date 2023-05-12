@@ -95,8 +95,10 @@ class SpectraValid(Feature):
             self.save_detuning_obj_to_file(detuning_obj, file)
 
     def save_detuning_obj_to_file(self, detuning_obj, file):
-        for index, spectrum_obj in enumerate(detuning_obj.spectrum_objects):
-            file.writelines(f"{index}\t{int(spectrum_obj.has_valid_peak)}\n")
+        for spectrum_obj in detuning_obj.spectrum_objects:
+            index = spectrum_obj.index
+            valid_peak = int(spectrum_obj.has_valid_peak)
+            file.writelines(f"{index}\t{valid_peak}\n")
 
     def data_is_saved(self):
         return np.all([os.path.exists(detuning_obj.spectra_valid_path)

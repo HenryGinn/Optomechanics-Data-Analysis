@@ -51,6 +51,7 @@ class Greek(Feature):
     def load_necessary_data_for_saving(self):
         self.data_set_obj.spectra_fit("Load")
         self.data_set_obj.spectra_fit_filtered("Load")
+        #self.data_set_obj.transmission_fit("Save")
 
     def refresh(self):
         self.data_set_obj.spectra_fit("Refresh")
