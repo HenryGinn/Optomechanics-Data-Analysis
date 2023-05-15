@@ -168,13 +168,20 @@ class SpectraFit(Feature):
 
     def set_spectrum_plotting_data(self, spectrum_obj):
         spectrum_obj.load_S21()
+        spectrum_obj.S21 = get_moving_average(spectrum_obj.S21, spectrum_obj.moving_average_size)
         if self.width is not None:
             peak_index = np.argmax(spectrum_obj.S21)
             left_index = peak_index - self.width
             right_index = peak_index + self.width
-            spectrum_obj.plotting_indices = slice(left_index, right_index)
+            spectrum_obj.plotting_indices = self.get_plotting_indicies_from_limits(left_index, right_index)
         else:
             spectrum_obj.plotting_indices = slice(None)
+
+    def get_plotting_indicies_from_limits(self, left_index, right_index):
+        if left_index >= 0 and right_index <= 5001:
+            return slice(left_index, right_index)
+        else:
+            return slice(None)
     
     def get_line_obj_S21(self, spectrum_obj):
         x_values = spectrum_obj.frequency[spectrum_obj.plotting_indices]

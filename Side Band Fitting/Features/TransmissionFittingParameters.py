@@ -7,13 +7,6 @@ from Utils import evaluate_lorentzian
 
 class TransmissionFittingParameters():
 
-    # kappa_ext, kappa_tot
-    #parameters_dict = {"24": (16965779.6, 26505841.9),
-    #                   "25": (16884359.9, 26415157.0),
-    #                   "26": (16773538.6, 26288609.2),
-    #                   "27": (16616858.7, 26141769.8),
-    #                   "28": (16415232.3, 25818528.8),
-    #                   "29": (18086263.1, 25508271.9)}
     parameters_dict = {"24": (3.72*10**12, 2.6*10**7),
                        "25": (4.4*10**12, 2.6*10**7),
                        "26": (4.6*10**12, 2.6*10**7),
@@ -42,7 +35,7 @@ class TransmissionFittingParameters():
     def get_automatic_fitting_parameters(self, initial_resonant):
         resonant = sc.leastsq(self.get_residuals,
                               initial_resonant)[0]
-        fitting_parameters = (*self.fixed_fitting_parameters, resonant)
+        fitting_parameters = (*self.fixed_fitting_parameters, resonant[0])
         return fitting_parameters
 
     def get_residuals(self, resonant):

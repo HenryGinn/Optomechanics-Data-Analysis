@@ -64,7 +64,9 @@ class Data():
 
     def set_omega_from_fit(self):
         centre_frequency = self.fitting_parameters[3] + self.frequency_shift
-        self.omega = centre_frequency - self.detuning_obj.cavity_frequency - self.detuning_obj.detuning
+        cavity_frequency = self.detuning_obj.cavity_frequency
+        detuning = self.detuning_obj.detuning
+        self.omega = centre_frequency - cavity_frequency - detuning
     
     def __str__(self):
         string = (f"{self.detuning_obj}, {self.file_path}")

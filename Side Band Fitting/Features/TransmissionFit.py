@@ -86,8 +86,10 @@ class TransmissionFit(Feature):
             self.load_trial_obj(trial_obj)
 
     def load_trial_obj(self, trial_obj):
-        for detuning_obj in trial_obj.detuning_objects:
-            pass
+        file_contents = get_file_contents_from_path(trial_obj.transmission_fit_path)
+        file_contents = list(zip(*file_contents))
+        for detuning_obj, detuning_data in zip(trial_obj.detuning_objects, file_contents):
+            detuning_obj.transmission_obj.fitting_parameters = detuning_data[1:]
             
 
     def create_plots(self, **kwargs):
@@ -99,7 +101,7 @@ class TransmissionFit(Feature):
         lines_objects = self.get_lines_objects(trial_obj)
         plots_obj = Plots(lines_objects, **kwargs)
         plots_obj.parent_results_path, _ = os.path.split(trial_obj.transmission_fit_path)
-        plots_obj.title = str(trial_obj)
+        plots_obj.title = f"{trial_obj} Transmission Fits"
         plots_obj.plot()
 
     def get_lines_objects(self, trial_obj):
@@ -109,6 +111,7 @@ class TransmissionFit(Feature):
 
     def get_lines_obj(self, detuning_obj):
         transmission_obj = detuning_obj.transmission_obj
+        transmission_obj.load_S21()
         line_objects = [self.get_line_obj_transmission(transmission_obj)]
         self.add_line_obj_fit(transmission_obj, line_objects)
         lines_obj = Lines(line_objects)

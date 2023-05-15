@@ -10,6 +10,7 @@ from Plotting.Line import Line
 from Utils import make_folder
 from Utils import get_file_contents_from_path
 from Utils import get_moving_average
+from Utils import mean_of_middle_values
 
 class AverageGreek(Feature):
 
@@ -41,6 +42,7 @@ class AverageGreek(Feature):
     def load_necessary_data_for_saving(self):
         self.data_set_obj.greek("Load")
         self.data_set_obj.fit_properties_filter("Load")
+        self.data_set_obj.spectra_fit_filtered("Load")
 
     def refresh_data(self):
         self.data_set_obj.greek("Refresh")
@@ -66,9 +68,9 @@ class AverageGreek(Feature):
             self.set_detuning_obj_trivial(detuning_obj)
 
     def set_detuning_obj_non_trivial(self, detuning_obj, values):
-        detuning_obj.gamma = np.mean(values[0])
-        detuning_obj.omega = np.abs(np.mean(values[1]))
-        detuning_obj.amplitude = np.mean(values[2])
+        detuning_obj.gamma = mean_of_middle_values(values[0], 20, 80)
+        detuning_obj.omega = np.abs(mean_of_middle_values(values[1], 20, 80))
+        detuning_obj.amplitude = mean_of_middle_values(values[2], 20, 80)
 
     def set_detuning_obj_trivial(self, detuning_obj):
         detuning_obj.gamma = None
@@ -129,20 +131,30 @@ class AverageGreek(Feature):
 
     def create_plots(self):
         for power_obj in self.data_set_obj.power_objects:
-            for trial_obj in power_obj.trial_objects:
-                self.create_trial_plot(trial_obj)
+            self.create_power_obj_plot(power_obj)
 
-    def create_trial_plot(self, trial_obj):
-        lines_objects = self.get_lines_objects(trial_obj)
-        plots_obj = Plots(lines_objects)
-        plots_obj.parent_results_path, _ = os.path.split(trial_obj.average_greek_path)
-        plots_obj.title = str(trial_obj)
-        plots_obj.plot()
-
-    def get_lines_objects(self, trial_obj):
+    def get_line_objects(self, trial_obj):
         values = list(zip(*[(detuning_obj.detuning, detuning_obj.gamma, detuning_obj.omega, detuning_obj.amplitude)
                             for detuning_obj in trial_obj.detuning_objects
                             if detuning_obj.gamma is not None]))
         line_objects = [Line(values[0], values_list) for values_list in values[1:]]
-        lines_objects = [Lines([line_obj]) for line_obj in line_objects]
+        return line_objects
+
+    def create_power_obj_plot(self, power_obj):
+        lines_objects = self.get_lines_objects_power(power_obj)
+        plots_obj = Plots(lines_objects)
+        plots_obj.parent_results_path, _ = os.path.split(power_obj.average_greek_path)
+        plots_obj.title = f"{power_obj} Sideband Properties"
+        plots_obj.plot()
+
+    def get_lines_objects(self, power_obj):
+        line_objects = [self.get_line_objects(trial_obj)
+                        for trial_obj in power_obj.trial_objects]
+        lines_objects = [Lines(line_objs) for line_objs in zip(*line_objects)]
+        self.set_lines_titles(lines_objects)
+        lines_objects[2].plot_type = "semilogy"
         return lines_objects
+
+    def set_lines_titles(self, lines_objects):
+        for lines_obj, title in zip(lines_objects, ["Gamma", "Omega", "Amplitude"]):
+            lines_obj.title = title

@@ -144,3 +144,10 @@ def evaluate_lorentzian(x_values, lorentzian_parameters):
     function_values = (F/(gamma**2 + 4*(x_values - w)**2)) + noise
     return function_values
  
+def mean_of_middle_values(data, percentile_1=25, percentile_2=75):
+    sorted_data = np.sort(data)
+    lower_value = np.percentile(sorted_data, percentile_1, method="lower")
+    higher_value = np.percentile(sorted_data, percentile_2, method="higher")
+    middle_values = sorted_data[(lower_value <= sorted_data) & (sorted_data <= higher_value)]
+    return np.mean(middle_values)
+    

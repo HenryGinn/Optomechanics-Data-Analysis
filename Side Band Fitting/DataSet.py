@@ -17,6 +17,7 @@ from Features.FitPropertiesFilter import FitPropertiesFilter
 from Features.FitPropertiesFilter2 import FitPropertiesFilter2
 from Features.Greek import Greek
 from Features.AverageGreek import AverageGreek
+from Features.TrialAverageGreek import TrialAverageGreek
 from Utils import make_folder
 
 class DataSet():
@@ -145,6 +146,7 @@ class DataSet():
         self.fit_properties_filter_obj = FitPropertiesFilter(self)
         self.fit_properties_filter2_obj = FitPropertiesFilter2(self)
         self.average_greek_obj = AverageGreek(self)
+        self.trial_average_greek_obj = TrialAverageGreek(self)
 
     def spectra_valid(self, command="Load", **kwargs):
         self.spectra_valid_obj.execute(command, **kwargs)
@@ -181,6 +183,9 @@ class DataSet():
 
     def average_greek(self, command="Plot", **kwargs):
         self.average_greek_obj.execute(command, **kwargs)
+
+    def trial_average_greek(self, command="Plot", **kwargs):
+        self.trial_average_greek_obj.execute(command, **kwargs)
         
     def __str__(self):
         string = f"{self.folder_name}"
