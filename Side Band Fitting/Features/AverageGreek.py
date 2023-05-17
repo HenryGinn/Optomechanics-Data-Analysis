@@ -129,19 +129,15 @@ class AverageGreek(Feature):
                 detuning_obj.omega = None
                 detuning_obj.amplitude = None
 
+    def load_necessary_data_for_plotting(self):
+        self.data_set_obj.transmission_fit("Load")
+
     def create_plots(self):
         for power_obj in self.data_set_obj.power_objects:
             self.create_power_obj_plot(power_obj)
 
-    def get_line_objects(self, trial_obj):
-        values = list(zip(*[(detuning_obj.detuning, detuning_obj.gamma, detuning_obj.omega, detuning_obj.amplitude)
-                            for detuning_obj in trial_obj.detuning_objects
-                            if detuning_obj.gamma is not None]))
-        line_objects = [Line(values[0], values_list) for values_list in values[1:]]
-        return line_objects
-
     def create_power_obj_plot(self, power_obj):
-        lines_objects = self.get_lines_objects_power(power_obj)
+        lines_objects = self.get_lines_objects(power_obj)
         plots_obj = Plots(lines_objects)
         plots_obj.parent_results_path, _ = os.path.split(power_obj.average_greek_path)
         plots_obj.title = f"{power_obj} Sideband Properties"
@@ -154,6 +150,13 @@ class AverageGreek(Feature):
         self.set_lines_titles(lines_objects)
         lines_objects[2].plot_type = "semilogy"
         return lines_objects
+
+    def get_line_objects(self, trial_obj):
+        values = list(zip(*[(detuning_obj.true_detuning, detuning_obj.gamma, detuning_obj.omega, detuning_obj.amplitude)
+                            for detuning_obj in trial_obj.detuning_objects
+                            if detuning_obj.gamma is not None]))
+        line_objects = [Line(values[0], values_list) for values_list in values[1:]]
+        return line_objects
 
     def set_lines_titles(self, lines_objects):
         for lines_obj, title in zip(lines_objects, ["Gamma", "Omega", "Amplitude"]):

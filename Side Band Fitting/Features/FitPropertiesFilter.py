@@ -83,7 +83,6 @@ class FitPropertiesFilter(Feature):
         self.gamma_mean, self.gamma_std = self.get_distribution_parameters(gamma)
         self.omega_mean, self.omega_std = self.get_distribution_parameters(omega)
         self.amplitude_mean, self.amplitude_std = self.get_distribution_parameters(amplitude)
-        print(detuning_obj, round(self.gamma_mean, 1), round(self.gamma_std, 2))
 
     def get_fit_properties(self, detuning_obj):
         fit_properties = [(spectrum_obj.gamma, spectrum_obj.omega, spectrum_obj.amplitude)

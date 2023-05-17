@@ -24,7 +24,7 @@ def get_data_set(data_set_data):
     return data_set
 
 def process_data_set(data_set):
-    #data_set.transmission_fit("Save")
+    data_set.transmission_fit("Save")
     #data_set.transmission_fit("Plot", subplots=None, aspect_ratio=1.7)
     #data_set.spectra_valid("Save")
     #data_set.spectra_valid("Plot", subplots=None)
@@ -42,8 +42,9 @@ def process_data_set(data_set):
     #data_set.fit_properties_filter("Save")
     #data_set.fit_properties_filter("Plot")
     #data_set.average_greek("Save")
-    #data_set.average_greek("Plot")
-    data_set.trial_average_greek("Plot")
+    data_set.average_greek("Plot")
+    #data_set.trial_average_greek("Save")
+    #data_set.trial_average_greek("Plot")
     pass
     
 def process_all_data_sets():
@@ -65,7 +66,7 @@ if os.name == "nt":
 else:
     data_set_path=None
 
-data_set_data = data_sets[4]
+data_set_data = data_sets[1]
 data_set = get_data_set(data_set_data)
 process_data_set(data_set)
 #process_all_data_sets()

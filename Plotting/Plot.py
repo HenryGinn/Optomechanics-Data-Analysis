@@ -149,16 +149,26 @@ class Plot():
     def plot_lines(self, ax, lines_obj):
         plot_function = self.get_plot_function(ax, lines_obj)
         for line_obj in lines_obj.line_objects:
-            self.plot_line(ax, line_obj, plot_function)
+            plot_function[0](ax, line_obj, plot_function[1])
 
     def get_plot_function(self, ax, lines_obj):
-        plot_functions = {"plot": ax.plot,
-                          "semilogy": ax.semilogy}
+        plot_functions = {"plot": (self.plot_type_1, ax.plot),
+                          "semilogy": (self.plot_type_1, ax.semilogy),
+                          "errorbar": (self.plot_type_2, ax.errorbar)}
         plot_function = plot_functions[lines_obj.plot_type]
         return plot_function
         
-    def plot_line(self, ax, line_obj, plot_function):
+    def plot_type_1(self, ax, line_obj, plot_function):
         plot_function(line_obj.x_values, line_obj.y_values,
+                      color=line_obj.colour,
+                      marker=line_obj.marker,
+                      linestyle=line_obj.linestyle,
+                      linewidth=line_obj.linewidth,
+                      label=line_obj.label)
+        
+    def plot_type_2(self, ax, line_obj, plot_function):
+        plot_function(line_obj.x_values, line_obj.y_values,
+                      xerr=line_obj.x_err, yerr=line_obj.y_err,
                       color=line_obj.colour,
                       marker=line_obj.marker,
                       linestyle=line_obj.linestyle,

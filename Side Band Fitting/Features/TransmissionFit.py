@@ -59,18 +59,22 @@ class TransmissionFit(Feature):
         transmission_obj = detuning_obj.transmission_obj
         transmission_obj.load_S21()
         transmission_obj.fitting_parameters = get_transmission_fitting_parameters(transmission_obj)
-        #transmission_obj.detuning_obj.cavity_frequency = transmission_obj.fitting_parameters[3]
+        omega_c = transmission_obj.fitting_parameters[3] # true peak of transmission
+        omega_d = detuning_obj.cavity_frequency - detuning_obj.detuning
+        detuning_obj.true_detuning = omega_c - omega_d
+        detuning_obj.true_detuning = detuning_obj.detuning
 
     def save_trial_obj(self, trial_obj):
         with open(trial_obj.transmission_fit_path, "w") as file:
-            file.writelines("Detuning (Hz)\tF\tGamma\tNoise\tResonant\n")
+            file.writelines("Detuning (Hz)\tTrue Detuning (Hz)\tF\tGamma\tNoise\tResonant\n")
             self.save_trial_obj_to_file(trial_obj, file)
 
     def save_trial_obj_to_file(self, trial_obj, file):
         for detuning_obj in trial_obj.detuning_objects:
             detuning = detuning_obj.detuning
+            true_detuning = detuning_obj.true_detuning
             F, gamma, noise, resonant = detuning_obj.transmission_obj.fitting_parameters
-            file.writelines(f"{detuning}\t{F}\t{gamma}\t{noise}\t{resonant}\n")
+            file.writelines(f"{detuning}\t{true_detuning}\t{F}\t{gamma}\t{noise}\t{resonant}\n")
 
     def data_is_saved(self):
         return np.all([os.path.exists(trial_obj.transmission_fit_path)
@@ -89,8 +93,8 @@ class TransmissionFit(Feature):
         file_contents = get_file_contents_from_path(trial_obj.transmission_fit_path)
         file_contents = list(zip(*file_contents))
         for detuning_obj, detuning_data in zip(trial_obj.detuning_objects, file_contents):
-            detuning_obj.transmission_obj.fitting_parameters = detuning_data[1:]
-            
+            detuning_obj.true_detuning = detuning_data[1]
+            detuning_obj.transmission_obj.fitting_parameters = detuning_data[2:]
 
     def create_plots(self, **kwargs):
         for power_obj in self.data_set_obj.power_objects:

@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 
 import numpy as np
 
@@ -57,7 +58,7 @@ class TrialAverageGreek(Feature):
                                 for detuning in power_obj.detunings}
 
     def get_gamma_values(self, power_obj):
-        gamma_values = power_obj.detuning_dict.copy()
+        gamma_values = deepcopy(power_obj.detuning_dict)
         for trial_obj in power_obj.trial_objects:
             for detuning_obj in trial_obj.detuning_objects:
                 if detuning_obj.gamma is not None:
@@ -72,7 +73,7 @@ class TrialAverageGreek(Feature):
                                 for detuning in power_obj.detunings}
 
     def get_omega_values(self, power_obj):
-        omega_values = power_obj.detuning_dict.copy()
+        omega_values = deepcopy(power_obj.detuning_dict)
         for trial_obj in power_obj.trial_objects:
             for detuning_obj in trial_obj.detuning_objects:
                 if detuning_obj.omega is not None:
@@ -87,7 +88,7 @@ class TrialAverageGreek(Feature):
                                    for detuning in power_obj.detunings}
 
     def get_amplitude_values(self, power_obj):
-        amplitude_values = power_obj.detuning_dict.copy()
+        amplitude_values = deepcopy(power_obj.detuning_dict)
         for trial_obj in power_obj.trial_objects:
             for detuning_obj in trial_obj.detuning_objects:
                 if detuning_obj.amplitude is not None:
@@ -142,7 +143,7 @@ class TrialAverageGreek(Feature):
         detunings = [detuning_obj.detuning for detuning_obj in power_obj.trial_objects[0].detuning_objects]
         power_obj.detunings = detunings
         power_obj.gamma_mean = {detuning: gamma_mean for detuning, gamma_mean in zip(detunings, greek_data[0])}
-        power_obj.gamma_mean = {detuning: gamma_std for detuning, gamma_std in zip(detunings, greek_data[1])}
+        power_obj.gamma_std = {detuning: gamma_std for detuning, gamma_std in zip(detunings, greek_data[1])}
         power_obj.omega_mean = {detuning: omega_mean for detuning, omega_mean in zip(detunings, greek_data[2])}
         power_obj.omega_std = {detuning: omega_std for detuning, omega_std in zip(detunings, greek_data[3])}
         power_obj.amplitude_mean = {detuning: amplitude_mean for detuning, amplitude_mean in zip(detunings, greek_data[4])}
@@ -168,20 +169,23 @@ class TrialAverageGreek(Feature):
     def get_gamma_lines_obj(self, power_obj):
         x_values = power_obj.detunings
         y_values = list(power_obj.gamma_mean.values())
-        lines_obj = Lines([Line(x_values, y_values)])
+        y_err = list(power_obj.gamma_std.values())
+        lines_obj = Lines([Line(x_values, y_values, y_err=y_err)], plot_type="errorbar")
         lines_obj.title = "Gamma"
         return lines_obj
 
     def get_omega_lines_obj(self, power_obj):
         x_values = power_obj.detunings
         y_values = list(power_obj.omega_mean.values())
-        lines_obj = Lines([Line(x_values, y_values)])
+        y_err = list(power_obj.omega_std.values())
+        lines_obj = Lines([Line(x_values, y_values, y_err=y_err)], plot_type="errorbar")
         lines_obj.title = "Omega"
         return lines_obj
 
     def get_amplitude_lines_obj(self, power_obj):
         x_values = power_obj.detunings
-        y_values = list(power_obj.gamma_mean.values())
-        lines_obj = Lines([Line(x_values, y_values)], plot_type="semilogy")
-        lines_obj.title = "Amplitude"
+        y_values = list(power_obj.amplitude_mean.values())
+        y_err = list(power_obj.amplitude_std.values())
+        lines_obj = Lines([Line(x_values, y_values, y_err=y_err)], plot_type="errorbar")
+        lines_obj.title = "Log Amplitude"
         return lines_obj
